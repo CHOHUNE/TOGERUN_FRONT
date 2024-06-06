@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-
 import SockJS from 'sockjs-client';
 import { Stomp } from "@stomp/stompjs";
 import { fetchMessages } from "../api/api";
 
 const ChatRoom = () => {
     const dispatch = useDispatch();
-    const messages = useSelector((state)=>state.chat.chats);
-
-
+    const messages = useSelector((state) => state.chat.chats);
     const [newMessage, setNewMessage] = useState('');
     const [stompClient, setStompClient] = useState(null);
 
@@ -40,28 +36,30 @@ const ChatRoom = () => {
             stompClient.send('/app/sendMessage', {}, JSON.stringify({ content: newMessage }));
             console.log(newMessage)
             setNewMessage('');
-
             dispatch(fetchMessages());
-
         }
     };
 
     return (
-        <div>
-            Chat Room
-            <div>
+        <div className="container mx-auto p-4">
+            <h1 className="text-3xl font-bold mb-4">Chat Room</h1>
+            <div className="chat chat-start bg-base-100 p-4 rounded-box mb-4">
                 {messages.map((message) => (
-                    <div key={message.id}>
-                     {message.content}
+                    <div key={message.id} className="chat-bubble">
+                        {message.content}
                     </div>
                 ))}
+            </div>
+            <div className="flex items-center space-x-2">
                 <input
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
+                    className="input input-bordered w-full"
+                    placeholder="Type your message"
                 />
+                <button onClick={sendMessage} className="btn btn-primary">Send</button>
             </div>
-            <button onClick={sendMessage}>Send</button>
         </div>
     );
 };
