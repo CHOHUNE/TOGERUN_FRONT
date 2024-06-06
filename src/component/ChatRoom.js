@@ -1,69 +1,69 @@
-import React, {useEffect, useState} from 'react';
-import {useParams} from "react-router-dom";
-import {useDispatch, useSelector} from "react-redux";
+import React, { useEffect, useState } from 'react';
+import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
 import SockJS from 'sockjs-client';
-
-import message from "sockjs-client/lib/transport/lib/buffered-sender.js";
-import {Stomp} from "@stomp/stompjs";
-import {fetchMessages} from "../api/api";
+import { Stomp } from "@stomp/stompjs";
+import { fetchMessages } from "../api/api";
 
 const ChatRoom = () => {
-
-    const {chatRoomId} = useParams();
     const dispatch = useDispatch();
-    const messages = useSelector((state) => state.chat.message);
+    const messages = useSelector((state)=>state.chat.chats);
 
-    const [newMessage, setNewMessage] = useState(' ')
+
+    const [newMessage, setNewMessage] = useState('');
     const [stompClient, setStompClient] = useState(null);
 
     useEffect(() => {
-        dispatch(fetchMessages(chatRoomId))
+        dispatch(fetchMessages());
 
-        const socket = new SockJS('http://localhost:8080/ws')
-        const stompClient = Stomp.over(socket);
+        const socket = new SockJS('http://localhost:8080/ws');
+        const stompClientInstance = Stomp.over(socket);
 
-        stompClient.connect({}, () => {
-            stompClient.subscribe('/topic/messages', (message) => {
-                dispatch(fetchMessages(chatRoomId))
+        stompClientInstance.connect({}, () => {
+            stompClientInstance.subscribe('/topic/messages', () => {
+                dispatch(fetchMessages());
+            });
+        });
 
-            })
-        })
-
-        setStompClient(stompClient)
+        setStompClient(stompClientInstance);
 
         return () => {
-            if (stompClient) {
-                stompClient.disconnect()
+            if (stompClientInstance) {
+                stompClientInstance.disconnect();
             }
-        }
-
-    }, [dispatch, chatRoomId]);
-
+        };
+    }, [dispatch]);
 
     const sendMessage = async () => {
         if (stompClient && newMessage) {
+            stompClient.send('/app/sendMessage', {}, JSON.stringify({ content: newMessage }));
+            console.log(newMessage)
+            setNewMessage('');
+
+            dispatch(fetchMessages());
 
         }
+    };
 
-        return (
+    return (
+        <div>
+            Chat Room
             <div>
-                Chat Room
-                <div>
-                    {messages.map((messages) => (
-                        <div key={message.id}>
-                          {message.sender.username}
-                            {message.content}
-                        </div>
-                    ))}
-                    <input
-                        type={"text"}
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}/>
-                </div>
-                <button onClick={sendMessage}>Send</button>
+                {messages.map((message) => (
+                    <div key={message.id}>
+                     {message.content}
+                    </div>
+                ))}
+                <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                />
             </div>
-        );
-    }
-}
+            <button onClick={sendMessage}>Send</button>
+        </div>
+    );
+};
+
 export default ChatRoom;

@@ -3,6 +3,10 @@ import {useDispatch, useSelector} from "react-redux";
 import {Link} from "react-router-dom";
 import {fetchPosts} from "../api/api";
 
+
+
+
+
 const PostList = () => {
 
     const dispatch = useDispatch();
@@ -23,11 +27,22 @@ const PostList = () => {
             <h1>Posts</h1>
             <Link to={"/post"}>Create Post</Link>
             <ul>
-                {posts.map((post)=>(
-                    <li key={post.id}>
-                        <Link to={`/posts/${post.id}`}>{post.title}</Link>
-                    </li>
-                ))}
+
+
+
+                        <tr>
+                            <th>title</th>
+                            <th>body</th>
+                        </tr>
+
+
+
+                        {posts.map((post)=>(
+                            <li key={post.id}>
+                                <Link to={`/posts/${post.id}`}>{post.title}</Link>
+                            </li>
+                        ))}
+
             </ul>
 
 

@@ -17,9 +17,10 @@ const PostDetail = () => {
 
     return (
         <div>
-            <h1>{post.title}</h1>
-            <p>{post.content}</p>
-            <Link to={`/chat/${postId}`}>1:1 채팅하기</Link>
+            <h1>제목 : {post.title}</h1>
+            <h3>{postId} 번 게시물</h3>
+            <p>컨텐츠 : {post.content}</p>
+            <Link to={`/chats/${postId}`}>1:1 채팅하기</Link>
         </div>
     );
 };

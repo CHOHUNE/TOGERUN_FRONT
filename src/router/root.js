@@ -18,7 +18,7 @@ const root = createBrowserRouter([
         path: "posts/:postId",
         element: <Suspense fallback={Loading}><PostDetail/></Suspense>
     }, {
-        path: "chat/:chatRoomId",
+        path: "chats/:chatRoomId",
         element: <Suspense fallback={Loading}><ChatRoom/></Suspense>
     },{
     path:"/post",
