@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import SockJS from 'sockjs-client';
 import { Stomp } from "@stomp/stompjs";
-import { fetchMessages } from "../api/api";
+import { fetchMessages } from "../../api/api";
+import BasicLayout from "../../layouts/BasicLayout";
 
-const ChatRoom = () => {
+const ChatRoomPage = () => {
     const dispatch = useDispatch();
     const messages = useSelector((state) => state.chat.chats);
     const [newMessage, setNewMessage] = useState('');
@@ -64,4 +65,4 @@ const ChatRoom = () => {
     );
 };
 
-export default ChatRoom;
+export default ChatRoomPage;

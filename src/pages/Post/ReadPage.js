@@ -1,10 +1,11 @@
-// src/components/PostDetail.js
+// src/components/ReadPage.js
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import {fetchPostById} from "../api/api";
+import {fetchPostById} from "../../api/api";
+import BasicLayout from "../../layouts/BasicLayout";
 
-const PostDetail = () => {
+const ReadPage = () => {
     const { postId } = useParams();
     const dispatch = useDispatch();
     const post = useSelector((state) => state.post.posts.find((p) => p.id === Number(postId)));
@@ -16,6 +17,7 @@ const PostDetail = () => {
     if (!post) return <div>Loading...</div>;
 
     return (
+
         <div className="container mx-auto p-4">
             <div className="card bg-base-100 shadow-xl">
                 <div className="card-body">
@@ -23,11 +25,12 @@ const PostDetail = () => {
                     <h3 className="text-xl mb-2">{postId} 번 게시물</h3>
                     <p className="mb-4">{post.content}</p>
                     <div className="card-actions justify-end">
-                        <Link to={`/chats/${postId}`} className="btn btn-outline btn-primary">1:1 채팅하기</Link>
+                        <Link to={`/post/chat/${postId}`} className="btn btn-outline btn-primary">1:1 채팅하기</Link>
                     </div>
                 </div>
             </div>
         </div>
+
     );
 };
-export default PostDetail;
+export default ReadPage;

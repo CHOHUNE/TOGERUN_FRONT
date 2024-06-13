@@ -1,28 +1,38 @@
 import {createBrowserRouter} from "react-router-dom";
 import {lazy, Suspense} from "react";
-import PostList from "../component/PostList";
+import PostIndexPage from "../pages/Post/IndexPage";
+import postRouter from "./postRouter";
 
 
-const Loading = <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-purple-500"></div>
 
-const PostDetail = lazy(() => import("../component/PostDetail"));
-const ChatRoom = lazy(() => import("../component/ChatRoom"));
-const CreatePostForm = lazy(() => import("../component/CreatePostForm"));
+const Loading = () => <div className={"loading loading-spinner loading-lg"}/>
+
+
+const Main = lazy(() => import("../pages/MainPage"));
+const About = lazy(() => import("../pages/About"));
+const Home = lazy(() => import("../pages/Home"));
 
 const root = createBrowserRouter([
+    {path:"/home",
+        element:<Suspense fallback={Loading}><Home/></Suspense>
+
+        // 추후에 적용할 접근시 보게될 첫 로그인 화면
+    },
     {
         path: "",
-        element: <Suspense fallback={Loading}><PostList/></Suspense>
+        element: <Suspense fallback={Loading}><Main/></Suspense>
 
-    }, {
-        path: "posts/:postId",
-        element: <Suspense fallback={Loading}><PostDetail/></Suspense>
-    }, {
-        path: "chats/:chatRoomId",
-        element: <Suspense fallback={Loading}><ChatRoom/></Suspense>
-    },{
-    path:"/post",
-        element:<Suspense fallback={Loading}><CreatePostForm/></Suspense>
+    },
+    {
+        path: "/about",
+        element: <Suspense fallback={Loading}><About/></Suspense>
+    },
+
+    {
+        path: "/post",
+        element: <Suspense fallback={Loading}><PostIndexPage/></Suspense>,
+        children: postRouter()
+
     }
 ])
 
