@@ -1,12 +1,17 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import {Link, useSearchParams} from "react-router-dom";
 import { fetchPosts } from "../../api/api";
 import BasicLayout from "../../layouts/BasicLayout";
 
 const ListPage = () => {
     const dispatch = useDispatch();
     const posts = useSelector((state) => state.post.posts);
+
+    const [queryParams] = useSearchParams();
+    const page = queryParams.get('page') ? parseInt(queryParams.get('page')) : 1;
+    const size = queryParams.get('size') ? parseInt(queryParams.get('size' )) : 10;
+
 
     useEffect(() => {
         dispatch(fetchPosts());
@@ -33,10 +38,13 @@ const ListPage = () => {
                         </div>
                     </div>
                 ))}
+                Post List Page Component --{page} -- {size}
+
             </div>
         </div>
 
     );
 };
+
 
 export default ListPage;

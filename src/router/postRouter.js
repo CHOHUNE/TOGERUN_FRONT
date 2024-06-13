@@ -8,8 +8,9 @@ import {createBrowserRouter} from "react-router-dom";
 
     const PostDetail = lazy(() => import("../pages/Post/ReadPage"));
     const ChatRoom = lazy(() => import("../pages/Post/ChatRoomPage"));
-    const CreatePostForm = lazy(() => import("../component/CreatePostForm"));
+    const CreatePostForm = lazy(() => import("../pages/Post/AddPage"));
     const ListPage = lazy(() => import("../pages/Post/ListPage"));
+    const Modify = lazy(() => import("../pages/Post/ModifyPage"));
 
     const postRouter =()=>{
         return [{
@@ -27,6 +28,9 @@ import {createBrowserRouter} from "react-router-dom";
             },{
                 path:"write",
                 element:<Suspense fallback={Loading}><CreatePostForm/></Suspense>
+            },{
+            path:"modify/:postId",
+                element: <Suspense fallback={Loading}><Modify/></Suspense>
             }
         ]
     }

@@ -6,11 +6,11 @@ const IndexPage = () => {
 
     const navigate = useNavigate();
     const handleClickList = useCallback(()=>{
-        navigate({pathname:'list'})
+        navigate({pathname:'list'},[])
     })
 
     const handleClickAdd = useCallback( ()=>{
-        navigate({pathname:'add'})
+        navigate({pathname:'write'},[])
     })
 
     return (
@@ -19,7 +19,7 @@ const IndexPage = () => {
                 <div className={"text-xl m-1 p-2 w-20 font-extrabold text-center underline"} onClick={handleClickList}>
                     LIST
                 </div>
-                <div className={"text-xl m-1 p-2 w20 font-extrabold text-center underline"}>ADD</div>
+                <div className={"text-xl m-1 p-2 w20 font-extrabold text-center underline"} onClick={handleClickAdd}>ADD</div>
             </div>
             <div className={"flex flex-wrap w-full"}>
                 <Outlet/>

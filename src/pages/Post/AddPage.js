@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { createPost } from "../api/api";
+import { createPost } from "../../api/api";
 
-const CreatePostForm = () => {
+const AddPage = () => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const dispatch = useDispatch();
@@ -50,4 +50,4 @@ const CreatePostForm = () => {
     );
 };
 
-export default CreatePostForm;
+export default AddPage;
