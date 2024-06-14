@@ -1,39 +1,26 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
-import {Link, useSearchParams} from "react-router-dom";
+import {Link} from "react-router-dom";
 import {fetchPosts} from "../../api/api";
-import PageComponent from "../../component/common/PageComponent";
 import useCustomMove from "../../hooks/useCustomMove";
+import PageComponent from "../../component/common/PageComponent";
+import ListComponent from "../../component/post/ListComponent";
 
-const initState ={
-    id:0,
-    title:''
-    ,user:''
-    ,localDate:''
-    ,content:''
-
-}
+const initState = {
+    dtoList: [],
+    pageNumList: [],
+    pageRequestDTO: null,
+    prev: false,
+    next: false,
+    totalCount: 0,
+    prevPage: 0,
+    nextPage: 0,
+    totalPage: 0,
+    current: 0
+};
 
 const ListPage = () => {
-    const dispatch = useDispatch();
 
-
-    const {page, refresh, size, moveToList} = useCustomMove();
-    const [serverData, setServerData] = useState(initState)
-
-    // useEffect(() => {
-    //     getList({page, size}).then(data=>{
-    //         console.log(data)
-    //         serverData(data);
-    //     })
-    // }, [page,size,refresh]);
-
-
-    const posts = useSelector((state) => state.post.posts);
-
-    useEffect(() => {
-        dispatch(fetchPosts());
-    }, [dispatch]);
 
     return (
 
@@ -42,24 +29,9 @@ const ListPage = () => {
             <div className="flex justify-center mb-6">
                 <Link to="/post/write" className="btn btn-primary">Create Post</Link>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {posts.map((post) => (
-                    <div key={post.id} className="card bg-base-100 shadow-xl">
-                        <div className="card-body">
-                            <h2 className="card-title">
-                                <Link to={`/post/${post.id}`} className="link link-primary">{post.title}</Link>
-                            </h2>
-                            <p>{post.body}</p>
-                            <div className="card-actions justify-end">
-                                <Link to={`/post/${post.id}`} className="btn btn-outline btn-primary">Read More</Link>
-                            </div>
-                        </div>
-                    </div>
-                ))}
 
-                {/*<PageComponent serverData={serverData} movePage={moveToList}/>*/}
+            <ListComponent/>
 
-            </div>
         </div>
 
     );

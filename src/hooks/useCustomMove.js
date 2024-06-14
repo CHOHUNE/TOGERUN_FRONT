@@ -24,23 +24,23 @@ const useCustomMove =()=>{
     const queryDefault = createSearchParams({page,size}).toString();
     const [refresh, setRefresh] = useState(false)
 
-    const moveToList = (pageParam)=>{
-
+    const moveToList = (pageParam) => {
         let queryStr = ""
 
         if (pageParam) {
-            const pageNum = getNum(pageParam.page,1);
-            const sizeNum = getNum(pageParam.size, 10);
 
-            queryStr = createSearchParams({page:pageNum,size:sizeNum}).toString()
+            const pageNum = getNum(pageParam.page, 1)
+            const sizeNum = getNum(pageParam.size, 10)
 
-        }else{
-
-            queryStr = queryDefault;
+            queryStr = createSearchParams({page: pageNum, size: sizeNum}).toString()
+        } else {
+            queryStr = queryDefault
         }
         setRefresh(!refresh)
-        navigate({pathname:'../list',search:queryStr})
+        navigate({pathname: '../list', search: queryStr})
     }
+
+
 
     const moveToModify=(id)=>{
         navigate({pathname:`../modify${id}`,search:queryDefault})

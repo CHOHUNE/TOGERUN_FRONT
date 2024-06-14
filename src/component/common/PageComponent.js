@@ -1,15 +1,17 @@
-import React from 'react';
+const PageComponent = ({serverData, movePage}) => {
 
-const PageComponent = ({serverData,movePage}) => {
+    console.log("Current page:", serverData.current);
+    console.log("Page numbers:", serverData.pageNumList);
 
 
     return (
-        <div className={"m-6 flex justify-center"}>
+        <div className="m-6 flex justify-center">
+
             {serverData.prev ?
-                <div className={"m-2 p-2 w-16 text-center font-bold text-blue-400"} onClick={() => movePage(serverData.prev)}>
-                    Prev
-                </div> : <></>
-            }
+                <div
+                    className="m-2 p-2 w-16 text-center  font-bold text-blue-400 "
+                    onClick={() => movePage({page:serverData.prevPage} )}>
+                    Prev </div> : <></>}
 
             {serverData.pageNumList.map(pageNum =>
                 <div
@@ -29,7 +31,8 @@ const PageComponent = ({serverData,movePage}) => {
                 </div> : <></>}
 
         </div>
+
     );
-};
+}
 
 export default PageComponent;
