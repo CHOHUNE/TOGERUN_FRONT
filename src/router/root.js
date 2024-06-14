@@ -5,7 +5,7 @@ import postRouter from "./postRouter";
 
 
 
-const Loading = () => <div className={"loading loading-spinner loading-lg"}/>
+const Loading =  <div className={"loading loading-spinner loading-lg"}/>
 
 
 const Main = lazy(() => import("../pages/MainPage"));

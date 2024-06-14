@@ -1,17 +1,35 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from "react-redux";
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from "react-redux";
 import {Link, useSearchParams} from "react-router-dom";
-import { fetchPosts } from "../../api/api";
-import BasicLayout from "../../layouts/BasicLayout";
+import {fetchPosts} from "../../api/api";
+import PageComponent from "../../component/common/PageComponent";
+import useCustomMove from "../../hooks/useCustomMove";
+
+const initState ={
+    id:0,
+    title:''
+    ,user:''
+    ,localDate:''
+    ,content:''
+
+}
 
 const ListPage = () => {
     const dispatch = useDispatch();
+
+
+    const {page, refresh, size, moveToList} = useCustomMove();
+    const [serverData, setServerData] = useState(initState)
+
+    // useEffect(() => {
+    //     getList({page, size}).then(data=>{
+    //         console.log(data)
+    //         serverData(data);
+    //     })
+    // }, [page,size,refresh]);
+
+
     const posts = useSelector((state) => state.post.posts);
-
-    const [queryParams] = useSearchParams();
-    const page = queryParams.get('page') ? parseInt(queryParams.get('page')) : 1;
-    const size = queryParams.get('size') ? parseInt(queryParams.get('size' )) : 10;
-
 
     useEffect(() => {
         dispatch(fetchPosts());
@@ -38,7 +56,8 @@ const ListPage = () => {
                         </div>
                     </div>
                 ))}
-                Post List Page Component --{page} -- {size}
+
+                {/*<PageComponent serverData={serverData} movePage={moveToList}/>*/}
 
             </div>
         </div>

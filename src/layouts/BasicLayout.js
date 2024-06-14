@@ -1,6 +1,6 @@
 import React from "react";
 import BasicMenu from "../menus/BasicMenu";
-import Footer from "../component/Footer";
+import Footer from "../component/common/Footer";
 
 
 

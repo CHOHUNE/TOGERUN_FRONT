@@ -1,4 +1,4 @@
-import SideOpenDrawer from "../component/sideOpenDrawer";
+import SideOpenDrawer from "../component/common/sideOpenDrawer";
 
 const BasicMenu = () => {
 

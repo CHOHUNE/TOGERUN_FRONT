@@ -5,6 +5,16 @@ const axiosInstance= axios.create({
     baseURL:'http://localhost:8080/api'
 })
 
+// export const getList = async(pageParams) =>{
+//
+//     const {page,size} = pageParams;
+//
+//     const res = await axiosInstance.get(`/posts`, {params:{page,size}})
+//
+//     return res.data
+// }
+
+
 export const fetchChatRooms = createAsyncThunk('chats/fetchChatRooms', async (chatRoomId) => {
     const response = await axiosInstance.get(`/chats/${chatRoomId}/`)
 
@@ -18,9 +28,10 @@ export const fetchMessages = createAsyncThunk('chats/fetchMessages', async (chat
 });
 
 
-export const fetchPosts= createAsyncThunk('post/fetchPosts',async()=>{
+export const fetchPosts= createAsyncThunk('post/fetchPosts',async(pageParams)=>{
     const response = await axiosInstance.get('/posts');
-    return response.data;
+
+    return response.data
 
 })
 

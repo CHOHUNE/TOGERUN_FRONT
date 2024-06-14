@@ -1,10 +1,9 @@
 import React, {lazy, Suspense} from 'react';
-import {createBrowserRouter} from "react-router-dom";
 
 
 
 
-    const Loading = () => <div className={"loading loading-spinner loading-lg"}/>
+    const Loading =  <div className={"loading loading-spinner loading-lg"}/>
 
     const PostDetail = lazy(() => import("../pages/Post/ReadPage"));
     const ChatRoom = lazy(() => import("../pages/Post/ChatRoomPage"));

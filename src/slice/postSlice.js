@@ -5,9 +5,15 @@ export const postSlice = createSlice({
     name: 'post',
     initialState: {
         posts: [],
-        post: null,
-        status: null,
+        post: {
+            id:0,
+            title:''
+            ,user:''
+            ,localDate:''
+            ,content:''
+        },
     },
+    reducers:{},
     extraReducers: (builder) => {
         builder.addCase(fetchPosts.fulfilled, (state, action) => {
             state.status = 'succeeded';
