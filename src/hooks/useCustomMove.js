@@ -7,7 +7,6 @@ const getNum = (param,defaultValue)=>{
         return defaultValue;
 
     }
-
     return parseInt(param);
 
 }
@@ -18,8 +17,8 @@ const useCustomMove =()=>{
     const navigate = useNavigate();
     const [queryParams] = useSearchParams();
 
-    const page = getNum(queryParams.get("page"),1);
-    const size = getNum(queryParams.get("size"), 10);
+    const page = getNum(queryParams.get("page"), 1);
+    const size = getNum(queryParams.get("size"), 10)
 
     const queryDefault = createSearchParams({page,size}).toString();
     const [refresh, setRefresh] = useState(false)
@@ -46,7 +45,15 @@ const useCustomMove =()=>{
         navigate({pathname:`../modify${id}`,search:queryDefault})
     }
 
-    return {moveToList,moveToModify}
+    const moveToRead =(num)=>{
+
+        navigate({
+            pathname:`../read/${num}`,
+            search:queryDefault
+        })
+    }
+
+    return {moveToList,moveToModify,page,size,refresh,moveToRead}
 
 }
 

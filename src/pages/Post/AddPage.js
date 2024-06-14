@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { createPost } from "../../api/api";
 
 const AddPage = () => {
+
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const dispatch = useDispatch();

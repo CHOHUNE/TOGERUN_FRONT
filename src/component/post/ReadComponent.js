@@ -6,14 +6,14 @@ import { Link} from "react-router-dom";
 import useCustomMove from "../../hooks/useCustomMove";
 
 
-const initState ={
-    id:0,
-    title:''
-    ,user:''
-    ,localDate:''
-    ,content:''
-
-}
+// const initState ={
+//     id:0,
+//     title:''
+//     ,user:''
+//     ,localDate:''
+//     ,content:''
+//
+// }
 
 function ReadComponent({postId}) {
 
