@@ -42,13 +42,13 @@ const useCustomMove =()=>{
 
 
     const moveToModify=(id)=>{
-        navigate({pathname:`../modify${id}`,search:queryDefault})
+        navigate({pathname:`../modify/${id}`,search:queryDefault})
     }
 
     const moveToRead =(num)=>{
 
         navigate({
-            pathname:`../read/${num}`,
+            pathname:`../${num}`,
             search:queryDefault
         })
     }
