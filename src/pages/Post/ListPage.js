@@ -1,9 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
+import React from 'react';
 import {Link} from "react-router-dom";
-import {fetchPosts} from "../../api/api";
-import useCustomMove from "../../hooks/useCustomMove";
-import PageComponent from "../../component/common/PageComponent";
 import ListComponent from "../../component/post/ListComponent";
 
 const initState = {

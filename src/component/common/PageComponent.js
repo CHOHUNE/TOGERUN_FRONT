@@ -5,7 +5,7 @@ const PageComponent = ({serverData, movePage}) => {
 
 
     return (
-        <div className="m-6 flex justify-center">
+        <div className="m-6 flex justify-center " >
 
             {serverData.prev ?
                 <div
@@ -16,7 +16,7 @@ const PageComponent = ({serverData, movePage}) => {
             {serverData.pageNumList.map(pageNum =>
                 <div
                     key={pageNum}
-                    className={ `m-2 p-2 w-12  text-center rounded shadow-md text-white ${serverData.current === pageNum? 'bg-gray-500':'bg-blue-400'}`}
+                    className={ `m-2 p-2 w-12  text-center rounded shadow-md text-white cursor-pointer ${serverData.current === pageNum? 'bg-gray-500':'bg-blue-400'}`}
                     onClick={() => movePage( {page:pageNum})}>
                     {pageNum}
                 </div>

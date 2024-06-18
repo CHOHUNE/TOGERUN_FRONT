@@ -14,6 +14,10 @@ export const getList = async(pageParams) =>{
     return res.data
 }
 
+export const postAdd =async(post)=>{
+    const response = await axiosInstance.post('/posts',post )
+    return response.data
+}
 
 
 
@@ -42,8 +46,4 @@ export const fetchPostById = createAsyncThunk('posts/fetchPostById',async (postI
     return response.data
 })
 
-export const createPost = createAsyncThunk ('posts/createPost' , async (post)=>{
-    const response = await axiosInstance.post('/posts',post )
-    return response.data
-})
 

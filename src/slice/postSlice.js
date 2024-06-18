@@ -1,5 +1,5 @@
 import {createSlice} from '@reduxjs/toolkit';
-import {createPost, fetchPostById, fetchPosts} from '../api/api';
+import { fetchPostById, fetchPosts} from '../api/api';
 
 export const postSlice = createSlice({
     name: 'post',
@@ -27,11 +27,7 @@ export const postSlice = createSlice({
             state.status = 'succeeded';
             state.serverData.dtoList = Array.isArray(action.payload) ? action.payload : [action.payload];
         });
-        builder.addCase(createPost.fulfilled, (state, action) => {
-            state.status = 'succeeded';
 
-
-        });
     },
 });
 
