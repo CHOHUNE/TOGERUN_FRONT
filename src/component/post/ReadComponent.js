@@ -1,9 +1,10 @@
 
-import React, {useEffect} from 'react';
-import {fetchPostById} from "../../api/api";
+import React, {useEffect, useState} from 'react';
+import {deleteOne, fetchPostById} from "../../api/api";
 import {useDispatch, useSelector} from "react-redux";
 import { Link} from "react-router-dom";
 import useCustomMove from "../../hooks/useCustomMove";
+import ResultModal from "../common/ResultModal";
 
 
 // const initState ={
@@ -19,6 +20,7 @@ function ReadComponent({postId}) {
 
     const dispatch = useDispatch();
     const post = useSelector((state) => state.post.serverData.dtoList.find((p) => p.id === Number(postId)));
+    const [result, setResult] = useState()
 
 
     useEffect(() => {
@@ -27,6 +29,20 @@ function ReadComponent({postId}) {
 
 
     const {moveToList, moveToModify} = useCustomMove();
+
+    function handleClickDelete() {
+        deleteOne(postId).then(
+        result=>{
+            setResult(postId)
+        });
+        console.log(result)
+    }
+
+    const closeModal = () => {
+        setResult(null)
+        moveToList()
+    }
+
 
     return (
         <div className="card bg-base-100 shadow-xl">
@@ -40,9 +56,11 @@ function ReadComponent({postId}) {
                     <button className={"btn btn-outline btn-neutral"} onClick={() => moveToModify(postId)}>Modify
                     </button>
                     <button className={"btn btn-outline btn-secondary"} onClick={moveToList}>Back</button>
-                    <button className={"btn btn-outline btn-error"}>Delete</button>
+                    <button className={"btn btn-outline btn-error"} onClick={handleClickDelete}>Delete</button>
                 </div>
             </div>
+            {result ? <ResultModal title={'게시글 삭제'} content={` ${result} 번 게시물 삭제가 완료 되었습니다.`} callbackFn={closeModal}/> : <></> }
+
         </div>
     );
 }

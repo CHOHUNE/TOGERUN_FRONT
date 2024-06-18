@@ -19,6 +19,17 @@ export const postAdd =async(post)=>{
     return response.data
 }
 
+export const deleteOne=async(id)=>{
+    const response = await axiosInstance.delete(`/posts/${id}`)
+    return response.data
+}
+
+export const putOne = async (post)=>{
+const response = await axiosInstance.put(`/posts/${post.id}`,post)
+    return response.data
+
+}
+
 
 
 export const fetchChatRooms = createAsyncThunk('chats/fetchChatRooms', async (chatRoomId) => {
