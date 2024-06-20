@@ -2,6 +2,7 @@ import {createBrowserRouter} from "react-router-dom";
 import {lazy, Suspense} from "react";
 import PostIndexPage from "../pages/Post/IndexPage";
 import postRouter from "./postRouter";
+import memberRouter from "./memberRouter";
 
 
 
@@ -33,6 +34,9 @@ const root = createBrowserRouter([
         element: <Suspense fallback={Loading}><PostIndexPage/></Suspense>,
         children: postRouter()
 
+    },{
+    path:'/member',
+        children:memberRouter()
     }
 ])
 
