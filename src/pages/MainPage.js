@@ -3,8 +3,7 @@ import BasicLayout from "../layouts/BasicLayout";
 import {Link} from "react-router-dom";
 
 function MainPage(props) {
-    return (
-        <BasicLayout>
+    return (<BasicLayout>
             <div className={"text-3xl "}>
                 MainPage
             </div>

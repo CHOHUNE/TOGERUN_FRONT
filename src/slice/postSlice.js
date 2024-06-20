@@ -1,5 +1,5 @@
 import {createSlice} from '@reduxjs/toolkit';
-import { fetchPostById, fetchPosts} from '../api/api';
+import {fetchPostById, fetchPosts} from '../api/api';
 
 export const postSlice = createSlice({
     name: 'post',
@@ -17,7 +17,7 @@ export const postSlice = createSlice({
             current: 0
         },
     },
-    reducers:{},
+    reducers: {},
     extraReducers: (builder) => {
         builder.addCase(fetchPosts.fulfilled, (state, action) => {
             state.status = 'succeeded';

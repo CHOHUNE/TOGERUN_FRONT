@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import SockJS from 'sockjs-client';
 import { Stomp } from "@stomp/stompjs";
 import { fetchMessages } from "../../api/api";
-import BasicLayout from "../../layouts/BasicLayout";
 
 const ChatRoomPage = () => {
     const dispatch = useDispatch();

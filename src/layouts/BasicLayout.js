@@ -20,14 +20,7 @@ const BasicLayout = ({children}) => {
                     {children}
                     {/*이 부분에 props가 들어감 -> MainPage*/}
                 </main>
-
-            {/*    <aside className={"flex justify-center items-center"}>*/}
-
-
-            {/*</aside>*/}
-
         </div>
-
     <Footer/>
 
 

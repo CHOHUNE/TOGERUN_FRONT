@@ -1,7 +1,4 @@
-import React, {useState} from 'react';
-import {postAdd} from "../../api/api";
-import useCustomMove from "../../hooks/useCustomMove";
-import ResultModal from "../../component/common/ResultModal";
+import React from 'react';
 import AddComponent from "../../component/post/AddComponent";
 
 const AddPage = () => {
