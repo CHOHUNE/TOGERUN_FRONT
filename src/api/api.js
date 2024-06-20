@@ -1,7 +1,7 @@
 import axios, {post} from "axios";
 import {createAsyncThunk} from "@reduxjs/toolkit";
 
-const axiosInstance = axios.create({
+export const axiosInstance = axios.create({
     baseURL: 'http://localhost:8080/api'
 })
 
