@@ -8,7 +8,7 @@ const AddPage = () => {
         <div className="container mx-auto p-4">
             <AddComponent/>
         </div>
-                );
-            };
+    );
+};
 
 export default AddPage;

@@ -83,8 +83,8 @@ const BasicMenu = () => {
                 </button>
             </div>
             <div className={"join space-x-12"}>
-                <SideOpenDrawer />
-                <button className={"btn join-item"} onClick={()=>navigate("/member/login")}>Login</button>
+                <SideOpenDrawer/>
+                <button className={"btn join-item"} onClick={() => navigate("/member/login")}>Login</button>
             </div>
 
         </div>

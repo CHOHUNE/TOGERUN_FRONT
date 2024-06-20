@@ -3,7 +3,6 @@ import BasicMenu from "../menus/BasicMenu";
 import Footer from "../component/common/Footer";
 
 
-
 const BasicLayout = ({children}) => {
     return (
         <>
@@ -20,12 +19,12 @@ const BasicLayout = ({children}) => {
                     {children}
                     {/*이 부분에 props가 들어감 -> MainPage*/}
                 </main>
-        </div>
-    <Footer/>
+            </div>
+            <Footer/>
 
 
-</>
+        </>
 
-)
+    )
 }
 export default BasicLayout;

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from "react-redux";
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from "react-redux";
 import SockJS from 'sockjs-client';
-import { Stomp } from "@stomp/stompjs";
-import { fetchMessages } from "../../api/api";
+import {Stomp} from "@stomp/stompjs";
+import {fetchMessages} from "../../api/api";
 
 const ChatRoomPage = () => {
     const dispatch = useDispatch();
@@ -33,7 +33,7 @@ const ChatRoomPage = () => {
 
     const sendMessage = async () => {
         if (stompClient && newMessage) {
-            stompClient.send('/app/sendMessage', {}, JSON.stringify({ content: newMessage }));
+            stompClient.send('/app/sendMessage', {}, JSON.stringify({content: newMessage}));
             console.log(newMessage)
             setNewMessage('');
             dispatch(fetchMessages());

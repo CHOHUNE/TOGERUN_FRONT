@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import ResultModal from "../common/ResultModal";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchPostById, putOne } from "../../api/api";
+import {useDispatch, useSelector} from "react-redux";
+import {fetchPostById, putOne} from "../../api/api";
 import useCustomMove from "../../hooks/useCustomMove";
 
-function ModifyComponent({ postId }) {
+function ModifyComponent({postId}) {
     const dispatch = useDispatch();
     const post = useSelector((state) => state.post.serverData.dtoList.find((p) => p.id === Number(postId)));
-    const [localPost, setLocalPost] = useState({ title: '', content: '' });
+    const [localPost, setLocalPost] = useState({title: '', content: ''});
     const [result, setResult] = useState();
-    const { moveToList, moveToRead } = useCustomMove();
+    const {moveToList, moveToRead} = useCustomMove();
 
     useEffect(() => {
         dispatch(fetchPostById(postId));
@@ -17,12 +17,12 @@ function ModifyComponent({ postId }) {
 
     useEffect(() => {
         if (post) {
-            setLocalPost({ title: post.title, content: post.content });
+            setLocalPost({title: post.title, content: post.content});
         }
     }, [post]);
 
     const handleChangePost = (e) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setLocalPost((prevState) => ({
             ...prevState,
             [name]: value
@@ -31,7 +31,7 @@ function ModifyComponent({ postId }) {
 
     const handleClickModify = (e) => {
         e.preventDefault();
-        putOne({ ...post, ...localPost }).then(
+        putOne({...post, ...localPost}).then(
             result => {
                 setResult("Modified");
             }
@@ -45,7 +45,8 @@ function ModifyComponent({ postId }) {
 
     return (
         <div>
-            {result ? <ResultModal title={'게시글 수정'} content={` ${result} 번 게시물 수정이 완료 되었습니다.`} callbackFn={closeModal}/> : <></>}
+            {result ? <ResultModal title={'게시글 수정'} content={` ${result} 번 게시물 수정이 완료 되었습니다.`}
+                                   callbackFn={closeModal}/> : <></>}
             <form onSubmit={handleClickModify} className="space-y-4">
                 <h1 className="text-3xl font-bold mb-4">Modify Post</h1>
                 <div className="form-control">

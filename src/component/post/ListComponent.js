@@ -1,17 +1,17 @@
-import React, { useEffect } from 'react';
-import { Link } from "react-router-dom";
+import React, {useEffect} from 'react';
+import {Link} from "react-router-dom";
 import PageComponent from "../common/PageComponent";
-import { useDispatch, useSelector } from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import useCustomMove from "../../hooks/useCustomMove";
-import { fetchPosts } from "../../api/api";
+import {fetchPosts} from "../../api/api";
 
 function ListComponent(props) {
     const dispatch = useDispatch();
-    const { page, refresh, size, moveToList, moveToRead } = useCustomMove();
+    const {page, refresh, size, moveToList, moveToRead} = useCustomMove();
     const serverData = useSelector((state) => state.post.serverData);
 
     useEffect(() => {
-        dispatch(fetchPosts({ page, size }));
+        dispatch(fetchPosts({page, size}));
     }, [dispatch, page, size, refresh]);
 
     return (
@@ -40,7 +40,7 @@ function ListComponent(props) {
                 ))}
                 </tbody>
             </table>
-            <PageComponent serverData={serverData} movePage={moveToList} />
+            <PageComponent serverData={serverData} movePage={moveToList}/>
         </div>
     );
 }
