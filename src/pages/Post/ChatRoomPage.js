@@ -6,7 +6,7 @@ import {fetchMessages} from "../../api/api";
 
 const ChatRoomPage = () => {
     const dispatch = useDispatch();
-    const messages = useSelector((state) => state.chat.chats);
+    const messages = useSelector((state) => state.chatSlice.chats);
     const [newMessage, setNewMessage] = useState('');
     const [stompClient, setStompClient] = useState(null);
 

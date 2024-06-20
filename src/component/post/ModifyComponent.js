@@ -6,7 +6,7 @@ import useCustomMove from "../../hooks/useCustomMove";
 
 function ModifyComponent({postId}) {
     const dispatch = useDispatch();
-    const post = useSelector((state) => state.post.serverData.dtoList.find((p) => p.id === Number(postId)));
+    const post = useSelector((state) => state.postSlice.serverData.dtoList.find((p) => p.id === Number(postId)));
     const [localPost, setLocalPost] = useState({title: '', content: ''});
     const [result, setResult] = useState();
     const {moveToList, moveToRead} = useCustomMove();

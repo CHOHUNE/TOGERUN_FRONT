@@ -7,7 +7,7 @@ import ResultModal from "../common/ResultModal";
 
 function ReadComponent({postId}) {
     const dispatch = useDispatch();
-    const post = useSelector((state) => state.post.serverData.dtoList.find((p) => p.id === Number(postId)));
+    const post = useSelector((state) => state.postSlice.serverData.dtoList.find((p) => p.id === Number(postId)));
     const [result, setResult] = useState();
 
     useEffect(() => {

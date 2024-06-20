@@ -8,7 +8,7 @@ import {fetchPosts} from "../../api/api";
 function ListComponent(props) {
     const dispatch = useDispatch();
     const {page, refresh, size, moveToList, moveToRead} = useCustomMove();
-    const serverData = useSelector((state) => state.post.serverData);
+    const serverData = useSelector((state) => state.postSlice.serverData);
 
     useEffect(() => {
         dispatch(fetchPosts({page, size}));

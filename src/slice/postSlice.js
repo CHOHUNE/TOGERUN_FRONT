@@ -2,7 +2,7 @@ import {createSlice} from '@reduxjs/toolkit';
 import {fetchPostById, fetchPosts} from '../api/api';
 
 export const postSlice = createSlice({
-    name: 'post',
+    name: 'postSlice',
     initialState: {
         serverData: {
             dtoList: [],
