@@ -1,6 +1,6 @@
 import React from 'react';
 import BasicMenu from "../../menus/BasicMenu";
-import LogoutComponent from "../../component/post/LogOutComponent";
+import LogoutComponent from "../../component/member/LogOutComponent";
 
 const LogoutPage = () => {
     return (
