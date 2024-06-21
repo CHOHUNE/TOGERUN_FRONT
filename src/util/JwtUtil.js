@@ -1,17 +1,17 @@
 import axios from "axios";
+import {getCookie} from "./cookieUtil";
 
 
-const jwtAxios = axios.create()
+const jwtAxios = axios.create({
+    baseURL: 'http://localhost:8080/api'
+})
 
-const getCookies =(member)=>{
 
-    return undefined
-}
 
 const beforeReq =(config)=>{
     console.log(".....before request.....")
 
-    const memberInfo = getCookies('member')
+    const memberInfo = getCookie('member')
 
     if (!memberInfo) {
         console.log("....member NOT FOUND")

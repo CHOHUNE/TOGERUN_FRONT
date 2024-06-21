@@ -1,5 +1,5 @@
 import React from 'react';
-import LoginComponent from "../component/post/LoginComponent";
+import LoginComponent from "../component/member/LoginComponent";
 
 function Home(props) {
     return (

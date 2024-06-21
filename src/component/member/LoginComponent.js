@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {useDispatch} from "react-redux";
-import {login, loginPostAsync} from "../../slice/loginSlice";
+import useCustomLogin from "../../hooks/useCustomLogin";
+import ResultModal from "../common/ResultModal";
 
 const initState = {
     email: '',
@@ -10,6 +11,10 @@ const initState = {
 const LoginComponent = () => {
 
     const [loginParam, setLoginParam] = useState({...initState})
+
+
+
+    const {doLogin,moveToPath} = useCustomLogin();
     const dispatch = useDispatch();
 
     const handleChange = (e) => {
@@ -19,8 +24,13 @@ const LoginComponent = () => {
 
     const handleClickLogin = (e) => {
         e.preventDefault();
-        // dispatch(login(loginParam))
-        dispatch(loginPostAsync(loginParam))
+        doLogin(loginParam).then(response => {
+            if (!response.error) {
+                moveToPath('/')
+
+            }
+        })
+
     }
 
     return (
