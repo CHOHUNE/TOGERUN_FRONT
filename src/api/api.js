@@ -1,5 +1,6 @@
 import axios, {post} from "axios";
 import {createAsyncThunk} from "@reduxjs/toolkit";
+import jwtAxios from "../util/JwtUtil";
 
 export const axiosInstance = axios.create({
     baseURL: 'http://localhost:8080/api'
@@ -9,36 +10,36 @@ export const getList = async (pageParams) => {
 
     const {page, size} = pageParams;
 
-    const res = await axiosInstance.get(`/posts/list`, {params: {page, size}})
+    const res = await jwtAxios.get(`/posts/list`, {params: {page, size}})
 
     return res.data
 }
 
 export const postAdd = async (post) => {
-    const response = await axiosInstance.post('/posts', post)
+    const response = await jwtAxios.post('/posts', post)
     return response.data
 }
 
 export const deleteOne = async (id) => {
-    const response = await axiosInstance.delete(`/posts/${id}`)
+    const response = await jwtAxios.delete(`/posts/${id}`)
     return response.data
 }
 
 export const putOne = async (post) => {
-    const response = await axiosInstance.put(`/posts/${post.id}`, post)
+    const response = await jwtAxios.put(`/posts/${post.id}`, post)
     return response.data
 
 }
 
 
 export const fetchChatRooms = createAsyncThunk('chats/fetchChatRooms', async (chatRoomId) => {
-    const response = await axiosInstance.get(`/chats/${chatRoomId}/`)
+    const response = await jwtAxios.get(`/chats/${chatRoomId}/`)
 
     return response.data
 });
 
 export const fetchMessages = createAsyncThunk('chats/fetchMessages', async (chatRoomId) => {
-    const response = await axiosInstance.get(`/chats`)
+    const response = await jwtAxios.get(`/chats`)
 
     return response.data
 });
