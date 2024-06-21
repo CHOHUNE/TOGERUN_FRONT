@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {useDispatch} from "react-redux";
 import useCustomLogin from "../../hooks/useCustomLogin";
 import ResultModal from "../common/ResultModal";
+import KakaoLoginComponent from "./KakaoLoginComponent";
 
 const initState = {
     email: '',
@@ -56,7 +57,9 @@ const LoginComponent = () => {
                 <div className="form-control mt-6">
                     <button className="btn btn-primary" onClick={handleClickLogin}>Login</button>
                 </div>
+                <KakaoLoginComponent/>
             </form>
+
         </div>
     );
 };
