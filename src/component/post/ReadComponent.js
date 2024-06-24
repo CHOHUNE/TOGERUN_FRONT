@@ -47,12 +47,15 @@ function ReadComponent({postId}) {
 
     const closeModal = () => {
 
-        queryClient.invalidateQueries(['post', postId]);
+        // queryClient.invalidateQueries(['post', postId]);
+
         queryClient.invalidateQueries(['post/List']);
 
         if(delMutation.isSuccess){
             moveToList()
         }
+
+
     }
 
     if (!post) {
