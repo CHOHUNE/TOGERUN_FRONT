@@ -16,7 +16,9 @@ export const getList = async (pageParams) => {
 }
 
 export const postAdd = async (post) => {
-    const response = await jwtAxios.post('/posts', post)
+
+    const response = await jwtAxios.postForm('/posts', post)
+
     return response.data
 }
 
