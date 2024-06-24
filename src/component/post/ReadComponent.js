@@ -1,31 +1,58 @@
-import React, {useEffect, useState} from 'react';
-import {deleteOne, fetchPostById} from "../../api/api";
-import {useDispatch, useSelector} from "react-redux";
+import React from 'react';
+import {deleteOne, getOne,} from "../../api/api";
 import {Link} from "react-router-dom";
 import useCustomMove from "../../hooks/useCustomMove";
 import ResultModal from "../common/ResultModal";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {initState} from "./initState";
+import useCustomLogin from "../../hooks/useCustomLogin";
+import FetchingModal from "../common/FetchingModal";
+
+
+
 
 function ReadComponent({postId}) {
-    const dispatch = useDispatch();
-    const post = useSelector((state) => state.postSlice.serverData.dtoList.find((p) => p.id === Number(postId)));
-    const [result, setResult] = useState();
+    // const dispatch = useDispatch();
+    // const post = useSelector((state) => state.postSlice.serverData.dtoList.find((p) => p.id === Number(postId)));
+    // const [result, setResult] = useState();
 
-    useEffect(() => {
-        dispatch(fetchPostById(postId));
-    }, [dispatch, postId]);
+    const {data,isFetching} = useQuery({
+        queryKey: ['post', postId],
+        queryFn: () => getOne(postId),
+        staleTime: 1000 * 60 * 30
+    });
 
-    const {moveToList, moveToModify} = useCustomMove();
+    const queryClient = useQueryClient();
+
+    const post = data || initState;
+
+    // useEffect(() => {
+    //     dispatch(fetchPostById(postId));
+    // }, [dispatch, postId]);
+
+    const {moveToList, moveToModify,size,page} = useCustomMove();
+
+    const {loginState} = useCustomLogin();
+
+    const delMutation = useMutation({mutationFn: (postId) => deleteOne(postId)});
 
     function handleClickDelete() {
-        deleteOne(postId).then(result => {
-            setResult(postId);
-        });
-        console.log(result);
+        // deleteOne(postId).then(result => {
+        //     setResult(postId);
+        // });
+        // console.log(result);
+
+        delMutation.mutate(postId)
     }
 
     const closeModal = () => {
-        setResult(null);
-        moveToList();
+
+        queryClient.invalidateQueries(['post', postId]);
+        queryClient.invalidateQueries(['post/List']);
+
+        if(delMutation.isSuccess){
+            moveToList()
+        }
     }
 
     if (!post) {
@@ -33,6 +60,8 @@ function ReadComponent({postId}) {
     }
 
     return (<div className="card bg-base-100 shadow-xl">
+
+        {isFetching? <FetchingModal/> : <></>}
         <div className="card-body">
             <div className="flex justify-between items-center">
                 <h1 className="card-title text-3xl mb-4">{post.title}</h1>
@@ -47,7 +76,8 @@ function ReadComponent({postId}) {
                 <button className="btn btn-outline btn-error" onClick={handleClickDelete}>Delete</button>
             </div>
         </div>
-        {result ? <ResultModal title={'게시글 삭제'} content={` ${result} 번 게시물 삭제가 완료 되었습니다.`}
+        {delMutation.isSuccess?
+        <ResultModal title={'게시글 삭제'} content={`게시물 삭제가 완료 되었습니다.`}
                                callbackFn={closeModal}/> : <></>}
     </div>);
 }

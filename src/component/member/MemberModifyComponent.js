@@ -10,7 +10,7 @@ const initState = {
     nickname:''
 }
 
-function MemberModifyComponent(props) {
+function MemberModifyComponent() {
 
 
     const [user, setUser] = useState(initState)
@@ -18,7 +18,7 @@ function MemberModifyComponent(props) {
     const loginInfo = useSelector(state => state.loginSlice);
 
     const {moveToLogin} = useCustomLogin();
-    const [result, setResult] = useState()
+    const [result, setResult] = useState('')
 
 
     useEffect(() => {
@@ -33,9 +33,10 @@ function MemberModifyComponent(props) {
     const handleClickModify=(e)=>{
         e.preventDefault();
 
-        modifyMember(user).then(result=>{
-            setResult("Modified")
-        })
+        modifyMember(user).then(
+
+            ()=>  setResult("Modified")
+        )
     }
 
     const closeModal=()=>{

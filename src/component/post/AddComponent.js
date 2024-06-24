@@ -2,20 +2,20 @@ import React, {useState} from 'react';
 import {postAdd} from "../../api/api";
 import useCustomMove from "../../hooks/useCustomMove";
 import ResultModal from "../../component/common/ResultModal";
+import FetchingModal from "../common/FetchingModal";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {initState} from "./initState";
 
-const initState = {
-    title: '',
-    content: '',
-    delFlag: false,
-    local_date: ''
-}
 
 
 const AddComponent = () => {
 
     const [post, setPost] = useState({...initState})
     const {moveToList} = useCustomMove();
-    const [result, setResult] = useState()
+
+    const addMutation = useMutation({
+        mutationFn:(post)=>postAdd(post)
+    });
 
     const handleChangePost = (e) => {
         const {name, value} = e.target;
@@ -29,23 +29,37 @@ const AddComponent = () => {
     const handleSubmit =(e) => {
 
         e.preventDefault()
-        postAdd(post).then(
-            result => {
-                setResult(result.id)
-                setPost({...initState})
 
-            })
+        const formData = new FormData();
+
+        formData.append('title', post.title)
+        formData.append('content', post.content)
+
+
+        addMutation.mutate(formData)
+
+        // postAdd(post).then(
+        //     result => {
+        //         setResult(result.id)
+        //         setPost({...initState})
+        //
+        //     })
 
     };
 
+    const queryClient = useQueryClient();
+
+
     const closeModal = () => {
-        setResult(null)
-        moveToList()
+        // setResult(null)
+        queryClient.invalidateQueries('post/List')
+        moveToList({page:1})
     }
 
     return (
     <div>
-        {result ? <ResultModal title={'게시글 작성'} content={` ${result} 번 게시물 작성이 완료 되었습니다.`} callbackFn={closeModal}/> : <></> }
+        {addMutation.isPending ? <FetchingModal/> : <></>}
+        {addMutation.isSuccess ? <ResultModal title={'게시글 작성'} content={` ${addMutation.data.result} 번 게시물 작성이 완료 되었습니다.`} callbackFn={closeModal}/> : <></> }
             <form onSubmit={handleSubmit} className="space-y-4">
                 <h1 className="text-3xl font-bold mb-4">Create Post</h1>
                 <div className="form-control">

@@ -27,10 +27,15 @@ export const deleteOne = async (id) => {
     return response.data
 }
 
-export const putOne = async (post) => {
-    const response = await jwtAxios.put(`/posts/${post.id}`, post)
+export const putOne = async (postId,post) => {
+    const response = await jwtAxios.putForm(`/posts/${postId}`, post)
     return response.data
 
+}
+
+export const getOne= async (id) => {
+    const response = await jwtAxios.get(`/posts/${id}`)
+    return response.data
 }
 
 
@@ -47,16 +52,6 @@ export const fetchMessages = createAsyncThunk('chats/fetchMessages', async (chat
 });
 
 
-export const fetchPosts = createAsyncThunk('post/fetchPosts', async (pageParams) => {
 
-    return getList(pageParams)
-
-})
-
-export const fetchPostById = createAsyncThunk('posts/fetchPostById', async (postId) => {
-    const response = await axiosInstance.get(`/posts/${postId}`)
-
-    return response.data
-})
 
 
