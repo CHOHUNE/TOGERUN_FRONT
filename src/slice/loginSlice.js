@@ -1,10 +1,16 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {loginPost} from "../api/memberApi";
-import {setCookie} from "../util/cookieUtil";
+import {getCookie, removeCookie, setCookie} from "../util/cookieUtil";
 
 
 const initState = {
     email: ''
+}
+
+const loadMemberCookie =()=>{
+    const memberInfo = getCookie('member')
+
+    return memberInfo
 }
 
 export const loginPostAsync = createAsyncThunk('loginPostAsync', (param) => loginPost(param));
@@ -12,7 +18,7 @@ export const loginPostAsync = createAsyncThunk('loginPostAsync', (param) => logi
 
 const loginSlice = createSlice({
     name: 'loginSlice',
-    initialState: initState,
+    initialState: loadMemberCookie()||initState,
     reducers: {
         login: (state, action) => {
             console.log("............")
@@ -27,6 +33,7 @@ const loginSlice = createSlice({
             // state.email = action.payload.email
             return action.payload
 
+            // 오류 발생했던 return 문
             // return state.email = action.payload.email
             //     여기서 return 문을 쓰면 redux 는 이를 새 상태로 간주한다. 동시에 기존의 초안을 동시에 수정하려고 하면 오류가 발생한다
             //  [Immer] An immer producer returned a new value and modified its draft. Either return a new value or modify the draft.
@@ -46,6 +53,8 @@ const loginSlice = createSlice({
             console.log("logout......")
             console.log("action.payload", action.payload);
             console.log("............")
+
+            removeCookie('member')
 
             state.email = {...initState}
         }
