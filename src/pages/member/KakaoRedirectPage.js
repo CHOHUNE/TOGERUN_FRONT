@@ -1,9 +1,7 @@
 import React, {useEffect} from 'react';
 import {useSearchParams} from "react-router-dom";
 import {getAccessToken, getMemberAccessToken} from "../../api/kakaoApi";
-import {useDispatch} from "react-redux";
 import useCustomLogin from "../../hooks/useCustomLogin";
-import {login} from "../../slice/loginSlice";
 
 function KakaoRedirectPage(props) {
 
@@ -11,7 +9,7 @@ function KakaoRedirectPage(props) {
 
     const {saveAsCookie,moveToPath} = useCustomLogin();
 
-    const dispatch = useDispatch();
+    // const dispatch = useDispatch();
 
     const authCode = searchParams.get('code');
 

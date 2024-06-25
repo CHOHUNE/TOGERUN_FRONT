@@ -85,7 +85,7 @@ function ReadComponent({postId}) {
             <div className="modal modal-open">
                 <div className="modal-box">
                     <h3 className="font-bold text-lg">게시물을 삭제 하시겠습니까?</h3>
-                    <div className="modal-action">
+                    <div className="modal-action py-5">
                         <button className="btn btn-outline btn-error" onClick={handleClickDelete}>Yes</button>
                         <button className="btn btn-outline btn-neutral" onClick={toggleDeleteModal}>No</button>
                         <button  className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={toggleDeleteModal}>✕

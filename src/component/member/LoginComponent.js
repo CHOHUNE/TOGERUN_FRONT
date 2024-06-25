@@ -1,7 +1,6 @@
 import React, {useState} from 'react';
 import {useDispatch} from "react-redux";
 import useCustomLogin from "../../hooks/useCustomLogin";
-import ResultModal from "../common/ResultModal";
 import KakaoLoginComponent from "./KakaoLoginComponent";
 
 const initState = {
@@ -16,7 +15,7 @@ const LoginComponent = () => {
 
 
     const {doLogin,moveToPath} = useCustomLogin();
-    const dispatch = useDispatch();
+    // const dispatch = useDispatch();
 
     const handleChange = (e) => {
         loginParam[e.target.name] = e.target.value
@@ -50,12 +49,13 @@ const LoginComponent = () => {
                     </label>
                     <input name={"pw"} type="password" value={loginParam.pw} onChange={handleChange}
                            placeholder="password" className="input input-bordered" required/>
-                    <label className="label">
-                        {/*<a href="#" className="label-text-alt link link-hover">Forgot password?</a>*/}
-                    </label>
                 </div>
-                <div className="form-control mt-6">
-                    <button className="btn btn-primary" onClick={handleClickLogin}>Login</button>
+                <div className="flex justify-end my-4 ">
+                    <a href="#" className="label-text-alt link link-hover mr-4">회원가입</a>
+                    <a href="#" className="label-text-alt link link-hover">비밀번호 찾기</a>
+                </div>
+                <div className="form-control">
+                    <button className="btn btn-primary" onClick={handleClickLogin}>로그인</button>
                 </div>
                 <KakaoLoginComponent/>
             </form>

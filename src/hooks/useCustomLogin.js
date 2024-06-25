@@ -56,7 +56,7 @@ function UseCustomLogin(props) {
     }
 
 
-    return {loginState,isLogin,doLogin,doLogout,moveToPath,moveToLogin,moveToLoginReturn}
+    return {loginState,isLogin,doLogin,doLogout,moveToPath,moveToLogin,moveToLoginReturn,saveAsCookie}
 }
 
 export default UseCustomLogin;

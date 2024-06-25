@@ -9,7 +9,7 @@ import {postInitState} from "./PostInitState";
 
 function ModifyComponent({postId}) {
 
-    const [post,setPost] = useState(initS)
+    const [post,setPost] = useState(postInitState)
     
     const queryClient = useQueryClient();
 

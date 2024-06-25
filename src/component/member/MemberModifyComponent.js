@@ -14,16 +14,13 @@ function MemberModifyComponent() {
 
 
     const [user, setUser] = useState(initState)
-
-    const loginInfo = useSelector(state => state.loginSlice);
-
-    const {moveToLogin} = useCustomLogin();
+    const {loginState,moveToLogin} = useCustomLogin();
     const [result, setResult] = useState('')
 
 
     useEffect(() => {
-        setUser({...loginInfo, pw:'TEMP'})
-    }, [loginInfo]);
+        setUser({...loginState, pw:'TEMP'})
+    }, [loginState]);
 
     const handleChange =(e)=>{
         user[e.target.name] =e.target.value
