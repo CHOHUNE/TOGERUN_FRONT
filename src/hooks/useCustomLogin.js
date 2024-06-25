@@ -1,35 +1,51 @@
 import React from 'react';
 import {Navigate, useNavigate} from "react-router-dom";
-import {useDispatch, useSelector} from "react-redux";
-import {loginPostAsync, logout} from "../slice/loginSlice";
+import {useRecoilState, useResetRecoilState} from "recoil";
+import {signInState} from "../atoms/singinState";
+import {loginPost} from "../api/memberApi";
+import {removeCookie, setCookie} from "../util/cookieUtil";
 
 function UseCustomLogin(props) {
 
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const loginState = useSelector(state=>state.loginSlice);
+    //deprecated
+    // const loginState = useSelector(state=>state.loginSlice);
+    // const dispatch = useDispatch();
 
+    const [loginState,setLoginState] = useRecoilState(signInState);
+    const resetState = useResetRecoilState(signInState);
     const isLogin =!!loginState.email;
+    const navigate = useNavigate();
 
     const doLogin = async (loginParam) => {
 
+        // deprecated
+        // const action = await dispatch(loginPostAsync(loginParam))
+        // return action.payload
 
+        const result = await loginPost(loginParam);
 
-        const action = await dispatch(loginPostAsync(loginParam))
+            saveAsCookie(result)
 
+        console.log("result{}",result)
+        console.log("result.email{}",result.email)
 
-        return action.payload
-
-
+        return result;
     };
 
     const doLogout=()=>{
-        dispatch(logout());
+        // dispatch(logout())
+        removeCookie('member');
+        resetState();
+    }
+
+    const saveAsCookie=(data)=>{
+        setCookie('member',JSON.stringify(data),1)
+        setLoginState(data)
     }
 
     const moveToLogin =(path)=>{
         navigate({pathname:'/member/login'},{replace: true})
-    }
+    } //replace : true 를 하면 이전 페이지로 돌아갈 수 없다.
 
     const moveToLoginReturn =()=>{
         return <Navigate replace to = {"/member/login"}/>

@@ -1,9 +1,11 @@
 import SideOpenDrawer from "../component/common/sideOpenDrawer";
 import {useNavigate} from "react-router-dom";
+import useCustomLogin from "../hooks/useCustomLogin";
 
 const BasicMenu = () => {
 
     const navigate = useNavigate();
+    const {loginState} = useCustomLogin();
 
     return (
         <div className="navbar bg-base-100 px-7">
