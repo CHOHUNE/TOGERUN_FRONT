@@ -4,12 +4,12 @@ import { getOne, putOne} from "../../api/api";
 import useCustomMove from "../../hooks/useCustomMove";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import FetchingModal from "../common/FetchingModal";
-import {initState} from "./initState";
+import {postInitState} from "./PostInitState";
 
 
 function ModifyComponent({postId}) {
 
-    const [post,setPost] = useState(initState)
+    const [post,setPost] = useState(initS)
     
     const queryClient = useQueryClient();
 

@@ -4,13 +4,13 @@ import useCustomMove from "../../hooks/useCustomMove";
 import ResultModal from "../../component/common/ResultModal";
 import FetchingModal from "../common/FetchingModal";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {initState} from "./initState";
+import {postInitState} from "./PostInitState";
 
 
 
 const AddComponent = () => {
 
-    const [post, setPost] = useState({...initState})
+    const [post, setPost] = useState({...postInitState})
     const {moveToList} = useCustomMove();
 
     const addMutation = useMutation({
@@ -41,7 +41,7 @@ const AddComponent = () => {
         // postAdd(post).then(
         //     result => {
         //         setResult(result.id)
-        //         setPost({...initState})
+        //         setPost({...postInitState})
         //
         //     })
 
@@ -59,7 +59,7 @@ const AddComponent = () => {
     return (
     <div>
         {addMutation.isPending ? <FetchingModal/> : <></>}
-        {addMutation.isSuccess ? <ResultModal title={'게시글 작성'} content={` ${addMutation.data.result} 번 게시물 작성이 완료 되었습니다.`} callbackFn={closeModal}/> : <></> }
+        {addMutation.isSuccess ? <ResultModal title={'게시글 작성'} content={` 게시물 작성이 완료 되었습니다.`} callbackFn={closeModal}/> : <></> }
             <form onSubmit={handleSubmit} className="space-y-4">
                 <h1 className="text-3xl font-bold mb-4">Create Post</h1>
                 <div className="form-control">

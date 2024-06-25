@@ -3,7 +3,7 @@
 // import {getCookie, removeCookie, setCookie} from "../util/cookieUtil";
 //
 //
-// const initState = {
+// const postInitState = {
 //     email: ''
 // }
 //
@@ -18,7 +18,7 @@
 //
 // const loginSlice = createSlice({
 //     name: 'loginSlice',
-//     initialState: loadMemberCookie()||initState,
+//     initialState: loadMemberCookie()||postInitState,
 //     reducers: {
 //         login: (state, action) => {
 //             console.log("............")
@@ -56,7 +56,7 @@
 //
 //             removeCookie('member')
 //
-//             state.email = {...initState}
+//             state.email = {...postInitState}
 //         }
 //     }, extraReducers: (builder) => {
 //         builder.addCase(loginPostAsync.fulfilled, (state, action) => {
