@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import ResultModal from "../common/ResultModal";
-import {useSelector} from "react-redux";
 import useCustomLogin from "../../hooks/useCustomLogin";
 import {modifyMember} from "../../api/memberApi";
 

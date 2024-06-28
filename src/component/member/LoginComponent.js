@@ -1,7 +1,5 @@
 import React, {useState} from 'react';
-import {useDispatch} from "react-redux";
 import useCustomLogin from "../../hooks/useCustomLogin";
-import KakaoLoginComponent from "./KakaoLoginComponent";
 
 const initState = {
     email: '',
@@ -57,9 +55,9 @@ const LoginComponent = () => {
                 <div className="form-control">
                     <button className="btn btn-primary" onClick={handleClickLogin}>로그인</button>
                 </div>
-                <KakaoLoginComponent/>
+                {/*<KakaoLoginComponent/>*/}
                 <a href={"http://localhost:8080/oauth2/authorization/naver"} className={"btn btn-primary"}>네이버 로그인</a>
-                <a href={"http://localhost:8080/login/oauth2/code/google"} className={"btn btn-primary"}>구글 로그인</a>
+                <a href={"http://localhost:8080/oauth2/authorization/google"} className={"btn btn-primary"}>구글 로그인</a>
                 <a href={"https://kauth.kakao.com/oauth/authorize"} className={"btn btn-primary"}>카카오 로그인 (임시) </a>
 
 

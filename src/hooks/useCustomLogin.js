@@ -4,6 +4,7 @@ import {useRecoilState, useResetRecoilState} from "recoil";
 import {signInState} from "../atoms/singinState";
 import {loginPost} from "../api/memberApi";
 import {removeCookie, setCookie} from "../util/cookieUtil";
+import axios from "axios";
 
 function UseCustomLogin(props) {
 
@@ -29,12 +30,18 @@ function UseCustomLogin(props) {
         console.log("result{}",result)
         console.log("result.email{}",result.email)
 
+
+
         return result;
     };
 
-    const doLogout=()=>{
+    const doLogout=async()=>{
         // dispatch(logout())
-        removeCookie('member');
+
+        // nai('/api/member/logout')
+
+        removeCookie('member')
+        removeCookie('JSESSIONID')
         resetState();
     }
 

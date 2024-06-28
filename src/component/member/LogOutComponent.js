@@ -1,13 +1,22 @@
 import React from 'react';
 import useCustomLogin from "../../hooks/useCustomLogin";
 
+import {axiosInstance} from "../../api/api";
+import {removeCookie} from "../../util/cookieUtil";
+
 function LogoutComponent(props) {
 
     const {doLogout,moveToPath} = useCustomLogin();
 
-    const handleClickLogout = () => {
-        doLogout()
-        moveToPath('/')
+    const handleClickLogout = async () => {
+
+        removeCookie('member')
+        removeCookie('JSESSIONID')
+
+        await axiosInstance.post('/member/logout')
+
+        // doLogout()
+        // moveToPath('/')
     }
 
     return (
