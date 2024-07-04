@@ -13,10 +13,10 @@ function LogoutComponent(props) {
         removeCookie('member')
         removeCookie('JSESSIONID')
 
-        await axiosInstance.post('/member/logout')
+        // await axiosInstance.post('/member/logout')
 
-        // doLogout()
-        // moveToPath('/')
+        doLogout()
+        moveToPath('/')
     }
 
     return (

@@ -30,8 +30,6 @@ function UseCustomLogin(props) {
         console.log("result{}",result)
         console.log("result.email{}",result.email)
 
-
-
         return result;
     };
 

@@ -7,39 +7,43 @@ const jwtAxios = axios.create({
     baseURL: 'http://localhost:8080/api'
 })
 
-const refreshJWT = async (accessToken, refreshToken)=>{
+const refreshJWT = async (accessToken, refreshToken) => {
 
-    const header = {headers:{"Authorization" :`Bearer ${accessToken}`}}
 
-    const res = await axiosInstance.get(`/member/refresh?refreshToken=${refreshToken}`,header)
 
-    console.log("refreshJWT{}",res.data)
+    const header = {headers: {"Authorization": `Bearer ${accessToken}`}}
+
+    const res = await axiosInstance.get(`/member/refresh?refreshToken=${refreshToken}`, header)
+
+    console.log("----------------------")
+    console.log(res.data)
 
     return res.data
 }
 
 
-const beforeReq =(config)=>{
-    console.log(".....before request.....")
+const beforeReq = (config)=>{
+    console.log("----- before Request -----")
 
     const memberInfo = getCookie('member')
-
-    console.log("memberInfo{}",memberInfo)
+    console.log("memberinfo",memberInfo)
 
     if (!memberInfo) {
-        console.log("....member NOT FOUND")
+        console.log("Member NOT FOUND")
         return Promise.reject(
             {
-                response:{data :{error:"REQUIRE_LOGIN"}}
+                response:{ data: { error:"REQUIRE_LOGIN"} }
             }
         )
     }
 
-    const {accessToken} = memberInfo
+    const {accessToken} =memberInfo
     console.log("accessToken",accessToken)
-    config.headers.Authorization =`Bearer ${accessToken}`
+
+    config.headers.Authorization = `Bearer ${accessToken}`
 
     return config
+
 }
 
 const requestFail = (err)=>{
@@ -47,33 +51,36 @@ const requestFail = (err)=>{
     return Promise.reject(err)
 }
 
-const beforeRes = async (res)=>{
-    console.log(".....before return response.....")
+const beforeRes = async (res) => {
+    console.log("before return response...........")
 
+    //console.log(res)
+
+    //'ERROR_ACCESS_TOKEN'
     const data = res.data
 
+    if (data && data.error === 'ERROR_ACCESS_TOKEN') {
 
-    if(data &&data.error === 'ERROR_ACCESS_TOKEN'){
-
-        const memberCookieValue = getCookie("member");
+        const memberCookieValue = getCookie("member")
 
         const result = await refreshJWT(memberCookieValue.accessToken, memberCookieValue.refreshToken)
-        console.log("refreshJWT RESULT{}",result)
+        console.log("refreshJWT RESULT", result)
 
-        memberCookieValue.accessToken = result.accessToken;
-        memberCookieValue.refreshToken = result.refreshToken;
+        memberCookieValue.accessToken = result.accessToken
+        memberCookieValue.refreshToken = result.refreshToken
 
-        setCookie("member",JSON.stringify(memberCookieValue),1)
+        setCookie("member", JSON.stringify(memberCookieValue), 1)
 
+        //원래의 호출
         const originalRequest = res.config
 
         originalRequest.headers.Authorization = `Bearer ${result.accessToken}`
 
-        return await axios(originalRequest);
+        return axiosInstance(originalRequest)
+
     }
 
     return res
-
 }
 
 const responseFail =(err)=>{
