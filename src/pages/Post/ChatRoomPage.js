@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { getChatRoom } from "../../api/api";
 import ChatRoomComponent from '../../component/post/ChatRoomComponent';
+import useCustomLogin from "../../hooks/useCustomLogin";
 
 const ChatRoomPage = ({ postId }) => {
     const [chatRoomId, setChatRoomId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const {loginState} = useCustomLogin()
 
     useEffect(() => {
         const loadChatRoom = async () => {
@@ -30,7 +32,7 @@ const ChatRoomPage = ({ postId }) => {
 
         <div className="container mx-auto p-4">
             <h1 className="text-3xl font-bold mb-4">Chat Room</h1>
-            <ChatRoomComponent chatRoomId={chatRoomId} userEmail={userEmail} />
+            <ChatRoomComponent chatRoomId={chatRoomId} userEmail={loginState.email} />
         </div>
 
     );
