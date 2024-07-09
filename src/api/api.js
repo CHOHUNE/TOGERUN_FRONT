@@ -1,5 +1,4 @@
-import axios, {post} from "axios";
-import {createAsyncThunk} from "@reduxjs/toolkit";
+import axios from "axios";
 import jwtAxios from "../util/JwtUtil";
 
 export const axiosInstance = axios.create({
@@ -39,17 +38,11 @@ export const getOne= async (id) => {
 }
 
 
-export const fetchChatRooms = createAsyncThunk('chats/fetchChatRooms', async (chatRoomId) => {
-    const response = await jwtAxios.get(`/chats/${chatRoomId}/`)
+export const getChatRoom = async(postId, writerId, subscriberId)=>{
+    const response = await jwtAxios.get(`/api/chatroom?postId=${postId}`);
 
     return response.data
-});
-
-export const fetchMessages = createAsyncThunk('chats/fetchMessages', async (chatRoomId) => {
-    const response = await jwtAxios.get(`/chats`)
-
-    return response.data
-});
+}
 
 
 

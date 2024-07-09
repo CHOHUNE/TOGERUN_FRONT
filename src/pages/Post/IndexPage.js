@@ -9,7 +9,7 @@ const IndexPage = () => {
         navigate({pathname: 'list'}, [])
     })
 
-    const handleClickAdd = useCallback(() => {
+    const handleClickAdd = useCallback(() => {  // useCallback : 함수를 캐싱해서 재사용할 수 있게 해준다.
         navigate({pathname: 'write'}, [])
     })
 

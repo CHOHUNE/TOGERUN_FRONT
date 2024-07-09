@@ -1,66 +1,38 @@
-import React, {useEffect, useState} from 'react';
-import {useDispatch, useSelector} from "react-redux";
-import SockJS from 'sockjs-client';
-import {Stomp} from "@stomp/stompjs";
-import {fetchMessages} from "../../api/api";
+import React, { useState, useEffect } from 'react';
+import { getChatRoom } from "../../api/api";
+import ChatRoomComponent from '../../component/post/ChatRoomComponent';
 
-const ChatRoomPage = () => {
-    const dispatch = useDispatch();
-    const messages = useSelector((state) => state.chatSlice.chats);
-    const [newMessage, setNewMessage] = useState('');
-    const [stompClient, setStompClient] = useState(null);
+const ChatRoomPage = ({ postId }) => {
+    const [chatRoomId, setChatRoomId] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        dispatch(fetchMessages());
-
-        const socket = new SockJS('http://localhost:8080/ws');
-        const stompClientInstance = Stomp.over(socket);
-
-        stompClientInstance.connect({}, () => {
-            stompClientInstance.subscribe('/topic/messages', () => {
-                dispatch(fetchMessages());
-            });
-        });
-
-        setStompClient(stompClientInstance);
-
-        return () => {
-            if (stompClientInstance) {
-                stompClientInstance.disconnect();
+        const loadChatRoom = async () => {
+            try {
+                const data = await getChatRoom(postId);
+                setChatRoomId(data.chatRoomId);
+                setLoading(false);
+            } catch (err) {
+                setError("Failed to load chat room");
+                setLoading(false);
             }
         };
-    }, [dispatch]);
 
-    const sendMessage = async () => {
-        if (stompClient && newMessage) {
-            stompClient.send('/app/sendMessage', {}, JSON.stringify({content: newMessage}));
-            console.log(newMessage)
-            setNewMessage('');
-            dispatch(fetchMessages());
-        }
-    };
+        loadChatRoom();
+    }, [postId]);
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>{error}</div>;
+    if (!chatRoomId) return <div>Chat room not found</div>;
 
     return (
+
         <div className="container mx-auto p-4">
             <h1 className="text-3xl font-bold mb-4">Chat Room</h1>
-            <div className="chat chat-start bg-base-100 p-4 rounded-box mb-4">
-                {messages.map((message) => (
-                    <div key={message.id} className="chat-bubble">
-                        {message.content}
-                    </div>
-                ))}
-            </div>
-            <div className="flex items-center space-x-2">
-                <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    className="input input-bordered w-full"
-                    placeholder="Type your message"
-                />
-                <button onClick={sendMessage} className="btn btn-primary">Send</button>
-            </div>
+            <ChatRoomComponent chatRoomId={chatRoomId} userEmail={userEmail} />
         </div>
+
     );
 };
 

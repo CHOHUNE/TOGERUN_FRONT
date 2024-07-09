@@ -2,18 +2,6 @@ import React from 'react';
 import {Link} from "react-router-dom";
 import ListComponent from "../../component/post/ListComponent";
 
-const initState = {
-    dtoList: [],
-    pageNumList: [],
-    pageRequestDTO: null,
-    prev: false,
-    next: false,
-    totalCount: 0,
-    prevPage: 0,
-    nextPage: 0,
-    totalPage: 0,
-    current: 0
-};
 
 const ListPage = () => {
 
