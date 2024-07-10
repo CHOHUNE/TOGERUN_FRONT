@@ -4,20 +4,19 @@ import SockJS from 'sockjs-client';
 import jwtAxios from "../../util/JwtUtil";
 
 
-const ChatRoomComponent = ({ chatRoomId, userEmail }) => {
+const ChatRoomComponent = ({ postId, userEmail }) => {
 
 
     const [messages, setMessages] = useState([]);
-    const [newMessage, setNewMessage] = useState()
-
     const [stompClient, setStompClient] = useState(null);
 
-    useEffect(() => {
+
+    console.log("postId{}", postId,"userEmail{}", userEmail)
 
         const fetchMessages = async ()=>{
 
             try{
-                const response = await jwtAxios.get(`/chatroom/${chatRoomId}/messages`)
+                const response = await jwtAxios.get(`/post/${postId}/chat`)
                 setMessages(response.data)
             }catch(error){
                 console.error("Failed to fetch messages",error)
@@ -27,7 +26,7 @@ const ChatRoomComponent = ({ chatRoomId, userEmail }) => {
         const joinChatRoom =async()=>{
             try {
                 await jwtAxios.post(`/chatroom/join`, null, {
-                    params: {postId: chatRoomId, email: userEmail}
+                    params: {postId: postId, email: userEmail}
                 });
 
             } catch (error){
@@ -35,15 +34,19 @@ const ChatRoomComponent = ({ chatRoomId, userEmail }) => {
             }
         };
 
+    useEffect(() => {
+
+        fetchMessages()
+
         joinChatRoom();
 
 
-        const socket = new SockJS(`http://localhost:8080/ws/${chatRoomId}`);
+        const socket = new SockJS(`http://localhost:8080/ws/${postId}`);
         const stompClientInstance = Stomp.over(socket);
 
         stompClientInstance.connect({
         }, () => {
-            stompClientInstance.subscribe(`/topic/${chatRoomId}`, (messageOutput) => {
+            stompClientInstance.subscribe(`/topic/${postId}`, (messageOutput) => {
 
                 const message = JSON.parse(messageOutput.body);
                 setMessages((prevMessages) => [...prevMessages, message]);
@@ -58,12 +61,12 @@ const ChatRoomComponent = ({ chatRoomId, userEmail }) => {
                 stompClientInstance.disconnect();
             }
         };
-    }, [chatRoomId, userEmail]);
+    }, [postId, userEmail]);
 
     const sendMessage = async () => {
         if (stompClient && stompClient.connected ) {
-            const messageDTO = { content: messages.trim(), userEmail: userEmail, chatRoomId: chatRoomId };
-            stompClient.send(`/app/chat/${chatRoomId}/sendMessage`, {},
+            const messageDTO = { content: messages.trim(), userEmail: userEmail, chatRoomId: postId };
+            stompClient.send(`/app/chat/${postId}/sendMessage`, {},
                 JSON.stringify({
                     messageDTO
                 }));

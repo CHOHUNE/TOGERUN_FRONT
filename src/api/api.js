@@ -9,37 +9,37 @@ export const getList = async (pageParams) => {
 
     const {page, size} = pageParams;
 
-    const res = await jwtAxios.get(`/posts/list`, {params: {page, size}})
+    const res = await jwtAxios.get(`/post/list`, {params: {page, size}})
 
     return res.data
 }
 
 export const postAdd = async (post) => {
 
-    const response = await jwtAxios.postForm('/posts', post)
+    const response = await jwtAxios.postForm('/post', post)
 
     return response.data
 }
 
-export const deleteOne = async (id) => {
-    const response = await jwtAxios.delete(`/posts/${id}`)
+export const deleteOne = async (postId) => {
+    const response = await jwtAxios.delete(`/post/${postId}`)
     return response.data
 }
 
 export const putOne = async (postId,post) => {
-    const response = await jwtAxios.putForm(`/posts/${postId}`, post)
+    const response = await jwtAxios.putForm(`/post/${postId}`, post)
     return response.data
 
 }
 
-export const getOne= async (id) => {
-    const response = await jwtAxios.get(`/posts/${id}`)
+export const getOne= async (postId) => {
+    const response = await jwtAxios.get(`/post/${postId}`)
     return response.data
 }
 
 
-export const getChatRoom = async(postId, writerId, subscriberId)=>{
-    const response = await jwtAxios.get(`/api/chatroom?postId=${postId}`);
+export const getChatRoom = async(postId)=>{
+    const response = await jwtAxios.get(`/post/${postId}/chat/`);
 
     return response.data
 }

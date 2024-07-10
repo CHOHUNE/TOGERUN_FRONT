@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {deleteOne, getOne,} from "../../api/api";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import useCustomMove from "../../hooks/useCustomMove";
 import ResultModal from "../common/ResultModal";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
@@ -32,7 +32,9 @@ function ReadComponent({postId}) {
 
     const {moveToList, moveToModify,size,page} = useCustomMove();
 
-    const {loginState} = useCustomLogin();
+    // const {loginState} = useCustomLogin();
+
+    const navigate = useNavigate();
 
     const delMutation = useMutation({mutationFn: (postId) => deleteOne(postId)});
 
@@ -75,7 +77,8 @@ function ReadComponent({postId}) {
             <h3 className="text-xl mb-2">{postId} 번 게시물</h3>
             <p className="mb-4">{post.content}</p>
             <div className="card-actions justify-end">
-                <Link to={`/post/chat/${postId}`} className="btn btn-outline btn-primary">1:1 채팅하기</Link>
+                {/*<Link to={`/post/chat/${postId}`} className="btn btn-outline btn-primary">1:1 채팅하기</Link>*/}
+                <buton className={"btn btn-outline btn-primary"} onClick={()=>navigate(`/post/${postId}/chat`)}>채팅방 입장</buton>
                 <button className="btn btn-outline btn-neutral" onClick={() => moveToModify(postId)}>Modify</button>
                 <button className="btn btn-outline btn-secondary" onClick={moveToList}>Back</button>
                 <button className="btn btn-outline btn-error" onClick={toggleDeleteModal}>Delete</button>

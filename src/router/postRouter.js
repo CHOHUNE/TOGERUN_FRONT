@@ -20,7 +20,7 @@ const postRouter = () => {
             element: <Suspense fallback={Loading}><PostDetail/></Suspense>
         },
         {
-            path: "chat/:chatRoomId",
+            path: ":postId/chat",
             element: <Suspense fallback={Loading}><ChatRoom/></Suspense>
         }, {
             path: "write",
