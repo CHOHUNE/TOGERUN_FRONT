@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Stomp } from "@stomp/stompjs";
 import SockJS from 'sockjs-client';
 import jwtAxios from "../../util/JwtUtil";
+import {fetchMessages, joinChatRoom} from "../../api/memberApi";
 
 
 const ChatRoomComponent = ({ postId, userEmail }) => {
@@ -9,36 +10,17 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
 
     const [messages, setMessages] = useState([]);
     const [stompClient, setStompClient] = useState(null);
+    const [newMessage, setNewMessage] = useState('');
 
 
-    console.log("postId{}", postId,"userEmail{}", userEmail)
+    // console.log("postId:", postId,"userEmail{}", userEmail)
 
-        const fetchMessages = async ()=>{
-
-            try{
-                const response = await jwtAxios.get(`/post/${postId}/chat`)
-                setMessages(response.data)
-            }catch(error){
-                console.error("Failed to fetch messages",error)
-            }
-        }
-
-        const joinChatRoom =async()=>{
-            try {
-                await jwtAxios.post(`/chatroom/join`, null, {
-                    params: {postId: postId, email: userEmail}
-                });
-
-            } catch (error){
-                console.error("Failed to join chat room",error)
-            }
-        };
 
     useEffect(() => {
 
-        fetchMessages()
+        fetchMessages(postId)
 
-        joinChatRoom();
+        joinChatRoom(postId,userEmail);
 
 
         const socket = new SockJS(`http://localhost:8080/ws/${postId}`);
@@ -86,8 +68,8 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
             <div className="flex items-center space-x-2">
                 <input
                     type="text"
-                    value={messages}
-                    onChange={(e) => setMessages(e.target.value)}
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
                     className="input input-bordered w-full"
                     placeholder="Type your message"
                 />

@@ -24,3 +24,14 @@ export const modifyMember = async(member) =>{
 
     return res.data
 }
+
+export const fetchMessages = async (postId)=>{
+
+        const response = await jwtAxios.get(`/post/${postId}/chat`)
+}
+
+export const joinChatRoom =async(postId,userEmail)=>{
+        await jwtAxios.post(`/post/${postId}/chat/join`, null, {
+            params: { email: userEmail}
+        });
+};

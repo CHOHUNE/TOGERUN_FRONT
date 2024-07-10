@@ -39,7 +39,7 @@ export const getOne= async (postId) => {
 
 
 export const getChatRoom = async(postId)=>{
-    const response = await jwtAxios.get(`/post/${postId}/chat/`);
+    const response = await jwtAxios.get(`/post/${postId}/chat`);
 
     return response.data
 }
