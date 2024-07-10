@@ -78,7 +78,7 @@ function ReadComponent({postId}) {
             <p className="mb-4">{post.content}</p>
             <div className="card-actions justify-end">
                 {/*<Link to={`/post/chat/${postId}`} className="btn btn-outline btn-primary">1:1 채팅하기</Link>*/}
-                <buton className={"btn btn-outline btn-primary"} onClick={()=>navigate(`/post/${postId}/chat`)}>채팅방 입장</buton>
+                <button className={"btn btn-outline btn-primary"} onClick={()=>navigate(`/post/${postId}/chat`)}>채팅방 입장</button>
                 <button className="btn btn-outline btn-neutral" onClick={() => moveToModify(postId)}>Modify</button>
                 <button className="btn btn-outline btn-secondary" onClick={moveToList}>Back</button>
                 <button className="btn btn-outline btn-error" onClick={toggleDeleteModal}>Delete</button>

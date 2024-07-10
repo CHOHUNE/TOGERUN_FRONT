@@ -1,58 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import { Stomp } from "@stomp/stompjs";
+import { Client } from "@stomp/stompjs";
 import SockJS from 'sockjs-client';
 import jwtAxios from "../../util/JwtUtil";
-import {fetchMessages, joinChatRoom} from "../../api/memberApi";
-
+import { fetchMessages, joinChatRoom } from "../../api/memberApi";
 
 const ChatRoomComponent = ({ postId, userEmail }) => {
-
-
     const [messages, setMessages] = useState([]);
     const [stompClient, setStompClient] = useState(null);
     const [newMessage, setNewMessage] = useState('');
 
-
-    // console.log("postId:", postId,"userEmail{}", userEmail)
-
-
     useEffect(() => {
-
-        fetchMessages(postId)
-
-        joinChatRoom(postId,userEmail);
-
+        fetchMessages(postId);
+        joinChatRoom(postId, userEmail);
 
         const socket = new SockJS(`http://localhost:8080/ws/${postId}`);
-        const stompClientInstance = Stomp.over(socket);
-
-        stompClientInstance.connect({
-        }, () => {
-            stompClientInstance.subscribe(`/topic/${postId}`, (messageOutput) => {
-
-                const message = JSON.parse(messageOutput.body);
-                setMessages((prevMessages) => [...prevMessages, message]);
-
-            });
+        const client = new Client({
+            webSocketFactory: () => socket,
+            reconnectDelay: 5000, // auto reconnect
+            debug: (str) => {
+                console.log(str);
+            }
         });
 
-        setStompClient(stompClientInstance); // stompClient 상태 업데이트
+        client.onConnect = () => {
+            client.subscribe(`/topic/${postId}`, (messageOutput) => {
+                const message = JSON.parse(messageOutput.body);
+                setMessages((prevMessages) => [...prevMessages, message]);
+            });
+        };
+
+        client.activate();
+
+        setStompClient(client); // stompClient 상태 업데이트
 
         return () => {
-            if (stompClientInstance && stompClientInstance.connected) {
-                stompClientInstance.disconnect();
+            if (client && client.connected) {
+                client.deactivate();
             }
         };
     }, [postId, userEmail]);
 
     const sendMessage = async () => {
-        if (stompClient && stompClient.connected ) {
-            const messageDTO = { content: messages.trim(), userEmail: userEmail, chatRoomId: postId };
-            stompClient.send(`/app/chat/${postId}/sendMessage`, {},
-                JSON.stringify({
-                    messageDTO
-                }));
-            setMessages('');
+        if (stompClient && stompClient.connected) {
+            const messageDTO = { content: newMessage.trim(), userEmail: userEmail, chatRoomId: postId };
+            stompClient.publish({
+                destination: `/app/chat/${postId}/sendMessage`,
+                body: JSON.stringify({ messageDTO })
+            });
+            setNewMessage('');
         }
     };
 
