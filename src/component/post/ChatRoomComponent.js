@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Client } from "@stomp/stompjs";
-import SockJS from 'sockjs-client';
-import jwtAxios from "../../util/JwtUtil";
 import { fetchMessages, joinChatRoom } from "../../api/memberApi";
 
 const ChatRoomComponent = ({ postId, userEmail }) => {
@@ -10,24 +8,49 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
     const [newMessage, setNewMessage] = useState('');
 
     useEffect(() => {
-        fetchMessages(postId);
-        joinChatRoom(postId, userEmail);
 
-        const socket = new SockJS(`http://localhost:8080/ws/${postId}`);
+        joinChatRoom(postId, userEmail).
+        then( res => {
+            console.log(res)
+        }).catch(
+            err => {
+                console.log(err)
+            }
+        )
+
+        fetchMessages(postId).then(
+            res => {
+                setMessages(res)
+
+            }).catch(
+            err => {
+                console.log(err)
+            }
+        )
+
+        // const socket = new SockJS(`http://localhost:8080/ws/${postId}/chat`);
+        // 웹소켓 연결시 SockJs 클라이언트를 사용하면 기본적으로 현재 세션의 쿠키 정보를 웹소켓 연결 요청에 포함 시키려고 시도한다.
+        // 즉 브라우저는 자동으로 현재 쿠키를 요청 헤더에 담아 요청을 보낸다.
+        // 담아보낼 쿠키를 커스텀 할수 없나? -> SockJS 는 쿠키를 커스텀 할수 없다.
+        // 웹소켓 URL 에 추가 전달 하는 방법이 있긴 하다. -> http://localhost:8080/ws/{postId}?token=token
+        // 근데 좀 비효율 적인 듯?...
+        // 일단 순수 Socket 으로 진행 해본다. -> 폭 넓은 브라우저 지원은 못하지만 모던 브라우저 타겟과 가볍다는 장점이 있다.
+
+
         const client = new Client({
-            webSocketFactory: () => socket,
-            reconnectDelay: 5000, // auto reconnect
+            brokerURL: `ws://localhost:8080/chat`,
+            // webSocketFactory: () => socket,
+            reconnectDelay: 50000, // auto reconnect
+            onConnect:()=>{
+                client.subscribe(`/topic/chat/${postId}`, (message) => {
+                    const msg = JSON.parse(message.body);
+                    setMessages((prevMessages) => [...prevMessages, msg]);
+                });
+            },
             debug: (str) => {
                 console.log(str);
             }
         });
-
-        client.onConnect = () => {
-            client.subscribe(`/topic/${postId}`, (messageOutput) => {
-                const message = JSON.parse(messageOutput.body);
-                setMessages((prevMessages) => [...prevMessages, message]);
-            });
-        };
 
         client.activate();
 
@@ -41,10 +64,10 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
     }, [postId, userEmail]);
 
     const sendMessage = async () => {
-        if (stompClient && stompClient.connected) {
+        if (stompClient && newMessage) {
             const messageDTO = { content: newMessage.trim(), userEmail: userEmail, chatRoomId: postId };
             stompClient.publish({
-                destination: `/app/chat/${postId}/sendMessage`,
+                destination: `/app/chat/${postId}/send`,
                 body: JSON.stringify({ messageDTO })
             });
             setNewMessage('');
@@ -55,7 +78,10 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
         <div>
             <div className="chat chat-start bg-base-100 p-4 rounded-box mb-4">
                 {messages.map((message) => (
-                    <div key={message.id} className="chat-bubble">
+                    <div
+                        key={message.id}
+                        className={`chat-bubble ${message.userEmail === userEmail ? 'chat-bubble-right' : 'chat-bubble-left'}`}
+                    >
                         {message.content}
                     </div>
                 ))}

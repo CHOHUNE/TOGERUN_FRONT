@@ -3,6 +3,7 @@ import jwtAxios from "../util/JwtUtil";
 
 export const axiosInstance = axios.create({
     baseURL: 'http://localhost:8080/api'
+    //추후 배포시 baseURL 만 변경 해준다
 })
 
 export const getList = async (pageParams) => {
