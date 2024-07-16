@@ -53,7 +53,8 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
         const formattedMsg = {
             id: msg.id,
             content: msg.content,
-            email: msg.email
+            email: msg.email,
+            createdAt: msg.createdAt
         };
         setMessages((prevMessages) => [...prevMessages, formattedMsg]);
     }, []);
@@ -63,7 +64,8 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
         if (stompClient && newMessage.trim()) {
             const messageDTO = {
                 content: newMessage.trim(),
-                email: userEmail
+                email: userEmail,
+                createdAt: new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString()
             };
             stompClient.publish({
                 destination: `/app/chat/${postId}/send`,
@@ -115,6 +117,12 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
         }
     }, [messages]);
 
+    const formatTime = (timestamp) => {
+        const date = new Date(timestamp);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+
     return (
         <div className="flex flex-col h-screen">
             <div
@@ -135,9 +143,12 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
                             <p className="text-sm font-semibold mb-1">{message.email}</p>
                             <p>{message.content}</p>
                         </div>
+                        <div className="chat-footer text-xs opacity-50 mt-1">
+                            {formatTime(message.createdAt)}
+                        </div>
                     </div>
                 ))}
-                <div ref={messagesEndRef} />
+                <div ref={messagesEndRef}/>
             </div>
 
             {!isNearBottom && (
