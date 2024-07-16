@@ -9,6 +9,8 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
 
     useEffect(() => {
 
+        console.log("userEmail",userEmail)
+
 
         joinChatRoom(postId, userEmail).then( res => {
             console.log("join ChatRoom")
@@ -22,6 +24,9 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
         fetchMessages(postId).then(
             res => {
                 setMessages(res)
+                console.log(res)
+                console.log("fetchMessages",messages)
+
 
             }).catch(
             err => {
@@ -45,7 +50,16 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
             onConnect:()=>{
                 client.subscribe(`/topic/chat/${postId}`, (message) => {
                     const msg = JSON.parse(message.body);
-                    setMessages((prevMessages) => [...prevMessages, msg]);
+                    console.log("Received raw message:", msg);
+
+                    const formattedMsg = {
+                        id: msg.id,
+                        content: msg.content,
+                        email: msg.email
+                    };
+
+                    setMessages((prevMessages) => [...prevMessages, formattedMsg]);
+                    console.log("Formatted and added message:", formattedMsg);
                 });
             },
             debug: (str) => {
@@ -54,7 +68,6 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
         });
 
         client.activate();
-
         setStompClient(client); // stompClient 상태 업데이트
 
         return () => {
@@ -67,14 +80,18 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
     const sendMessage = async () => {
         if (stompClient && newMessage) {
             const messageDTO = {
-                content: newMessage.trim(), email: userEmail , };
+                content: newMessage.trim(),
+                email: userEmail
+            };
             stompClient.publish({
                 destination: `/app/chat/${postId}/send`,
                 body: JSON.stringify( messageDTO )
             });
+
+            // setMessages((prevMessages) => [...prevMessages, messageDTO]);
             setNewMessage('');
 
-            console.log(messageDTO)
+            console.log("Sent Message",messageDTO)
         }
 
 
