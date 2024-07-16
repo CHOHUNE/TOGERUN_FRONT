@@ -1,105 +1,127 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Client } from "@stomp/stompjs";
 import { fetchMessages, joinChatRoom } from "../../api/memberApi";
+
+// 상수
+const SCROLL_THRESHOLD = 100;
+const WEBSOCKET_URL = 'ws://localhost:8080/chat';
 
 const ChatRoomComponent = ({ postId, userEmail }) => {
     const [messages, setMessages] = useState([]);
     const [stompClient, setStompClient] = useState(null);
     const [newMessage, setNewMessage] = useState('');
+    const [isNearBottom, setIsNearBottom] = useState(true);
 
-    useEffect(() => {
+    const messagesEndRef = useRef(null);
+    const scrollContainerRef = useRef(null);
 
-        console.log("userEmail",userEmail)
-
-
-        joinChatRoom(postId, userEmail).then( res => {
-            console.log("join ChatRoom")
-        }).catch(
-            err => {
-                console.log(err)
-                console.log("error joining ChatRoom")
-            }
-        )
-
-        fetchMessages(postId).then(
-            res => {
-                setMessages(res)
-                console.log(res)
-                console.log("fetchMessages",messages)
-
-
-            }).catch(
-            err => {
-                console.log(err)
-            }
-        )
-
-        // const socket = new SockJS(`http://localhost:8080/ws/${postId}/chat`);
-        // 웹소켓 연결시 SockJs 클라이언트를 사용하면 기본적으로 현재 세션의 쿠키 정보를 웹소켓 연결 요청에 포함 시키려고 시도한다.
-        // 즉 브라우저는 자동으로 현재 쿠키를 요청 헤더에 담아 요청을 보낸다.
-        // 담아보낼 쿠키를 커스텀 할수 없나? -> SockJS 는 쿠키를 커스텀 할수 없다.
-        // 웹소켓 URL 에 추가 전달 하는 방법이 있긴 하다. -> http://localhost:8080/ws/{postId}?token=token
-        // 근데 좀 비효율 적인 듯?...
-        // 일단 순수 Socket 으로 진행 해본다. -> 폭 넓은 브라우저 지원은 못하지만 모던 브라우저 타겟과 가볍다는 장점이 있다.
-
-
+    // 웹소켓 연결 설정
+    const setupWebSocket = useCallback(() => {
         const client = new Client({
-            brokerURL: `ws://localhost:8080/chat`,
-            // webSocketFactory: () => socket,
-            reconnectDelay: 500, // auto reconnect
-            onConnect:()=>{
-                client.subscribe(`/topic/chat/${postId}`, (message) => {
-                    const msg = JSON.parse(message.body);
-                    console.log("Received raw message:", msg);
-
-                    const formattedMsg = {
-                        id: msg.id,
-                        content: msg.content,
-                        email: msg.email
-                    };
-
-                    setMessages((prevMessages) => [...prevMessages, formattedMsg]);
-                    console.log("Formatted and added message:", formattedMsg);
-                });
+            brokerURL: WEBSOCKET_URL,
+            reconnectDelay: 500,
+            onConnect: () => {
+                client.subscribe(`/topic/chat/${postId}`, handleIncomingMessage);
             },
-            debug: (str) => {
-                console.log(str);
-            }
+            debug: console.log
         });
 
         client.activate();
-        setStompClient(client); // stompClient 상태 업데이트
+        setStompClient(client);
 
         return () => {
             if (client && client.connected) {
                 client.deactivate();
             }
         };
+    }, [postId]);
+
+    // 초기 데이터 로드
+    const loadInitialData = useCallback(async () => {
+        try {
+            await joinChatRoom(postId, userEmail);
+            const fetchedMessages = await fetchMessages(postId);
+            setMessages(fetchedMessages);
+        } catch (error) {
+            console.error("Error loading initial data:", error);
+        }
     }, [postId, userEmail]);
 
-    const sendMessage = async () => {
-        if (stompClient && newMessage) {
+    // 메시지 수신 처리
+    const handleIncomingMessage = useCallback((message) => {
+        const msg = JSON.parse(message.body);
+        const formattedMsg = {
+            id: msg.id,
+            content: msg.content,
+            email: msg.email
+        };
+        setMessages((prevMessages) => [...prevMessages, formattedMsg]);
+    }, []);
+
+    // 메시지 전송
+    const sendMessage = useCallback(() => {
+        if (stompClient && newMessage.trim()) {
             const messageDTO = {
                 content: newMessage.trim(),
                 email: userEmail
             };
             stompClient.publish({
                 destination: `/app/chat/${postId}/send`,
-                body: JSON.stringify( messageDTO )
+                body: JSON.stringify(messageDTO)
             });
-
-            // setMessages((prevMessages) => [...prevMessages, messageDTO]);
             setNewMessage('');
-
-            console.log("Sent Message",messageDTO)
         }
+    }, [stompClient, newMessage, postId, userEmail]);
 
-
+    // 스크롤 관련 함수들
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
+
+    const handleScroll = () => {
+        if (scrollContainerRef.current) {
+            const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+            setIsNearBottom(scrollHeight - (scrollTop + clientHeight) < SCROLL_THRESHOLD);
+        }
+    };
+
+    // 키 입력 처리
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    };
+
+    // 초기 설정 및 데이터 로드
+    useEffect(() => {
+        loadInitialData();
+        return setupWebSocket();
+    }, [loadInitialData, setupWebSocket]);
+
+    // 스크롤 이벤트 리스너 설정
+    useEffect(() => {
+        const scrollContainer = scrollContainerRef.current;
+        if (scrollContainer) {
+            scrollContainer.addEventListener('scroll', handleScroll);
+            return () => scrollContainer.removeEventListener('scroll', handleScroll);
+        }
+    }, []);
+
+    // 메시지 추가 시 스크롤 처리
+    useEffect(() => {
+        if (isNearBottom) {
+            scrollToBottom();
+        }
+    }, [messages]);
 
     return (
         <div className="flex flex-col h-screen">
-            <div className="flex-1 overflow-y-auto p-4">
+            <div
+                ref={scrollContainerRef}
+                className="flex-1 overflow-y-auto p-4"
+                onScroll={handleScroll}
+            >
                 {messages.map((message) => (
                     <div
                         key={message.id}
@@ -107,15 +129,25 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
                     >
                         <div className={`chat-bubble ${
                             message.email === userEmail
-                                ? 'bg-gray-200 text-gray-900'
-                                : 'bg-gray-400 text-gray-900'
+                                ? 'bg-white text-gray-900'
+                                : 'bg-gray-200 text-gray-900'
                         }`}>
                             <p className="text-sm font-semibold mb-1">{message.email}</p>
                             <p>{message.content}</p>
                         </div>
                     </div>
                 ))}
+                <div ref={messagesEndRef} />
             </div>
+
+            {!isNearBottom && (
+                <button
+                    onClick={scrollToBottom}
+                    className="fixed bottom-20 right-4 bg-blue-500 text-white rounded-full p-2"
+                >
+                    New messages
+                </button>
+            )}
 
             <div className="bg-gray-100 p-4">
                 <div className="flex items-center space-x-2">
@@ -125,12 +157,13 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
                         onChange={(e) => setNewMessage(e.target.value)}
                         className="flex-1 input input-bordered"
                         placeholder="Type your message"
+                        onKeyPress={handleKeyPress}
                     />
                     <button onClick={sendMessage} className="btn btn-primary">Send</button>
                 </div>
             </div>
         </div>
     );
-};
+}
 
 export default ChatRoomComponent;
