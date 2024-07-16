@@ -9,12 +9,13 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
 
     useEffect(() => {
 
-        joinChatRoom(postId, userEmail).
-        then( res => {
-            console.log(res)
+
+        joinChatRoom(postId, userEmail).then( res => {
+            console.log("join ChatRoom")
         }).catch(
             err => {
                 console.log(err)
+                console.log("error joining ChatRoom")
             }
         )
 
@@ -40,7 +41,7 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
         const client = new Client({
             brokerURL: `ws://localhost:8080/chat`,
             // webSocketFactory: () => socket,
-            reconnectDelay: 50000, // auto reconnect
+            reconnectDelay: 500, // auto reconnect
             onConnect:()=>{
                 client.subscribe(`/topic/chat/${postId}`, (message) => {
                     const msg = JSON.parse(message.body);
@@ -65,13 +66,18 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
 
     const sendMessage = async () => {
         if (stompClient && newMessage) {
-            const messageDTO = { content: newMessage.trim(), userEmail: userEmail, chatRoomId: postId };
+            const messageDTO = {
+                content: newMessage.trim(), email: userEmail , };
             stompClient.publish({
                 destination: `/app/chat/${postId}/send`,
-                body: JSON.stringify({ messageDTO })
+                body: JSON.stringify( messageDTO )
             });
             setNewMessage('');
+
+            console.log(messageDTO)
         }
+
+
     };
 
     return (
@@ -80,9 +86,9 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
                 {messages.map((message) => (
                     <div
                         key={message.id}
-                        className={`chat-bubble ${message.userEmail === userEmail ? 'chat-bubble-right' : 'chat-bubble-left'}`}
+                        className={`chat-bubble ${message.email === userEmail ? 'chat-bubble-right' : 'chat-bubble-left'}`}
                     >
-                        {message.content}
+                        {message.email} : {message.content}
                     </div>
                 ))}
             </div>
