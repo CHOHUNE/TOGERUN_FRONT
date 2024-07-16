@@ -98,26 +98,36 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
     };
 
     return (
-        <div>
-            <div className="chat chat-start bg-base-100 p-4 rounded-box mb-4">
+        <div className="flex flex-col h-screen">
+            <div className="flex-1 overflow-y-auto p-4">
                 {messages.map((message) => (
                     <div
                         key={message.id}
-                        className={`chat-bubble ${message.email === userEmail ? 'chat-bubble-right' : 'chat-bubble-left'}`}
+                        className={`chat ${message.email === userEmail ? 'chat-end' : 'chat-start'}`}
                     >
-                        {message.email} : {message.content}
+                        <div className={`chat-bubble ${
+                            message.email === userEmail
+                                ? 'bg-gray-200 text-gray-900'
+                                : 'bg-gray-400 text-gray-900'
+                        }`}>
+                            <p className="text-sm font-semibold mb-1">{message.email}</p>
+                            <p>{message.content}</p>
+                        </div>
                     </div>
                 ))}
             </div>
-            <div className="flex items-center space-x-2">
-                <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    className="input input-bordered w-full"
-                    placeholder="Type your message"
-                />
-                <button onClick={sendMessage} className="btn btn-primary">Send</button>
+
+            <div className="bg-gray-100 p-4">
+                <div className="flex items-center space-x-2">
+                    <input
+                        type="text"
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        className="flex-1 input input-bordered"
+                        placeholder="Type your message"
+                    />
+                    <button onClick={sendMessage} className="btn btn-primary">Send</button>
+                </div>
             </div>
         </div>
     );
