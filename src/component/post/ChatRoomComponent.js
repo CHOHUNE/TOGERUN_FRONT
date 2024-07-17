@@ -54,7 +54,8 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
             id: msg.id,
             content: msg.content,
             email: msg.email,
-            createdAt: msg.createdAt
+            createdAt: msg.createdAt,
+            chatMessageType: msg.chatMessageType
         };
         setMessages((prevMessages) => [...prevMessages, formattedMsg]);
     }, []);
@@ -65,7 +66,8 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
             const messageDTO = {
                 content: newMessage.trim(),
                 email: userEmail,
-                createdAt: new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString()
+                createdAt: new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString(),
+                chatMessageType: 'NORMAL'
             };
             stompClient.publish({
                 destination: `/app/chat/${postId}/send`,
@@ -77,12 +79,12 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
 
     // 스크롤 관련 함수들
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        messagesEndRef.current?.scrollIntoView({behavior: "smooth"});
     };
 
     const handleScroll = () => {
         if (scrollContainerRef.current) {
-            const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+            const {scrollTop, scrollHeight, clientHeight} = scrollContainerRef.current;
             setIsNearBottom(scrollHeight - (scrollTop + clientHeight) < SCROLL_THRESHOLD);
         }
     };
@@ -119,7 +121,7 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
 
     const formatTime = (timestamp) => {
         const date = new Date(timestamp);
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
     };
 
 
@@ -131,22 +133,33 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
                 onScroll={handleScroll}
             >
                 {messages.map((message) => (
-                    <div
-                        key={message.id}
-                        className={`chat ${message.email === userEmail ? 'chat-end' : 'chat-start'}`}
-                    >
-                        <div className={`chat-bubble ${
-                            message.email === userEmail
-                                ? 'bg-white text-gray-900'
-                                : 'bg-gray-200 text-gray-900'
-                        }`}>
-                            <p className="text-sm font-semibold mb-1">{message.email}</p>
-                            <p>{message.content}</p>
+                    message.chatMessageType === 'SYSTEM' ? (
+                        <div
+                            key={message.id}
+                            className="w-full flex justify-center"
+                        >
+                            <div className="bg-gray-300 text-gray-700 p-2 rounded">
+                                <p>{message.content}</p>
+                            </div>
                         </div>
-                        <div className="chat-footer text-xs opacity-50 mt-1">
-                            {formatTime(message.createdAt)}
+                    ) : (
+                        <div
+                            key={message.id}
+                            className={`chat ${message.email === userEmail ? 'chat-end' : 'chat-start'}`}
+                        >
+                            <div className={`chat-bubble ${
+                                message.email === userEmail
+                                    ? 'bg-white text-gray-900'
+                                    : 'bg-gray-200 text-gray-900'
+                            }`}>
+                                <p className="text-sm font-semibold mb-1">{message.email}</p>
+                                <p>{message.content}</p>
+                            </div>
+                            <div className="chat-footer text-xs opacity-50 mt-1">
+                                {formatTime(message.createdAt)}
+                            </div>
                         </div>
-                    </div>
+                    )
                 ))}
                 <div ref={messagesEndRef}/>
             </div>
