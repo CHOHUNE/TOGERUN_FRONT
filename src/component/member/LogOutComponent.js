@@ -1,7 +1,6 @@
 import React from 'react';
 import useCustomLogin from "../../hooks/useCustomLogin";
 
-import {axiosInstance} from "../../api/api";
 import {removeCookie} from "../../util/cookieUtil";
 
 function LogoutComponent(props) {

@@ -4,7 +4,7 @@ import {Link, useNavigate} from "react-router-dom";
 import useCustomMove from "../../hooks/useCustomMove";
 import ResultModal from "../common/ResultModal";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {postInitState} from "./PostInitState";
+import {postInitState} from "./inItstate/PostInitState";
 import useCustomLogin from "../../hooks/useCustomLogin";
 import FetchingModal from "../common/FetchingModal";
 
@@ -30,7 +30,7 @@ function ReadComponent({postId}) {
     //     dispatch(fetchPostById(postId));
     // }, [dispatch, postId]);
 
-    const {moveToList, moveToModify,size,page} = useCustomMove();
+    const {moveToList, moveToModify} = useCustomMove();
 
     // const {loginState} = useCustomLogin();
 

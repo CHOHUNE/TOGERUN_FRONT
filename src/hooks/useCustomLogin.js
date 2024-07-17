@@ -39,8 +39,10 @@ function UseCustomLogin(props) {
         // nai('/api/member/logout')
 
         removeCookie('member')
-        removeCookie('JSESSIONID')
+        // removeCookie('JSESSIONID')
         resetState();
+
+
     }
 
     const saveAsCookie=(data)=>{

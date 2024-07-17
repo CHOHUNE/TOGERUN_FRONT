@@ -2,7 +2,7 @@ import {atom} from "recoil";
 import {getCookie} from "../util/cookieUtil";
 
 
-const initState = {
+export const initState = {
     email:'',
     nickname:'',
     accessToken:'',

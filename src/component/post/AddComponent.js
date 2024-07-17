@@ -4,7 +4,7 @@ import useCustomMove from "../../hooks/useCustomMove";
 import ResultModal from "../../component/common/ResultModal";
 import FetchingModal from "../common/FetchingModal";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {postInitState} from "./PostInitState";
+import {postInitState} from "./inItstate/PostInitState";
 
 
 
