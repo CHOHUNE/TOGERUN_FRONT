@@ -1,34 +1,33 @@
 import SideOpenDrawer from "../component/common/sideOpenDrawer";
 import {useNavigate} from "react-router-dom";
 import useCustomLogin from "../hooks/useCustomLogin";
-import {removeCookie} from "../util/cookieUtil";
 import ResultModal from "../component/common/ResultModal";
 import React, {useState} from "react";
-import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {useRecoilState} from "recoil";
 import {initState, signInState} from "../atoms/singinState";
 
 const BasicMenu = () => {
 
-    const queryClient = useQueryClient;
+    // const queryClient = useQueryClient;
 
     const navigate = useNavigate();
-    const {loginState} = useCustomLogin();
 
-    const {doLogout,moveToPath} = useCustomLogin();
+    const {loginState,doLogout,moveToPath} = useCustomLogin();
     const [showLogoutModal, setShowLogoutModal] = useState(false)
     const [signIn,setSignIn] = useRecoilState(signInState);
 
-    const logoutMutation = useMutation(
-        {mutationFn: () => doLogout(),
-            onSuccess: () => {
-            setSignIn(initState)
-            }
-        });
+    // const logoutMutation = useMutation(
+    //     {mutationFn: () => doLogout(),
+    //         onSuccess: () => {
+    //         setSignIn(initState)
+    //         }
+    //     });
 
-    function handleClickLogout() {
+    const handleClickLogout = async () =>{
 
-        logoutMutation.mutate()
+        await doLogout();
+
+        setSignIn(initState)
         toggleLogoutModal()
     }
 
@@ -36,7 +35,7 @@ const BasicMenu = () => {
 
         // queryClient.invalidateQueries(); // 로그인 스테이트 불러오는 쿼리로 변경 필요
 
-        if(logoutMutation.isSuccess){
+        if(signIn.email ===''){
             moveToPath('/')
         }
     }
@@ -140,9 +139,10 @@ const BasicMenu = () => {
                     </div>
                 </div>
             )}
-            {logoutMutation.isSuccess ?
+            {signIn.email==='' && (
                 <ResultModal title={'로그아웃'} content={`로그아웃이 완료 되었습니다.`}
-                             callbackFn={closeModal}/> : <></>}
+                             callbackFn={closeModal}/>
+                )}
 
         </div>
 
