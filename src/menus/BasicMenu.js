@@ -1,11 +1,47 @@
 import SideOpenDrawer from "../component/common/sideOpenDrawer";
 import {useNavigate} from "react-router-dom";
 import useCustomLogin from "../hooks/useCustomLogin";
+import {removeCookie} from "../util/cookieUtil";
+import ResultModal from "../component/common/ResultModal";
+import React, {useState} from "react";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {useRecoilState} from "recoil";
+import {initState, signInState} from "../atoms/singinState";
 
 const BasicMenu = () => {
 
+    const queryClient = useQueryClient;
+
     const navigate = useNavigate();
     const {loginState} = useCustomLogin();
+
+    const {doLogout,moveToPath} = useCustomLogin();
+    const [showLogoutModal, setShowLogoutModal] = useState(false)
+    const [signIn,setSignIn] = useRecoilState(signInState);
+
+    const logoutMutation = useMutation(
+        {mutationFn: () => doLogout(),
+            onSuccess: () => {
+            setSignIn(initState)
+            }
+        });
+
+    function handleClickLogout() {
+
+        logoutMutation.mutate()
+        toggleLogoutModal()
+    }
+
+    const closeModal =()=>{
+
+        // queryClient.invalidateQueries(); // 로그인 스테이트 불러오는 쿼리로 변경 필요
+
+        if(logoutMutation.isSuccess){
+            moveToPath('/')
+        }
+    }
+
+    const toggleLogoutModal =()=> setShowLogoutModal(!showLogoutModal);
 
     return (
         <div className="navbar bg-base-100 px-7">
@@ -89,15 +125,29 @@ const BasicMenu = () => {
                 {!loginState.email ?
                 <button className={"btn join-item"} onClick={() => navigate("/member/login")}>Login</button>
                     :
-                    <button className={"btn join-item"} onClick={() => navigate("/member/logout")}>Logout</button>
+                    <button className={"btn join-item"} onClick={toggleLogoutModal}>Logout</button>
                 }
             </div>
+            {showLogoutModal && (
+                <div className="modal modal-open">
+                    <div className="modal-box">
+                        <h3 className="font-bold text-lg">로그아웃 하시겠습니까?</h3>
+                        <div className="modal-action py-5">
+                            <button className="btn btn-outline btn-error" onClick={handleClickLogout}>Yes</button>
+                            <button className="btn btn-outline btn-neutral" onClick={toggleLogoutModal}>No</button>
+                            <button  className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={toggleLogoutModal}>✕</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {logoutMutation.isSuccess ?
+                <ResultModal title={'로그아웃'} content={`로그아웃이 완료 되었습니다.`}
+                             callbackFn={closeModal}/> : <></>}
 
         </div>
 
 
     )
-        ;
 }
 
 export default BasicMenu;
