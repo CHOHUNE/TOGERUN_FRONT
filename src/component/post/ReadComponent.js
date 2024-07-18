@@ -4,7 +4,7 @@ import {Link, useNavigate} from "react-router-dom";
 import useCustomMove from "../../hooks/useCustomMove";
 import ResultModal from "../common/ResultModal";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {postInitState} from "./inItstate/PostInitState";
+import {postInitState} from "../../atoms/postInitState";
 import useCustomLogin from "../../hooks/useCustomLogin";
 import FetchingModal from "../common/FetchingModal";
 
