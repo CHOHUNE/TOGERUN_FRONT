@@ -1,12 +1,12 @@
 import SideOpenDrawer from "../component/common/sideOpenDrawer";
 import {useNavigate} from "react-router-dom";
 import useCustomLogin from "../hooks/useCustomLogin";
-import {removeCookie} from "../util/cookieUtil";
 import ResultModal from "../component/common/ResultModal";
 import React, {useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {useRecoilState} from "recoil";
 import {initState, signInState} from "../atoms/singinState";
+import useEventSource from "../hooks/useEventSource";
 
 const BasicMenu = () => {
 
@@ -34,14 +34,21 @@ const BasicMenu = () => {
 
     const closeModal =()=>{
 
-        // queryClient.invalidateQueries(); // 로그인 스테이트 불러오는 쿼리로 변경 필요
-
         if(logoutMutation.isSuccess){
             moveToPath('/')
         }
     }
 
     const toggleLogoutModal =()=> setShowLogoutModal(!showLogoutModal);
+
+    // EventSource 구독
+    useEventSource('http://localhost:8080/api/notifications/subscribe', (event) => {
+        const data = JSON.parse(event.data);
+        console.log('New event:', data);
+        // 새로운 이벤트를 처리하는 로직을 여기에 추가
+    }, (error) => {
+        console.error('EventSource error:', error);
+    });
 
     return (
         <div className="navbar bg-base-100 px-7">
