@@ -2,53 +2,61 @@ import SideOpenDrawer from "../component/common/sideOpenDrawer";
 import {useNavigate} from "react-router-dom";
 import useCustomLogin from "../hooks/useCustomLogin";
 import ResultModal from "../component/common/ResultModal";
-import React, {useState} from "react";
+import React, {useCallback, useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {useRecoilState} from "recoil";
 import {initState, signInState} from "../atoms/singinState";
 import useEventSource from "../hooks/useEventSource";
 
+
 const BasicMenu = () => {
-
     const queryClient = useQueryClient;
-
     const navigate = useNavigate();
-    const {loginState} = useCustomLogin();
+    const { loginState } = useCustomLogin();
+    const { doLogout, moveToPath } = useCustomLogin();
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [signIn, setSignIn] = useRecoilState(signInState);
 
-    const {doLogout,moveToPath} = useCustomLogin();
-    const [showLogoutModal, setShowLogoutModal] = useState(false)
-    const [signIn,setSignIn] = useRecoilState(signInState);
+    const [lastEventId, setLastEventId] = useState(null);
 
     const logoutMutation = useMutation(
-        {mutationFn: () => doLogout(),
+        { mutationFn: () => doLogout(),
             onSuccess: () => {
-                setSignIn(initState)
+                setSignIn(initState);
             }
         });
 
     function handleClickLogout() {
-
-        logoutMutation.mutate()
-        toggleLogoutModal()
+        logoutMutation.mutate();
+        toggleLogoutModal();
     }
 
-    const closeModal =()=>{
-
-        if(logoutMutation.isSuccess){
-            moveToPath('/')
+    const closeModal = () => {
+        if (logoutMutation.isSuccess) {
+            moveToPath('/');
         }
     }
 
-    const toggleLogoutModal =()=> setShowLogoutModal(!showLogoutModal);
+    const toggleLogoutModal = () => setShowLogoutModal(!showLogoutModal);
 
-    // EventSource 구독
-    useEventSource('http://localhost:8080/api/notifications/subscribe', (event) => {
+    const handleNewEvent = useCallback((event) => {
         const data = JSON.parse(event.data);
         console.log('New event:', data);
-        // 새로운 이벤트를 처리하는 로직을 여기에 추가
-    }, (error) => {
+        // 새로운 이벤트 처리 로직 추가
+        setLastEventId(event.lastEventId); // 마지막 이벤트 ID 저장
+    }, []);
+
+    const handleError = useCallback((error) => {
         console.error('EventSource error:', error);
-    });
+    }, []);
+
+    // EventSource 구독
+    useEventSource(
+        'http://localhost:8080/api/notifications/subscribe',
+        handleNewEvent,
+        handleError,
+        lastEventId
+        , []); // 빈 의존성 배열 추가
 
     return (
         <div className="navbar bg-base-100 px-7">
