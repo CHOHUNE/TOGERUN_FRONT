@@ -50,9 +50,9 @@ const useEventSource = (url, onMessage, onError, lastEventId) => {
                 setIsConnected(false);
             }
         };
-    }, [url, onMessage, onError, lastEventId, loginState, isConnected, setIsConnected]);
+    }, [url,  lastEventId, loginState]);
 
-    return { isConnected };
+    return { isConnected };TO
 };
 
 export default useEventSource;
