@@ -1,25 +1,38 @@
 // useEventSource.js
-import { useEffect, useRef } from 'react';
-import { getCookie } from '../util/cookieUtil';
-import { useRecoilState } from 'recoil';
-import { sseState } from '../atoms/sseState';
+import {useEffect, useRef} from 'react';
+import {getCookie} from '../util/cookieUtil';
+import {useRecoilState} from 'recoil';
+import {sseState} from '../atoms/sseState';
 import useCustomLogin from './useCustomLogin';
+import {EventSourcePolyfill, NativeEventSource} from "event-source-polyfill";
 
 const useEventSource = (url, onMessage, onError, lastEventId) => {
-    const { loginState } = useCustomLogin();
+    const {loginState} = useCustomLogin();
     const [isConnected, setIsConnected] = useRecoilState(sseState);
     const eventSourceRef = useRef(null);
 
+    const EventSource = EventSourcePolyfill || NativeEventSource;
+
     useEffect(() => {
         if (loginState.email && !isConnected) {
-            const memberCookie = getCookie('member');
-            if (!memberCookie || !memberCookie.accessToken) {
-                console.error('No valid token found in cookies');
+            const accessToken = getCookie('member').accessToken;
+
+            if (!accessToken) {
+                console.error('AccessToken is not found');
                 return;
             }
 
-            const token = memberCookie.accessToken;
-            eventSourceRef.current = new EventSource(`${url}?lastEventId=${lastEventId}&token=${token}`);
+
+            eventSourceRef.current = new EventSource(`${url}`, {
+
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+
+                    },
+                    // withCredentials: true 쿠키를 죄다 보내서 일단 주석 처리
+                }
+            );
+
 
             eventSourceRef.current.onmessage = (event) => {
                 if (onMessage) {
@@ -50,9 +63,9 @@ const useEventSource = (url, onMessage, onError, lastEventId) => {
                 setIsConnected(false);
             }
         };
-    }, [url,  lastEventId, loginState]);
+    }, [url, lastEventId, loginState]);
 
-    return { isConnected };TO
+    return {isConnected};
 };
 
 export default useEventSource;
