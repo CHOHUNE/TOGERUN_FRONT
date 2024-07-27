@@ -36,6 +36,7 @@ const AddComponent = () => {
         formData.append('content', post.content)
 
 
+
         addMutation.mutate(formData)
 
         // postAdd(post).then(

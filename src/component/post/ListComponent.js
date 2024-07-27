@@ -57,6 +57,7 @@ function ListComponent(props) {
                     <th className="text-center">ID</th>
                     <th className="text-center">Title</th>
                     <th className="text-center">Actions</th>
+                    <th className="text-center">Writer</th>
                     <th className="text-center">Date</th>
                 </tr>
                 </thead>
@@ -70,6 +71,7 @@ function ListComponent(props) {
                         <td className="text-center">
                             <Link to={`/post/${post.id}`} className="btn btn-outline btn-primary">Read More</Link>
                         </td>
+                        <td className="text-center">{post.nickname}</td>
                         <td className="text-center">{post.localDate}</td>
                     </tr>
                 ))}

@@ -32,8 +32,8 @@ export const fetchMessages = async (postId)=>{
     return res.data
 }
 
-export const joinChatRoom =async(postId,userEmail)=>{
+export const joinChatRoom =async(postId)=>{
         await jwtAxios.post(`/post/${postId}/chat/join`, null, {
-            params: { email: userEmail}
+            // params: { email: userEmail}
         });
 };
