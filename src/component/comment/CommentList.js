@@ -18,7 +18,7 @@ export function CommentList({
                         key={comment.id}
                         isSubmitting={false}
                         setIsSubmitting={setIsSubmitting}
-                        comment={comment.content}
+                        comment={comment}
                         onSubitComment={null}
                         onDelete={onDelete}
                     />

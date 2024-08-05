@@ -63,7 +63,8 @@ export const useCommentHook = (postId, setIsSubmitting, setIsEditing) => {
         setIsSubmitting(true);
         editComment.mutate({
             id: commentId,
-            comment_content: content,
+            content: content,
+            // created_by: loginState.email
         });
     };
 
