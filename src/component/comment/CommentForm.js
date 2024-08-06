@@ -11,6 +11,7 @@ export function CommentForm({isSubmitting,onSubmit}) {
             // 댓글이 비어있거나 공백만 포함된 경우, 제출하지 않음
             return;
         }
+
         onSubmit(content);
         setContent(""); // 제출 후 입력 필드 지우기
     }

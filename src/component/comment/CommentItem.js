@@ -4,12 +4,17 @@ import {PencilIcon, PlusIcon, TrashIcon, XMarkIcon} from "@heroicons/react/16/so
 import useCustomLogin from "../../hooks/useCustomLogin";
 
 export function CommentItem({ comment, postId, submittingState }) {
+
     const [isEditing, setIsEditing] = useState(false);
     const [isWriting, setIsWriting] = useState(false);
     const [commentEdited, setCommentEdited] = useState(comment.content);
+
     const [replyComment, setReplyComment] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(submittingState);
+
     const {isLogin,loginState} = useCustomLogin();
+
+    console.log("potsId", postId);
 
     const {
         handleAddComment,

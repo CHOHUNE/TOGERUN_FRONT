@@ -2,10 +2,11 @@ import React from "react";
 import {CommentItem} from "./CommentItem";
 
 export function CommentList({
-                                         commentList,
-                                         onDelete,
-                                         setIsSubmitting,
-                                     }) {
+                                commentList,
+                                onDelete,
+                                setIsSubmitting,
+                                postId
+                            }) {
 
     return (
         <div className="card mt-12 shadow-md">
@@ -21,6 +22,7 @@ export function CommentList({
                         comment={comment}
                         onSubitComment={null}
                         onDelete={onDelete}
+                        postId={postId}
                     />
                 ))}
             </div>

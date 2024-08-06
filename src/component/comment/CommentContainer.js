@@ -67,11 +67,13 @@ export function CommentContainer({postId}) {
             <CommentForm
                 isSubmitting={isSubmitting}
                 onSubmit={handleAddComment} />
+
             <CommentList
                 commentList={commentList}
                 isSubmitting={isSubmitting}
                 onDelete={handleDeleteComment}
                 onSubmit={handleAddComment}
+                postId={postId}
             />
         </div>
     );
