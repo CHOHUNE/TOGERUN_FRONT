@@ -2,10 +2,12 @@ import React from "react";
 import {CommentItem} from "./CommentItem";
 
 export function CommentList({
+
                                 commentList,
                                 onDelete,
                                 setIsSubmitting,
                                 postId
+
                             }) {
 
     return (
@@ -17,8 +19,7 @@ export function CommentList({
                 {commentList.map((comment) => (
                     <CommentItem
                         key={comment.id}
-                        isSubmitting={false}
-                        setIsSubmitting={setIsSubmitting}
+                        submittingState={setIsSubmitting}
                         comment={comment}
                         onSubitComment={null}
                         onDelete={onDelete}

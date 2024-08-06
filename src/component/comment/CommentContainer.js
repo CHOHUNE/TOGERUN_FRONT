@@ -10,7 +10,9 @@ export function CommentContainer({postId}) {
 
 
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [commentList, setCommentList] = useState([]);
+    // const [commentList, setCommentList] = useState([]);
+    // 상태 관리를 react-query 로 대체
+    // data를 직접 쓰는 방식으로 변경
 
     const queryClient = useQueryClient();
 
@@ -20,45 +22,28 @@ export function CommentContainer({postId}) {
     } = useCommentHook(postId, setIsSubmitting, null);
 
 
-    // 댓글 리스트를 가져오는 React Query
-    // const { data, refetch } = useQuery(
-    //     ["comments", postId],
-    //     () => fetchCommentList(postId),
-    //     {
-    //         onSuccess: (data) => {
-    //             setCommentList(data);
-    //         },
-    //         refetchOnWindowFocus: false, // 필요시 추가
-    //     }
-    // ); - 구버전의 react-query 코드 형식
-    // v5 이상 에서는 쿼리 관련 함수 호출시 객체 형태의 인자만 허용 한다.
 
-    const { data, refetch } = useQuery({
+    const { data:commentList, refetch } = useQuery({
+
         queryKey: ["comments", postId],
         queryFn: () => fetchCommentList(postId),
         enabled:!!postId,
 
-        // onSuccess: (data) => {
-        //     // setCommentList(data);
-        // },
-        // refetchOnWindowFocus: false,
-
-
     });
 
-    useEffect(() => {
-        if (data) {
-            setCommentList(data);
-            console.log("commentList updated", data);
-        }
-    }, [data]);
+    // useEffect(() => {
+    //     if (data) {
+    //         setCommentList(data);
+    //         console.log("commentList updated", data);
+    //     }
+    // }, [data]);
 
 
-    useEffect(() => {
-        if (!isSubmitting) {
-            refetch();
-        }
-    }, [isSubmitting, refetch]);
+    // useEffect(() => {
+    //     if (!isSubmitting) {
+    //         refetch();
+    //     }
+    // }, [isSubmitting, refetch]);
 
 
 
@@ -69,7 +54,7 @@ export function CommentContainer({postId}) {
                 onSubmit={handleAddComment} />
 
             <CommentList
-                commentList={commentList}
+                commentList={commentList || [] }
                 isSubmitting={isSubmitting}
                 onDelete={handleDeleteComment}
                 onSubmit={handleAddComment}
