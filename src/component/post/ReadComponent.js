@@ -74,10 +74,10 @@ function ReadComponent({postId}) {
                     <h1 className="card-title text-3xl">{post.title}</h1>
                     <div className="flex items-center space-x-2">
                         <button onClick={handleLikeToggle} className="btn btn-ghost btn-circle">
-                            {post.isLiked ? <HeartIconSolid className="h-6 w-6 text-red-500" /> : <HeartIcon className="h-6 w-6" />}
+                            {post.like ? <HeartIconSolid className="h-6 w-6 text-red-500" /> : <HeartIcon className="h-6 w-6" />}
                         </button>
                         <button onClick={handleFavoriteToggle} className="btn btn-ghost btn-circle">
-                            {post.isFavorited ? <StarIconSolid className="h-6 w-6 text-yellow-500" /> : <StarIcon className="h-6 w-6" />}
+                            {post.favorite ? <StarIconSolid className="h-6 w-6 text-yellow-500" /> : <StarIcon className="h-6 w-6" />}
                         </button>
                     </div>
                 </div>
