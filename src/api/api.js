@@ -65,6 +65,18 @@ export const modifyCommentAPI = async (editedComment)=>{
     return response.data
 }
 
+export const likeToggle =async (postId)=>{
+    const response = await jwtAxios.post(`/post/${postId}/like`);
+
+    return response.data
+}
+
+export const favoriteToggle = async (postId)=>{
+    const response = await jwtAxios.post(`/post/${postId}/favorite`);
+
+    return response.data
+}
+
 
 
 

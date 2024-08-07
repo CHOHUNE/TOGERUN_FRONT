@@ -61,6 +61,7 @@ export const useCommentHook = (postId, setIsSubmitting, setIsEditing,setWriting)
             });
         }
     };
+
     const handleDeleteComment = (commentId) => {
         setIsSubmitting(true);
         deleteComment.mutate(commentId);
@@ -83,6 +84,6 @@ export const useCommentHook = (postId, setIsSubmitting, setIsEditing,setWriting)
         handleAddComment,
         handleDeleteComment,
         handleEditComment,
-        // handleDuplicateSubmit,
+
     };
 };
