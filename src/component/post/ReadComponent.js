@@ -67,7 +67,7 @@ function ReadComponent({postId}) {
     }
 
     return (
-        <div className="card bg-base-100 shadow-xl">
+        <div className="card bg-base-100 shadow-xl relative z-0">
             {isFetching ? <FetchingModal/> : null}
             <div className="card-body">
                 <div className="flex justify-between items-center mb-4">
@@ -106,7 +106,7 @@ function ReadComponent({postId}) {
                 </div>
             </div>
             {showDeleteModal && (
-                <div className="modal modal-open">
+                <div className="modal modal-open z-50">
                     <div className="modal-box">
                         <h3 className="font-bold text-lg">게시물을 삭제 하시겠습니까?</h3>
                         <div className="modal-action py-5">

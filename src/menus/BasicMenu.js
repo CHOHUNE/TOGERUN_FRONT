@@ -6,7 +6,6 @@ import React, {useCallback, useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {useRecoilState} from "recoil";
 import {initState, signInState} from "../atoms/singinState";
-import useEventSource from "../hooks/useEventSource";
 import NotificationIcon from "../component/notification/NotificationIcon";
 
 

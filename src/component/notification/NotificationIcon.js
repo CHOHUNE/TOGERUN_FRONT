@@ -1,111 +1,136 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react';
-import useEventSource from "../../hooks/useEventSource";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { BellIcon } from '@heroicons/react/24/outline';
 import jwtAxios from "../../util/JwtUtil";
-import { useNavigate } from "react-router-dom";
+import useEventSource from "../../hooks/useEventSource";
+import {useNavigate} from "react-router-dom";
+import {basicURL} from "../../api/api";
 
 const NotificationIcon = () => {
-    const [isOpen, setIsOpen] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
-    const [page, setPage] = useState(1);
+    const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const notificationRef = useRef(null);
+
     const navigate = useNavigate();
-    const lastEventIdRef = useRef(null);
 
-    const toggleDropdown = () => {
-        setIsOpen(!isOpen);
-        if (!isOpen) {
-            setPage(1);
-            fetchNotifications(1, true);
-        }
-    };
-
-    const fetchNotifications = useCallback((pageNum, reset = false) => {
-        jwtAxios.get(`/api/notifications/all?page=${pageNum}&size=8`)
-            .then(response => {
+    const fetchNotifications = useCallback(async () => {
+        try {
+            const response = await jwtAxios.get(`/notifications/all?page=${page}&size=7`);
+            setNotifications(prev => {
                 const newNotifications = response.data.content;
-                setNotifications(prev => reset ? newNotifications : [...prev, ...newNotifications]);
-
-                setHasMore(response.data.hasNext);
-                setUnreadCount(response.data.unreadCount);
-
-            })
-            .catch(error => console.log("Error fetching Notifications", error));
-    }, []);
-
-    const handleNewEvent = useCallback((event) => {
-        const data = JSON.parse(event.data);
-        setNotifications(prev => [data, ...prev.slice(0, 7)]);  // Keep only the latest 8 notifications
-        setUnreadCount(prev => prev + 1);
-        lastEventIdRef.current = event.lastEventId;
-    }, []);
-
-    const handleError = useCallback((error) => {
-        console.error('EventSource error:', error);
-        // 여기에 재연결 로직 추가
-    }, []);
-
-    useEventSource(
-        'http://localhost:8080/api/notifications/subscribe',
-        handleNewEvent,
-        handleError,
-        lastEventIdRef.current
-    );
+                const uniqueNotifications = [...prev];
+                newNotifications.forEach(newNotif => {
+                    if (!uniqueNotifications.some(notif => notif.id === newNotif.id)) {
+                        uniqueNotifications.push(newNotif);
+                    }
+                });
+                return uniqueNotifications;
+            });
+            setUnreadCount(response.data.unreadCount);
+            setHasMore(page < response.data.totalPages - 1);
+            setPage(prev => prev + 1);
+        } catch (error) {
+            console.error("Failed to fetch notifications:", error);
+        }
+    }, [page]);
 
     useEffect(() => {
-        fetchNotifications(1, true);
-    }, [fetchNotifications]);
+        if (showNotifications && isInitialLoad) {
+            fetchNotifications();
+            setIsInitialLoad(false);
+        }
+    }, [showNotifications, isInitialLoad, fetchNotifications]);
 
-    const loadMore = () => {
-        if (hasMore) {
-            setPage(prev => prev + 1);
-            fetchNotifications(page + 1);
+    const handleNewNotification = useCallback((event) => {
+        const newNotification = JSON.parse(event.data);
+        setNotifications(prev => {
+            if (!prev.some(notif => notif.id === newNotification.id)) {
+                return [newNotification, ...prev];
+            }
+            return prev;
+        });
+        setUnreadCount(prev => prev + 1);
+    }, []);
+
+    useEventSource('http://localhost:8080/api/notifications/subscribe', handleNewNotification);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+                setShowNotifications(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    const handleNotificationClick = () => {
+        setShowNotifications(!showNotifications);
+    };
+
+    const markAsRead = async (notification) => {
+        try {
+            await jwtAxios.post(`/notifications/${notification.id}/read`);
+            setNotifications(prev =>
+                prev.map(notif =>
+                    notif.id === notification.Id ? { ...notif, isRead: true } : notif
+                )
+            );
+            setUnreadCount(prev => prev - 1);
+
+            navigate(notification.goUrl)
+
+        } catch (error) {
+            console.error("Failed to mark notification as read:", error);
         }
     };
 
-    const markAsRead = useCallback((notificationId) => {
-        jwtAxios.post(`/api/notifications/${notificationId}/read`)
-            .then(() => {
-                setNotifications(prev =>
-                    prev.map(notif =>
-                        notif.id === notificationId ? {...notif, isRead: true} : notif
-                    )
-                );
-                setUnreadCount(prev => Math.max(0, prev - 1));
-            })
-            .catch(error => console.log("Error marking notification as read", error));
-    }, []);
-
     return (
-        <div className="dropdown dropdown-end">
-            <button tabIndex={0} className="btn btn-ghost btn-circle" onClick={toggleDropdown}>
-                <div className="indicator">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
-                    {unreadCount > 0 && <span className="badge badge-xs badge-primary indicator-item">{unreadCount}</span>}
-                </div>
+        <div className="relative" ref={notificationRef}>
+            <button
+                onClick={handleNotificationClick}
+                className="p-1 rounded-full text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
+            >
+                <BellIcon className="h-6 w-6" />
+                {unreadCount > 0 && (
+                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                        {unreadCount}
+                    </span>
+                )}
             </button>
-            {isOpen && (
-                <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-64 mt-2 max-h-60 overflow-y-auto">
-                    {notifications.map(notification => (
-                        <li key={notification.id}
-                            onClick={() => {
-                                navigate(notification.goUrl);
-                                if (!notification.isRead) markAsRead(notification.id);
-                            }}
-                            className={`cursor-pointer ${notification.isRead ? 'opacity-50' : ''}`}>
-                            <a className="p-2 hover:bg-gray-100">
-                                <strong className="font-bold">{notification.nickname}</strong>: {notification.content}
-                            </a>
-                        </li>
-                    ))}
-                    {hasMore && (
-                        <li className="text-center">
-                            <button onClick={loadMore} className="btn btn-ghost btn-sm">더 보기</button>
-                        </li>
-                    )}
-                </ul>
+
+            {showNotifications && (
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-10 max-h-[80vh] overflow-y-auto">
+                    <div className="py-2">
+                        {notifications.map((notification) => (
+                            <div
+                                key={notification.id}
+                                className={`px-4 py-2 hover:bg-gray-100 ${
+                                    notification.isRead ? 'bg-gray-50' : 'bg-white'
+                                }`}
+                                onClick={() => markAsRead(notification)}
+                            >
+
+                                <p className="text-sm text-gray-600">{notification.content}</p>
+                                <p className="text-xs text-gray-400">{new Date(notification.createdAt).toLocaleString()}</p>
+                            </div>
+                        ))}
+                        {hasMore && (
+                            <button
+                                onClick={fetchNotifications}
+                                className="w-full px-4 py-2 bg-gray-100 text-gray-800 text-sm font-medium hover:bg-gray-200"
+                            >
+                                더 보기
+                            </button>
+                        )}
+                    </div>
+                </div>
             )}
         </div>
     );
