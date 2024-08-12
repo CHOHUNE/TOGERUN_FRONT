@@ -15,18 +15,18 @@ const refreshJWT = async (accessToken, refreshToken) => {
 
     const res = await axiosInstance.get(`/member/refresh?refreshToken=${refreshToken}`, header)
 
-    console.log("----------------------")
-    console.log(res.data)
+    // console.log("----------------------")
+    // console.log(res.data)
 
     return res.data
 }
 
 
 const beforeReq = (config)=>{
-    console.log("----- before Request -----")
+    // console.log("----- before Request -----")
 
     const memberInfo = getCookie('member')
-    console.log("memberinfo",memberInfo)
+    // console.log("memberinfo",memberInfo)
 
     if (!memberInfo) {
         console.log("Member NOT FOUND")
@@ -38,7 +38,7 @@ const beforeReq = (config)=>{
     }
 
     const {accessToken} =memberInfo
-    console.log("accessToken",accessToken)
+    // console.log("accessToken",accessToken)
 
     config.headers.Authorization = `Bearer ${accessToken}`
 

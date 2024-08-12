@@ -1,19 +1,17 @@
 import { useEffect, useRef } from 'react';
 import { getCookie } from '../util/cookieUtil';
 import { useRecoilState } from 'recoil';
-import { sseState } from '../atoms/sseState';
+import { notificationState } from '../atoms/notificationState';
 import useCustomLogin from './useCustomLogin';
-import { EventSourcePolyfill, NativeEventSource } from "event-source-polyfill";
+import { EventSourcePolyfill } from "event-source-polyfill";
 
-const useEventSource = (url, onMessage, onError, lastEventId) => {
+const useEventSource = (url, onMessage) => {
     const { loginState } = useCustomLogin();
-    const [isConnected, setIsConnected] = useRecoilState(sseState);
+    const [notificationExist, setNotificationExist] = useRecoilState(notificationState);
     const eventSourceRef = useRef(null);
 
-    const EventSource = EventSourcePolyfill || NativeEventSource;
-
     useEffect(() => {
-        if (loginState.email && !isConnected) {
+        if (loginState.email) {
             const accessToken = getCookie('member').accessToken;
 
             if (!accessToken) {
@@ -21,45 +19,55 @@ const useEventSource = (url, onMessage, onError, lastEventId) => {
                 return;
             }
 
-            eventSourceRef.current = new EventSource(`${url}`, {
+            eventSourceRef.current = new EventSourcePolyfill(`${url}`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
-                // withCredentials 옵션 제거
             });
 
-            eventSourceRef.current.onmessage = (event) => {
+            // eventSourceRef.current.onmessage = (event) => {
+            //     console.log('SSE Message Received:', event.data);
+            //     if (onMessage) {
+            //         onMessage(event);
+            //     }
+            // };
+
+            eventSourceRef.current.addEventListener('sse', (event) => {
+                const { data } = event;
+                console.log('SSE EVENT', data);
+
+                if (!data.includes(`EventStream Created`)) {
+                    setNotificationExist(false);
+                }
+
                 if (onMessage) {
                     onMessage(event);
                 }
-            };
+            });
+
+            eventSourceRef.current.onopen = () => console.log("SSE Connection Opened");
 
             eventSourceRef.current.onerror = (error) => {
-                if (onError) {
-                    onError(error);
-                }
+                console.log('SSE Error', error);
                 eventSourceRef.current.close();
-                setIsConnected(false);
+                setNotificationExist(false);
             };
 
-            setIsConnected(true);
-        } else if (!loginState.email && isConnected) {
-            // 로그아웃 시 SSE 연결 종료
+            setNotificationExist(true);
+        } else if (!loginState.email && notificationExist) {
             if (eventSourceRef.current) {
                 eventSourceRef.current.close();
-                setIsConnected(false);
+                setNotificationExist(false);
             }
         }
 
         return () => {
             if (eventSourceRef.current) {
                 eventSourceRef.current.close();
-                setIsConnected(false);
+                setNotificationExist(false);
             }
         };
-    }, [url, lastEventId, loginState, onMessage, onError, setIsConnected]);
-
-    return { isConnected };
+    }, [url, loginState, onMessage, setNotificationExist]);
 };
 
 export default useEventSource;

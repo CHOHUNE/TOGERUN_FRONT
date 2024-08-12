@@ -1,61 +1,55 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BellIcon } from '@heroicons/react/24/outline';
-import jwtAxios from "../../util/JwtUtil";
+import { useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {basicURL, fetchNotifications, markNotificationAsRead} from "../../api/api";
 import useEventSource from "../../hooks/useEventSource";
-import {useNavigate} from "react-router-dom";
-import {basicURL} from "../../api/api";
 
-const NotificationIcon = () => {
+const NotificationComponent = () => {
     const [showNotifications, setShowNotifications] = useState(false);
-    const [notifications, setNotifications] = useState([]);
-    const [unreadCount, setUnreadCount] = useState(0);
     const [page, setPage] = useState(0);
-    const [hasMore, setHasMore] = useState(true);
-    const [isInitialLoad, setIsInitialLoad] = useState(true);
-    const notificationRef = useRef(null);
-
     const navigate = useNavigate();
+    const notificationRef = useRef(null);
+    const queryClient = useQueryClient();
 
-    const fetchNotifications = useCallback(async () => {
+    const { data, isLoading, error } = useQuery({
+        queryKey: ['notifications', page],
+        queryFn: () => fetchNotifications(page),
+        keepPreviousData: true,
+        staleTime: 5000,
+    });
+
+    const notifications = data?.content || [];
+    const unreadCount = data?.unreadCount || 0;
+    const hasMore = page < (data?.totalPages - 1 || 0);
+
+    const handleNewNotification = useCallback(() => {
+
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+
+    }, [queryClient]);
+
+
+
+    useEventSource(`${basicURL}/notifications/subscribe`, handleNewNotification);
+
+    const markAsRead = async (notification) => {
         try {
-            const response = await jwtAxios.get(`/notifications/all?page=${page}&size=7`);
-            setNotifications(prev => {
-                const newNotifications = response.data.content;
-                const uniqueNotifications = [...prev];
-                newNotifications.forEach(newNotif => {
-                    if (!uniqueNotifications.some(notif => notif.id === newNotif.id)) {
-                        uniqueNotifications.push(newNotif);
-                    }
-                });
-                return uniqueNotifications;
-            });
-            setUnreadCount(response.data.unreadCount);
-            setHasMore(page < response.data.totalPages - 1);
-            setPage(prev => prev + 1);
+            await markNotificationAsRead(notification.id);
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
+            navigate(notification.goUrl);
         } catch (error) {
-            console.error("Failed to fetch notifications:", error);
+            console.error("Failed to mark notification as read:", error);
         }
-    }, [page]);
+    };
 
-    useEffect(() => {
-        if (showNotifications && isInitialLoad) {
-            fetchNotifications();
-            setIsInitialLoad(false);
+    const toggleNotifications = () => {
+        setShowNotifications(!showNotifications);
+        if (!showNotifications) {
+            setPage(0);
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
         }
-    }, [showNotifications, isInitialLoad, fetchNotifications]);
-
-    const handleNewNotification = useCallback((event) => {
-        const newNotification = JSON.parse(event.data);
-        setNotifications(prev => {
-            if (!prev.some(notif => notif.id === newNotification.id)) {
-                return [newNotification, ...prev];
-            }
-            return prev;
-        });
-        setUnreadCount(prev => prev + 1);
-    }, []);
-
-    useEventSource('http://localhost:8080/api/notifications/subscribe', handleNewNotification);
+    };
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -70,31 +64,14 @@ const NotificationIcon = () => {
         };
     }, []);
 
-    const handleNotificationClick = () => {
-        setShowNotifications(!showNotifications);
-    };
-
-    const markAsRead = async (notification) => {
-        try {
-            await jwtAxios.post(`/notifications/${notification.id}/read`);
-            setNotifications(prev =>
-                prev.map(notif =>
-                    notif.id === notification.Id ? { ...notif, isRead: true } : notif
-                )
-            );
-            setUnreadCount(prev => prev - 1);
-
-            navigate(notification.goUrl)
-
-        } catch (error) {
-            console.error("Failed to mark notification as read:", error);
-        }
-    };
+    if (error) {
+        console.error("Failed to fetch notifications:", error);
+    }
 
     return (
         <div className="relative" ref={notificationRef}>
             <button
-                onClick={handleNotificationClick}
+                onClick={toggleNotifications}
                 className="p-1 rounded-full text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
             >
                 <BellIcon className="h-6 w-6" />
@@ -108,22 +85,27 @@ const NotificationIcon = () => {
             {showNotifications && (
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-10 max-h-[80vh] overflow-y-auto">
                     <div className="py-2">
-                        {notifications.map((notification) => (
-                            <div
-                                key={notification.id}
-                                className={`px-4 py-2 hover:bg-gray-100 ${
-                                    notification.isRead ? 'bg-gray-50' : 'bg-white'
-                                }`}
-                                onClick={() => markAsRead(notification)}
-                            >
-
-                                <p className="text-sm text-gray-600">{notification.content}</p>
-                                <p className="text-xs text-gray-400">{new Date(notification.createdAt).toLocaleString()}</p>
-                            </div>
-                        ))}
-                        {hasMore && (
+                        {isLoading ? (
+                            <p className="text-center py-4">로딩 중...</p>
+                        ) : notifications.length === 0 ? (
+                            <p className="text-center py-4">알림이 없습니다.</p>
+                        ) : (
+                            notifications.map((notification) => (
+                                <div
+                                    key={notification.id}
+                                    className={`px-4 py-2 hover:bg-gray-100 ${
+                                        notification.isRead ? 'bg-gray-50' : 'bg-white'
+                                    }`}
+                                    onClick={() => markAsRead(notification)}
+                                >
+                                    <p className="text-sm text-gray-600">{notification.content}</p>
+                                    <p className="text-xs text-gray-400">{new Date(notification.createdAt).toLocaleString()}</p>
+                                </div>
+                            ))
+                        )}
+                        {!isLoading && hasMore && (
                             <button
-                                onClick={fetchNotifications}
+                                onClick={() => setPage(prev => prev + 1)}
                                 className="w-full px-4 py-2 bg-gray-100 text-gray-800 text-sm font-medium hover:bg-gray-200"
                             >
                                 더 보기
@@ -136,4 +118,4 @@ const NotificationIcon = () => {
     );
 };
 
-export default NotificationIcon;
+export default NotificationComponent;

@@ -80,6 +80,24 @@ export const favoriteToggle = async (postId)=>{
     return response.data
 }
 
+export const fetchNotifications = async ( page=0, size=7)=>{
+    const response = await jwtAxios.get(`/notifications/all?page=${page}&size=${size}`);
+
+    return response.data
+}
+
+export const markNotificationAsRead = async(notificationId)=>{
+    const response = await jwtAxios.post(`/notifications/${notificationId}/read`);
+    return response.data
+}
+
+export const subscribeNotification = async()=>{
+
+    return
+
+}
+
+
 
 
 
