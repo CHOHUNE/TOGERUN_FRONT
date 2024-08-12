@@ -25,25 +25,58 @@ function ReadComponent({postId}) {
 
     const navigate = useNavigate();
 
-    const delMutation = useMutation({mutationFn: (postId) => deleteOne(postId)});
-    const likeMutation = useMutation({
-        mutationFn: (postId) => likeToggle(postId),
+    const delMutation = useMutation({
+        mutationFn: (postId) => deleteOne(postId),
         onSuccess: () => {
-            queryClient.invalidateQueries(['post', postId]);
+            queryClient.invalidateQueries(['post/List']);
+            setShowDeleteModal(false);
+            moveToList();
         }
     });
+
+    const likeMutation = useMutation({
+        mutationFn: (postId) => likeToggle(postId),
+        onMutate: async () => {
+            await queryClient.cancelQueries(['post', postId]);
+            const previousPost = queryClient.getQueryData(['post', postId]);
+
+            queryClient.setQueryData(['post', postId], old => ({
+                ...old,
+                like: !old.like
+            }));
+
+            return { previousPost };
+        },
+        onError: (err, postId, context) => {
+            queryClient.setQueryData(['post', postId], context.previousPost);
+        },
+        // onSettled: () => {
+        //     queryClient.invalidateQueries(['post', postId]);
+        // }
+    });
+
     const favoriteMutation = useMutation({
         mutationFn: (postId) => favoriteToggle(postId),
-        onSuccess: () => {
-            queryClient.invalidateQueries(['post', postId]);
-        }
+        onMutate: async () => {
+            await queryClient.cancelQueries(['post', postId]);
+            const previousPost = queryClient.getQueryData(['post', postId]);
+
+            queryClient.setQueryData(['post', postId], old => ({
+                ...old,
+                favorite: !old.favorite
+            }));
+
+            return { previousPost };
+        },
+        onError: (err, postId, context) => {
+            queryClient.setQueryData(['post', postId], context.previousPost);
+        },
+        // onSettled: () => {
+        //     queryClient.invalidateQueries(['post', postId]);
+        // }
     });
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-    function handleClickDelete() {
-        delMutation.mutate(postId)
-    }
 
     const closeModal = () => {
         queryClient.invalidateQueries(['post/List']);
@@ -52,15 +85,14 @@ function ReadComponent({postId}) {
         }
     }
 
+    const handleClickDelete = ()=>delMutation.mutate(postId)
+
     const toggleDeleteModal = () => setShowDeleteModal(!showDeleteModal)
 
-    const handleLikeToggle = () => {
-        likeMutation.mutate(postId);
-    }
+    const handleLikeToggle = () => likeMutation.mutate(postId)
 
-    const handleFavoriteToggle = () => {
-        favoriteMutation.mutate(postId);
-    }
+    const handleFavoriteToggle = () => favoriteMutation.mutate(postId)
+
 
     if (!post) {
         return <div>Loading..</div>;

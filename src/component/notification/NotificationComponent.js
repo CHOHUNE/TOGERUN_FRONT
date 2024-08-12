@@ -2,15 +2,17 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BellIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {basicURL, fetchNotifications, markNotificationAsRead} from "../../api/api";
+import { basicURL, fetchNotifications, markNotificationAsRead } from "../../api/api";
 import useEventSource from "../../hooks/useEventSource";
 
 const NotificationComponent = () => {
+
     const [showNotifications, setShowNotifications] = useState(false);
     const [page, setPage] = useState(0);
     const navigate = useNavigate();
     const notificationRef = useRef(null);
     const queryClient = useQueryClient();
+    const batchUpdateTimeoutRef = useRef(null);
 
     const { data, isLoading, error } = useQuery({
         queryKey: ['notifications', page],
@@ -23,33 +25,70 @@ const NotificationComponent = () => {
     const unreadCount = data?.unreadCount || 0;
     const hasMore = page < (data?.totalPages - 1 || 0);
 
-    const handleNewNotification = useCallback(() => {
+    const handleNewNotification = useCallback((event) => {
+        const messageData = event.data;
+        console.log('Received SSE message:', messageData);
 
-        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        if (messageData === 'EventStream Created') {
+            console.log('EventStream connection established');
+            return;
+        }
 
-    }, [queryClient]);
 
 
+
+        if (batchUpdateTimeoutRef.current) {
+            clearTimeout(batchUpdateTimeoutRef.current);
+        }
+
+        batchUpdateTimeoutRef.current = setTimeout(() => {
+            queryClient.setQueryData(['notifications', page], (oldData) => {
+                if (!oldData) return oldData;
+
+                const newNotification = {
+                    id: messageData.id,
+                    content: messageData.content,
+                    createdAt: messageData.createdAt,
+                    isRead: false
+                };
+
+                return {
+                    ...oldData,
+                    content: [newNotification, ...oldData.content],
+                    unreadCount: oldData.unreadCount + 1
+                };
+            });
+        }, 100);
+    }, [queryClient, page]);
 
     useEventSource(`${basicURL}/notifications/subscribe`, handleNewNotification);
 
-    const markAsRead = async (notification) => {
+    const markAsRead = useCallback(async (notification) => {
         try {
             await markNotificationAsRead(notification.id);
-            queryClient.invalidateQueries({ queryKey: ['notifications'] });
+            queryClient.setQueryData(['notifications', page], (oldData) => {
+                if (!oldData) return oldData;
+                return {
+                    ...oldData,
+                    content: oldData.content.map(n =>
+                        n.id === notification.id ? { ...n, isRead: true } : n
+                    ),
+                    unreadCount: Math.max(0, oldData.unreadCount - 1)
+                };
+            });
             navigate(notification.goUrl);
         } catch (error) {
             console.error("Failed to mark notification as read:", error);
         }
-    };
+    }, [queryClient, page, navigate]);
 
-    const toggleNotifications = () => {
-        setShowNotifications(!showNotifications);
+    const toggleNotifications = useCallback(() => {
+        setShowNotifications(prev => !prev);
         if (!showNotifications) {
             setPage(0);
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
         }
-    };
+    }, [showNotifications, queryClient]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -61,6 +100,9 @@ const NotificationComponent = () => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
+            if (batchUpdateTimeoutRef.current) {
+                clearTimeout(batchUpdateTimeoutRef.current);
+            }
         };
     }, []);
 

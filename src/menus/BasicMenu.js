@@ -6,7 +6,7 @@ import React, {useCallback, useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {useRecoilState} from "recoil";
 import {initState, signInState} from "../atoms/singinState";
-import NotificationIcon from "../component/notification/NotificationIcon";
+import NotificationIcon from "../component/notification/NotificationComponent";
 
 
 const BasicMenu = () => {
