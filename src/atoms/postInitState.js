@@ -4,6 +4,10 @@ export const postInitState ={
         content: '',
         delFlag: false,
         local_date: '',
-        user:''
+        user:'',
+        longitude:'',
+        latitude:'',
+        placeName:'',
+
 
 }
