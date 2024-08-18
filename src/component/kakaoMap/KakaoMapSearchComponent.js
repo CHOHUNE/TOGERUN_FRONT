@@ -1,12 +1,12 @@
-
+import React, { useState, useEffect, useRef } from 'react';
 import { loadKakaoMapScript } from "../../kakaoMapLoader";
-import {useEffect, useRef, useState} from "react";
 
-const KakaoMapSearch = () => {
+const KakaoMapSearch = ({ onPlaceSelect }) => {
     const [keyword, setKeyword] = useState('이태원 맛집');
     const [places, setPlaces] = useState([]);
     const [pagination, setPagination] = useState(null);
     const [mapLoaded, setMapLoaded] = useState(false);
+    const [map, setMap] = useState(null);
 
     const mapRef = useRef(null);
     const markerRef = useRef([]);
@@ -31,12 +31,13 @@ const KakaoMapSearch = () => {
             level: 3
         };
 
-        const map = new window.kakao.maps.Map(mapContainer, mapOption);
+        const newMap = new window.kakao.maps.Map(mapContainer, mapOption);
+        setMap(newMap);
         const ps = new window.kakao.maps.services.Places();
 
         infowindowRef.current = new window.kakao.maps.InfoWindow({ zIndex: 1 });
 
-        searchPlaces(map, ps);
+        searchPlaces(newMap, ps);
     }
 
     const searchPlaces = (map, ps) => {
@@ -62,23 +63,29 @@ const KakaoMapSearch = () => {
     };
 
     const displayPlaces = (places, map) => {
-        const bounds = new kakao.maps.LatLngBounds();
+        const bounds = new window.kakao.maps.LatLngBounds();
         removeMarker();
 
         for (let i = 0; i < places.length; i++) {
-            const placePosition = new kakao.maps.LatLng(places[i].y, places[i].x);
+            const placePosition = new window.kakao.maps.LatLng(places[i].y, places[i].x);
             const marker = addMarker(placePosition, i, map);
             bounds.extend(placePosition);
 
-            (function(marker, title) {
-                kakao.maps.event.addListener(marker, 'mouseover', function() {
-                    displayInfowindow(marker, title, map);
+            (function(marker, place) {
+                window.kakao.maps.event.addListener(marker, 'click', function() {
+                    displayInfowindow(marker, place.place_name, map);
+                    panTo(map, marker.getPosition());
+                    onPlaceSelect(place);
                 });
 
-                kakao.maps.event.addListener(marker, 'mouseout', function() {
+                window.kakao.maps.event.addListener(marker, 'mouseover', function() {
+                    displayInfowindow(marker, place.place_name, map);
+                });
+
+                window.kakao.maps.event.addListener(marker, 'mouseout', function() {
                     infowindowRef.current.close();
                 });
-            })(marker, places[i].place_name);
+            })(marker, places[i]);
         }
 
         map.setBounds(bounds);
@@ -87,14 +94,14 @@ const KakaoMapSearch = () => {
 
     const addMarker = (position, idx, map) => {
         const imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png';
-        const imageSize = new kakao.maps.Size(36, 37);
+        const imageSize = new window.kakao.maps.Size(36, 37);
         const imgOptions = {
-            spriteSize: new kakao.maps.Size(36, 691),
-            spriteOrigin: new kakao.maps.Point(0, (idx * 46) + 10),
-            offset: new kakao.maps.Point(13, 37)
+            spriteSize: new window.kakao.maps.Size(36, 691),
+            spriteOrigin: new window.kakao.maps.Point(0, (idx * 46) + 10),
+            offset: new window.kakao.maps.Point(13, 37)
         };
-        const markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imgOptions);
-        const marker = new kakao.maps.Marker({
+        const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize, imgOptions);
+        const marker = new window.kakao.maps.Marker({
             position: position,
             image: markerImage
         });
@@ -118,16 +125,26 @@ const KakaoMapSearch = () => {
         infowindowRef.current.open(map, marker);
     };
 
+    const panTo = (map, position) => {
+        map.panTo(position);
+        map.setLevel(3); // 확대 레벨 설정 (낮을수록 더 확대됨)
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (mapLoaded && window.kakao && window.kakao.maps) {
-            const mapContainer = mapRef.current;
-            const map = new window.kakao.maps.Map(mapContainer, { center: new window.kakao.maps.LatLng(37.566826, 126.9786567), level: 3 });
+        if (mapLoaded && window.kakao && window.kakao.maps && map) {
             const ps = new window.kakao.maps.services.Places();
             searchPlaces(map, ps);
         }
     };
 
+    const handlePlaceClick = (place) => {
+        if (map) {
+            const position = new window.kakao.maps.LatLng(place.y, place.x);
+            panTo(map, position);
+            onPlaceSelect(place);
+        }
+    };
 
     return (
         <div className="container mx-auto p-4">
@@ -155,13 +172,13 @@ const KakaoMapSearch = () => {
                             <ul className="menu bg-base-200 rounded-box">
                                 {places.map((place, index) => (
                                     <li key={index}>
-                                        <a className="hover:bg-base-300">
+                                        <button onClick={() => handlePlaceClick(place)} className="hover:bg-base-300 w-full text-left">
                                             <div className="flex flex-col">
                                                 <span className="font-bold">{place.place_name}</span>
                                                 <span className="text-sm">{place.road_address_name || place.address_name}</span>
                                                 <span className="text-sm text-info">{place.phone}</span>
                                             </div>
-                                        </a>
+                                        </button>
                                     </li>
                                 ))}
                             </ul>

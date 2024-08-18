@@ -8,6 +8,7 @@ import {postInitState} from "../../atoms/postInitState";
 import FetchingModal from "../common/FetchingModal";
 import { HeartIcon, StarIcon, ChatBubbleLeftEllipsisIcon, PencilSquareIcon, ArrowUturnLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import KakaoMapComponent from "../kakaoMap/KakaoMapComponent";
 
 function ReadComponent({postId}) {
 
@@ -117,6 +118,7 @@ function ReadComponent({postId}) {
                     <h3 className="text-xl">{postId} 번 게시물</h3>
                     <span className="text-sm text-gray-500">{post.localDate}</span>
                 </div>
+                <KakaoMapComponent placeName={post.placeName} latitude={post.latitude} longitude={post.longitude} />
                 <p className="mb-6">{post.content}</p>
                 <div className="card-actions justify-end space-x-2">
                     <button className="btn btn-outline btn-primary" onClick={() => navigate(`/post/${postId}/chat`)}>

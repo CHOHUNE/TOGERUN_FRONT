@@ -1,24 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {loadKakaoMapScript} from "../../kakaoMapLoader";
-import {useQuery, useQueryClient} from "@tanstack/react-query";
-import {getOne} from "../../api/api";
-import {postInitState} from "../../atoms/postInitState";
 
 
-const KakaoMap = (postId) => {
+
+const KakaoMap = ({latitude,longitude,placeName}) => {
     const mapRef = useRef(null);
     const [mapLoaded, setMapLoaded] = useState(false);
-
-
-        const {data, isFetching} = useQuery({
-            queryKey: ['post', postId],
-            queryFn: () => getOne(postId),
-            staleTime: 1000 * 60 * 30
-        });
-
-        const queryClient = useQueryClient();
-
-        const post = data || postInitState;
 
 
         useEffect(() => {
@@ -29,32 +16,34 @@ const KakaoMap = (postId) => {
         }
     }, [mapLoaded]);
 
+
+
     useEffect(() => {
-        if (mapLoaded && mapRef.current && post.latitude && post.longitude) {
-            const { kakao } = window;
+        if (mapLoaded && mapRef.current && latitude && longitude) {
+            // const { kakao } = window;
 
             const options = {
-                center: new kakao.maps.LatLng(post.latitude, post.longitude),
+                center: new window.kakao.maps.LatLng(latitude, longitude),
                 level: 3
             };
 
-            const map = new kakao.maps.Map(mapRef.current, options);
+            const map = new window.kakao.maps.Map(mapRef.current, options);
 
-            const markerPosition = new kakao.maps.LatLng(post.latitude, post.longitude);
-            const marker = new kakao.maps.Marker({
+            const markerPosition = new window.kakao.maps.LatLng(latitude, longitude);
+            const marker = new window.kakao.maps.Marker({
                 position: markerPosition
             });
 
             marker.setMap(map);
 
-            if (post.placeName) {
-                const infowindow = new kakao.maps.InfoWindow({
-                    content: `<div style="padding:5px;">${post.placeName}</div>`
+            if (placeName) {
+                const infowindow = new window.kakao.maps.InfoWindow({
+                    content: `<div style="padding:5px;">${placeName}</div>`
                 });
                 infowindow.open(map, marker);
             }
         }
-    }, [mapLoaded, post.latitude, post.longitude, post.placeName]);
+    }, [mapLoaded, latitude, longitude, placeName]);
 
     return <div ref={mapRef} style={{ width: '100%', height: '400px' }} />;
 };

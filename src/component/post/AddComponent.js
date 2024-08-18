@@ -1,40 +1,29 @@
-import React, {useState} from 'react';
-import {postAdd} from "../../api/api";
+import React, { useState } from 'react';
+import { postAdd } from "../../api/api";
 import useCustomMove from "../../hooks/useCustomMove";
 import ResultModal from "../../component/common/ResultModal";
 import FetchingModal from "../common/FetchingModal";
-import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {postInitState} from "../../atoms/postInitState";
-import axios from "axios";
-import KakaoMapComponent from "../kakaoMap/KakaoMapComponent";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { postInitState } from "../../atoms/postInitState";
 import KakaoMapSearchComponent from "../kakaoMap/KakaoMapSearchComponent";
 
-
-
 const AddComponent = () => {
-
     const [post, setPost] = useState({...postInitState})
-    const {moveToList} = useCustomMove();
-
-    const [searchKeyword, setSearchKeyword] = useState('');
-    const [searchResults, setSearchResults] = useState([])
-
+    const { moveToList } = useCustomMove();
 
     const addMutation = useMutation({
-        mutationFn:(post)=>postAdd(post)
+        mutationFn: (post) => postAdd(post)
     });
 
     const handleChangePost = (e) => {
-        const {name, value} = e.target;
-
+        const { name, value } = e.target;
         setPost(prevState => ({
             ...prevState,
             [name]: value
         }));
     }
 
-    const handleSubmit =(e) => {
-
+    const handleSubmit = (e) => {
         e.preventDefault()
 
         const formData = new FormData();
@@ -46,51 +35,30 @@ const AddComponent = () => {
         formData.append('placeName', post.placeName);
 
         addMutation.mutate(formData)
-
     };
 
-    const handleSearchPlace = async() =>{
-        try{
-            const response = await axios.get('https://dapi.kakao.com/v2/local/search/keyword.json',{
-
-                params:{query:searchKeyword},
-                headers:{Authorization:'KakaoAK 995dc1e3b670dee696867930fef19998'}
-            })
-
-            setSearchResults(response.data.documents)
-
-        }catch(error){
-            console.error('Error Searching places',error)
-        }
-    }
-
-    const handleSelectPlace = (place) => {
+    const handlePlaceSelect = (place) => {
         setPost(prevState => ({
             ...prevState,
             latitude: parseFloat(place.y),
             longitude: parseFloat(place.x),
             placeName: place.place_name
         }));
-        setSearchResults([]);
     }
-
 
     const queryClient = useQueryClient();
 
-
     const closeModal = () => {
-        // setResult(null)
         queryClient.invalidateQueries('post/List')
         moveToList({page:1})
     }
 
     return (
-    <div>
-        {addMutation.isPending ? <FetchingModal/> : <></>}
-        {addMutation.isSuccess ? <ResultModal title={'게시글 작성'} content={` 게시물 작성이 완료 되었습니다.`} callbackFn={closeModal}/> : <></> }
+        <div>
+            {addMutation.isPending ? <FetchingModal/> : <></>}
+            {addMutation.isSuccess ? <ResultModal title={'게시글 작성'} content={` 게시물 작성이 완료 되었습니다.`} callbackFn={closeModal}/> : <></> }
             <form onSubmit={handleSubmit} className="space-y-4">
                 <h1 className="text-3xl font-bold mb-4">Create Post</h1>
-
 
                 <div className="form-control">
                     <label htmlFor="title" className="label">
@@ -99,7 +67,7 @@ const AddComponent = () => {
                     <input
                         id="title"
                         type="text"
-                        name={"title"}
+                        name="title"
                         value={post.title}
                         onChange={handleChangePost}
                         required
@@ -112,17 +80,34 @@ const AddComponent = () => {
                     </label>
                     <textarea
                         id="content"
-                        name={"content"}
+                        name="content"
                         value={post.content}
                         onChange={handleChangePost}
                         required
                         className="textarea textarea-bordered"
                     />
                 </div>
-                <button type="submit" className="btn btn-primary" >Create</button>
-
+                <div className="form-control">
+                    <label htmlFor="placeName" className="label">
+                        <span className="label-text">Selected Place</span>
+                    </label>
+                    <input
+                        id="placeName"
+                        type="text"
+                        name="placeName"
+                        value={post.placeName}
+                        readOnly
+                        className="input input-bordered"
+                    />
+                </div>
+                <button type="submit" className="btn btn-primary">Create</button>
             </form>
-    </div>
+
+            <div className="mt-8">
+                <h2 className="text-2xl font-bold mb-4">Search and Select a Place</h2>
+                <KakaoMapSearchComponent onPlaceSelect={handlePlaceSelect} />
+            </div>
+        </div>
     );
 };
 
