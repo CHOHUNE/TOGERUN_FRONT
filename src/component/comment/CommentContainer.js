@@ -31,21 +31,6 @@ export function CommentContainer({postId}) {
 
     });
 
-    // useEffect(() => {
-    //     if (data) {
-    //         setCommentList(data);
-    //         console.log("commentList updated", data);
-    //     }
-    // }, [data]);
-
-
-    // useEffect(() => {
-    //     if (!isSubmitting) {
-    //         refetch();
-    //     }
-    // }, [isSubmitting, refetch]);
-
-
 
     return (
         <div className="w-full my-12">
