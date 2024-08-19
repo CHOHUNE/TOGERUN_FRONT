@@ -148,7 +148,9 @@ const AddComponent = () => {
 
             <div className="mt-8">
                 <h2 className="text-2xl font-bold mb-4">집결 장소 검색</h2>
+            <div className={"bg-base-200 p-4 rounded-lg"}>
                 <KakaoMapSearchComponent onPlaceSelect={handlePlaceSelect} />
+            </div>
             </div>
         </div>
     );

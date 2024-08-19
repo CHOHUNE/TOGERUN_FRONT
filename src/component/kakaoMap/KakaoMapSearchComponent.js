@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { loadKakaoMapScript } from "../../kakaoMapLoader";
 
+
 // KakaoMapSearch 컴포넌트: 카카오맵 API를 사용하여 장소를 검색하고 결과를 지도와 목록으로 표시
-const KakaoMapSearch = ({ onPlaceSelect }) => {
+const KakaoMapSearch = ({onPlaceSelect}) => {
     // 상태 변수들
     const [keyword, setKeyword] = useState('연세대학교 대운동장'); // 검색 키워드
     const [places, setPlaces] = useState([]); // 검색된 장소들
@@ -54,7 +55,7 @@ const KakaoMapSearch = ({ onPlaceSelect }) => {
         }
 
         // 키워드로 장소 검색
-        ps.keywordSearch(keyword, (data, status, pagination) => placesSearchCB(data, status, pagination, map), { size: 10 });
+        ps.keywordSearch(keyword, (data, status, pagination) => placesSearchCB(data, status, pagination, map), {size: 10});
     };
 
     // 장소 검색 콜백 함수
@@ -107,18 +108,18 @@ const KakaoMapSearch = ({ onPlaceSelect }) => {
         markersRef.current[place.id] = marker;
 
         // 마커 클릭 이벤트 리스너
-        window.kakao.maps.event.addListener(marker, 'click', function() {
+        window.kakao.maps.event.addListener(marker, 'click', function () {
             handlePlaceSelection(place, map);
         });
 
         // 마커 마우스오버 이벤트 리스너
-        window.kakao.maps.event.addListener(marker, 'mouseover', function() {
+        window.kakao.maps.event.addListener(marker, 'mouseover', function () {
             setHoveredMarker(marker);
             displayCustomOverlay(marker, place.place_name, map);
         });
 
         // 마커 마우스아웃 이벤트 리스너
-        window.kakao.maps.event.addListener(marker, 'mouseout', function() {
+        window.kakao.maps.event.addListener(marker, 'mouseout', function () {
             setHoveredMarker(null);
             if (customOverlayRef.current) {
                 customOverlayRef.current.setMap(null);
@@ -196,17 +197,19 @@ const KakaoMapSearch = ({ onPlaceSelect }) => {
     };
 
     // 컴포넌트 렌더링
+// ... (이전 코드 유지)
+
     return (
         <div className="container mx-auto p-4">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {/* 지도 영역 */}
+                {/* 지도 영역 - 높이 증가 */}
                 <div className="lg:col-span-2">
-                    <div ref={mapRef} className="w-full h-96 lg:h-[calc(100vh-2rem)] rounded-lg shadow-lg"></div>
+                    <div ref={mapRef} className="w-full h-[600px] rounded-lg shadow-lg"></div>
                 </div>
                 {/* 검색 및 결과 목록 영역 */}
                 <div className="lg:col-span-1">
-                    <div className="card bg-base-100 shadow-xl">
-                        <div className="card-body">
+                    <div className="card bg-base-100 shadow-xl h-[600px] flex flex-col">
+                        <div className="card-body flex-none">
                             <h2 className="card-title">장소 검색</h2>
                             {/* 검색 폼 */}
                             <form onSubmit={handleSubmit} className="form-control">
@@ -221,32 +224,40 @@ const KakaoMapSearch = ({ onPlaceSelect }) => {
                                     <button type="submit" className="btn btn-primary">검색</button>
                                 </div>
                             </form>
-                            <div className="divider"></div>
-                            {/* 검색 결과 목록 */}
-                            <ul className="menu bg-base-200 rounded-box">
+                        </div>
+                        <div className="divider my-0"></div>
+                        {/* 검색 결과 목록 - 스크롤바 항상 표시 */}
+
+                        <div className={`flex-grow overflow-y-scroll pr-2 `}
+                             style={{scrollbarGutter: 'stable'}}>
+
+                            <ul className="menu bg-base-200 rounded-box p-2">
                                 {places.map((place, index) => (
                                     <li key={place.id}>
                                         <button
                                             onClick={() => handlePlaceClick(place)}
                                             onMouseEnter={() => setHoveredMarker(markersRef.current[place.id])}
                                             onMouseLeave={() => setHoveredMarker(null)}
-                                            className={`hover:bg-base-300 w-full text-left ${hoveredMarker === markersRef.current[place.id] ? 'bg-base-300' : ''}`}
+                                            className={`hover:bg-base-300 w-full text-left py-2 ${hoveredMarker === markersRef.current[place.id] ? 'bg-base-300' : ''}`}
                                         >
                                             <div className="flex flex-col">
                                                 <span className="font-bold">{index + 1}. {place.place_name}</span>
-                                                <span className="text-sm">{place.road_address_name || place.address_name}</span>
+                                                <span
+                                                    className="text-sm">{place.road_address_name || place.address_name}</span>
                                                 <span className="text-sm text-info">{place.phone}</span>
                                             </div>
                                         </button>
                                     </li>
                                 ))}
                             </ul>
-                            {/* 페이지네이션 */}
-                            <div className="btn-group justify-center mt-4">
-                                {pagination && Array.from({ length: pagination.last }, (_, i) => i + 1).map((page) => (
+                        </div>
+                        {/* 페이지네이션 */}
+                        <div className="card-body flex-none pt-2">
+                            <div className="btn-group justify-center">
+                                {pagination && Array.from({length: pagination.last}, (_, i) => i + 1).map((page) => (
                                     <button
                                         key={page}
-                                        className={`btn ${page === pagination.current ? 'btn-active' : ''}`}
+                                        className={`btn btn-sm ${page === pagination.current ? 'btn-active' : ''}`}
                                         onClick={() => pagination.gotoPage(page)}
                                     >
                                         {page}
@@ -259,6 +270,7 @@ const KakaoMapSearch = ({ onPlaceSelect }) => {
             </div>
         </div>
     );
-};
+}
+
 
 export default KakaoMapSearch;
