@@ -7,10 +7,11 @@ const KakaoMapSearch = ({ onPlaceSelect }) => {
     const [pagination, setPagination] = useState(null);
     const [mapLoaded, setMapLoaded] = useState(false);
     const [map, setMap] = useState(null);
+    const [hoveredMarker, setHoveredMarker] = useState(null);
 
     const mapRef = useRef(null);
-    const markerRef = useRef([]);
-    const infowindowRef = useRef(null);
+    const markersRef = useRef({});
+    const customOverlayRef = useRef(null);
 
     useEffect(() => {
         loadKakaoMapScript(() => {
@@ -35,8 +36,6 @@ const KakaoMapSearch = ({ onPlaceSelect }) => {
         setMap(newMap);
         const ps = new window.kakao.maps.services.Places();
 
-        infowindowRef.current = new window.kakao.maps.InfoWindow({ zIndex: 1 });
-
         searchPlaces(newMap, ps);
     }
 
@@ -46,7 +45,7 @@ const KakaoMapSearch = ({ onPlaceSelect }) => {
             return false;
         }
 
-        ps.keywordSearch(keyword, (data, status, pagination) => placesSearchCB(data, status, pagination, map));
+        ps.keywordSearch(keyword, (data, status, pagination) => placesSearchCB(data, status, pagination, map), { size: 10 });
     };
 
     const placesSearchCB = (data, status, pagination, map) => {
@@ -66,33 +65,17 @@ const KakaoMapSearch = ({ onPlaceSelect }) => {
         const bounds = new window.kakao.maps.LatLngBounds();
         removeMarker();
 
-        for (let i = 0; i < places.length; i++) {
-            const placePosition = new window.kakao.maps.LatLng(places[i].y, places[i].x);
-            const marker = addMarker(placePosition, i, map);
+        places.forEach((place, index) => {
+            const placePosition = new window.kakao.maps.LatLng(place.y, place.x);
+            const marker = addMarker(placePosition, index, map, place);
             bounds.extend(placePosition);
-
-            (function(marker, place) {
-                window.kakao.maps.event.addListener(marker, 'click', function() {
-                    displayInfowindow(marker, place.place_name, map);
-                    panTo(map, marker.getPosition());
-                    onPlaceSelect(place);
-                });
-
-                window.kakao.maps.event.addListener(marker, 'mouseover', function() {
-                    displayInfowindow(marker, place.place_name, map);
-                });
-
-                window.kakao.maps.event.addListener(marker, 'mouseout', function() {
-                    infowindowRef.current.close();
-                });
-            })(marker, places[i]);
-        }
+        });
 
         map.setBounds(bounds);
         setPlaces(places);
     };
 
-    const addMarker = (position, idx, map) => {
+    const addMarker = (position, idx, map, place) => {
         const imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png';
         const imageSize = new window.kakao.maps.Size(36, 37);
         const imgOptions = {
@@ -107,27 +90,71 @@ const KakaoMapSearch = ({ onPlaceSelect }) => {
         });
 
         marker.setMap(map);
-        markerRef.current.push(marker);
+        markersRef.current[place.id] = marker;
+
+        window.kakao.maps.event.addListener(marker, 'click', function() {
+            handlePlaceSelection(place, map);
+        });
+
+        window.kakao.maps.event.addListener(marker, 'mouseover', function() {
+            setHoveredMarker(marker);
+            displayCustomOverlay(marker, place.place_name, map);
+        });
+
+        window.kakao.maps.event.addListener(marker, 'mouseout', function() {
+            setHoveredMarker(null);
+            if (customOverlayRef.current) {
+                customOverlayRef.current.setMap(null);
+            }
+        });
 
         return marker;
     };
 
     const removeMarker = () => {
-        for (let i = 0; i < markerRef.current.length; i++) {
-            markerRef.current[i].setMap(null);
+        Object.values(markersRef.current).forEach(marker => {
+            marker.setMap(null);
+        });
+        markersRef.current = {};
+    };
+
+    const displayCustomOverlay = (marker, title, map) => {
+        if (customOverlayRef.current) {
+            customOverlayRef.current.setMap(null);
         }
-        markerRef.current = [];
+
+        const content = document.createElement('div');
+        content.innerHTML = `
+            <div style="padding:5px;background:white;border-radius:3px;box-shadow:0 2px 4px rgba(0,0,0,0.2);font-size:12px;">
+                ${title}
+            </div>
+        `;
+
+        const customOverlay = new window.kakao.maps.CustomOverlay({
+            content: content,
+            position: marker.getPosition(),
+            zIndex: 99
+        });
+
+        customOverlay.setMap(map);
+        customOverlayRef.current = customOverlay;
     };
 
-    const displayInfowindow = (marker, title, map) => {
-        const content = '<div style="padding:5px;z-index:1;">' + title + '</div>';
-        infowindowRef.current.setContent(content);
-        infowindowRef.current.open(map, marker);
-    };
+    const handlePlaceSelection = (place, map) => {
+        const marker = markersRef.current[place.id];
+        if (marker) {
+            const moveLatLon = marker.getPosition();
 
-    const panTo = (map, position) => {
-        map.panTo(position);
-        map.setLevel(3); // 확대 레벨 설정 (낮을수록 더 확대됨)
+            map.panTo(moveLatLon);
+
+            setTimeout(() => {
+                map.setCenter(moveLatLon);
+                map.setLevel(3, {animate: true});
+            }, 500);
+
+            displayCustomOverlay(marker, place.place_name, map);
+            onPlaceSelect(place);
+        }
     };
 
     const handleSubmit = (e) => {
@@ -140,9 +167,7 @@ const KakaoMapSearch = ({ onPlaceSelect }) => {
 
     const handlePlaceClick = (place) => {
         if (map) {
-            const position = new window.kakao.maps.LatLng(place.y, place.x);
-            panTo(map, position);
-            onPlaceSelect(place);
+            handlePlaceSelection(place, map);
         }
     };
 
@@ -171,10 +196,15 @@ const KakaoMapSearch = ({ onPlaceSelect }) => {
                             <div className="divider"></div>
                             <ul className="menu bg-base-200 rounded-box">
                                 {places.map((place, index) => (
-                                    <li key={index}>
-                                        <button onClick={() => handlePlaceClick(place)} className="hover:bg-base-300 w-full text-left">
+                                    <li key={place.id}>
+                                        <button
+                                            onClick={() => handlePlaceClick(place)}
+                                            onMouseEnter={() => setHoveredMarker(markersRef.current[place.id])}
+                                            onMouseLeave={() => setHoveredMarker(null)}
+                                            className={`hover:bg-base-300 w-full text-left ${hoveredMarker === markersRef.current[place.id] ? 'bg-base-300' : ''}`}
+                                        >
                                             <div className="flex flex-col">
-                                                <span className="font-bold">{place.place_name}</span>
+                                                <span className="font-bold">{index + 1}. {place.place_name}</span>
                                                 <span className="text-sm">{place.road_address_name || place.address_name}</span>
                                                 <span className="text-sm text-info">{place.phone}</span>
                                             </div>
