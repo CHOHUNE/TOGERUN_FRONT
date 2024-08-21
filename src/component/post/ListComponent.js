@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from "react-router-dom";
+import {Link, useLocation} from "react-router-dom";
 import PageComponent from "../common/PageComponent";
 import useCustomMove from "../../hooks/useCustomMove";
 import { getList} from "../../api/api";
@@ -17,22 +17,18 @@ const initState ={
     prevPage: 0,
     nextPage:0,
     totalPage:0,
-    current:0
+    current:0,
+
+
 }
 
 function ListComponent(props) {
-    const {page, refresh, size, moveToList, moveToRead} = useCustomMove();
+    const {page, refresh, size, moveToList,keyword} = useCustomMove();
 
-    // const dispatch = useDispatch();
-    // const serverData = useSelector((state) => state.postSlice.serverData);
-
-    // useEffect(() => {
-    //     dispatch(fetchPosts({page, size}));
-    // }, [dispatch, page, size, refresh]);
 
     const {data,isFetching,error,isError} = useQuery({
-        queryKey: ['post/List', {page,size,refresh}], //쿼리를 식별자와 쿼리의 파라미터 ( queryFn 에 전달되는 데이터다. )
-        queryFn:()=> getList({page,size}), // queryKey 의 파라메터가 바뀌면 자동으로 refresh 된다.
+        queryKey: ['post/List', {page,size,refresh,keyword}], //쿼리를 식별자와 쿼리의 파라미터 ( queryFn 에 전달되는 데이터다. )
+        queryFn:()=> getList({page,size,keyword}), // queryKey 의 파라메터가 바뀌면 자동으로 refresh 된다.
             staleTime:1000 * 60 * 5
     });
 
@@ -51,6 +47,7 @@ function ListComponent(props) {
     return (
         <div className="overflow-x-auto">
             {isFetching? <FetchingModal/>:<></>}
+            {keyword&&<p className={"my-4"}>검색어 : {keyword}</p> }
             <table className="table w-full">
                 <thead>
                 <tr>
