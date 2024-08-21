@@ -11,9 +11,9 @@ export const axiosInstance = axios.create({
 
 export const getList = async (pageParams) => {
 
-    const {page, size} = pageParams;
+    const {page, size,keyword} = pageParams;
 
-    const res = await jwtAxios.get(`/post/list`, {params: {page, size}})
+    const res = await jwtAxios.get(`/post/list`, {params: {page, size,keyword}})
 
     return res.data
 }

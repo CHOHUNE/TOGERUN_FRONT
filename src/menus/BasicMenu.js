@@ -17,6 +17,14 @@ const BasicMenu = () => {
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [signIn, setSignIn] = useRecoilState(signInState);
 
+    const [searchKeyword, setSearchKeyword] = useState()
+
+    const handleSearch =(e)=>{
+        e.preventDefault() // form 태그의 기본 이벤트를 막는다.
+        if (searchKeyword.trim()) {
+            navigate(`/post/list?keyword=${searchKeyword}`)
+        }
+    }
 
     const logoutMutation = useMutation(
         { mutationFn: () => doLogout(),
@@ -46,12 +54,17 @@ const BasicMenu = () => {
                 <div className="navbar-start">
                     <div className="dropdown">
                         <label tabIndex={0} className="btn btn-ghost lg:hidden">
-                            <Bars3Icon className="h-5 w-5" />
+                            <Bars3Icon className="h-5 w-5"/>
                         </label>
-                        <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                        <ul tabIndex={0}
+                            className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
                             {/*<li><a href="/">Main</a></li>*/}
-                            <li><a href="/post/list">Post</a></li>
-                            <li><a href="/member/modify">memberInfo</a></li>
+                            <li>
+                                <a href="/post/list">Post</a>
+                            </li>
+                            <li>
+                                <a href="/member/modify">memberInfo</a>
+                            </li>
                             {/*<li><a href="/list">List</a></li>*/}
                         </ul>
                     </div>
@@ -60,19 +73,33 @@ const BasicMenu = () => {
                 <div className="navbar-center hidden lg:flex">
                     <ul className="menu menu-horizontal px-1">
                         {/*<li>    <a href="/">Main</a></li>*/}
-                        <li><a href="/post/list">Post</a></li>
-                        <li><a href="/member/modify">memberInfo</a></li>
+                        <li>
+                            <a href="/post/list">Post</a>
+                        </li>
+                        <li>
+                            <a href="/member/modify">memberInfo</a>
+                        </li>
                         {/*<li><a href="/list">List</a></li>*/}
                     </ul>
                 </div>
                 <div className="navbar-end">
-                    <button className="btn btn-ghost btn-circle">
-                        <MagnifyingGlassIcon className="h-5 w-5"/>
-                    </button>
+                    <form onSubmit={handleSearch} className="flex items-center">
+                        <input
+                            type="text"
+                            placeholder="검색..."
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            className="input input-bordered w-full max-w-xs"
+                        />
+                        <button type="submit" className="btn btn-ghost btn-circle ml-2">
+                            <MagnifyingGlassIcon className="h-5 w-5"/>
+                        </button>
+                    </form>
                     <NotificationIcon/>
                     <div className="mr-2">
                         <SideOpenDrawer/>
                     </div>
+
                     {!loginState.email ?
                         <button className="btn" onClick={() => navigate("/member/login")}>Login</button>
                         :
@@ -80,16 +107,18 @@ const BasicMenu = () => {
                     }
                 </div>
 
-        </div>
+            </div>
 
-    {showLogoutModal && (
+            {showLogoutModal && (
                 <div className="modal modal-open">
                     <div className="modal-box">
                         <h3 className="font-bold text-lg">로그아웃 하시겠습니까?</h3>
                         <div className="modal-action py-5">
                             <button className="btn btn-outline btn-error" onClick={handleClickLogout}>Yes</button>
                             <button className="btn btn-outline btn-neutral" onClick={toggleLogoutModal}>No</button>
-                            <button  className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={toggleLogoutModal}>✕</button>
+                            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                                    onClick={toggleLogoutModal}>✕
+                            </button>
                         </div>
                     </div>
                 </div>
