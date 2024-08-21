@@ -98,7 +98,10 @@ export const subscribeNotification = async()=>{
 }
 
 
+export const fetchUnreadCount=async ()=>{
 
+    const response = await jwtAxios.get(`/notifications/unread/count`);
 
+    return response.data
 
-
+}

@@ -1,91 +1,111 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BellIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { basicURL, fetchNotifications, markNotificationAsRead } from "../../api/api";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { basicURL, fetchNotifications, markNotificationAsRead, fetchUnreadCount } from "../../api/api";
 import useEventSource from "../../hooks/useEventSource";
 
 const NotificationComponent = () => {
-
     const [showNotifications, setShowNotifications] = useState(false);
     const [page, setPage] = useState(0);
     const navigate = useNavigate();
     const notificationRef = useRef(null);
     const queryClient = useQueryClient();
-    const batchUpdateTimeoutRef = useRef(null);
 
-    const { data, isLoading, error } = useQuery({
+    const { data: notificationsData, isLoading, error, isFetching } = useQuery({
         queryKey: ['notifications', page],
         queryFn: () => fetchNotifications(page),
         keepPreviousData: true,
         staleTime: 5000,
+        enabled: showNotifications,
     });
 
-    const notifications = data?.content || [];
-    const unreadCount = data?.unreadCount || 0;
-    const hasMore = page < (data?.totalPages - 1 || 0);
+    const { data: unreadCountData } = useQuery({
+        queryKey: ['unreadCount'],
+        queryFn: fetchUnreadCount,
+        refetchInterval: 60000,
+    });
+
+    const notifications = notificationsData?.content || [];
+    const unreadCount = typeof unreadCountData === 'number' ? unreadCountData : 0;
+    const hasNextPage = notificationsData.currentPage < notificationsData.totalPages - 1 || notifications.length < notificationsData.totalElements;
+
+
+    const markAsReadMutation = useMutation({
+        mutationFn: markNotificationAsRead,
+        onMutate: async (notificationId) => {
+            await queryClient.cancelQueries({ queryKey: ['notifications', page] });
+            queryClient.setQueryData(['notifications', page], (old) => {
+                if (!old) return old;
+                return {
+                    ...old,
+                    content: old.content.map(n =>
+                        n.id === notificationId ? { ...n, isRead: true } : n
+                    ),
+                };
+            });
+            return { notificationId };
+        },
+        onError: (err, notificationId, context) => {
+            queryClient.setQueryData(['notifications', page], (old) => {
+                if (!old) return old;
+                return {
+                    ...old,
+                    content: old.content.map(n =>
+                        n.id === notificationId ? { ...n, isRead: false } : n
+                    ),
+                };
+            });
+            queryClient.setQueryData(['unreadCount'], (oldCount) => {
+                const currentCount = typeof oldCount === 'number' ? oldCount : 0;
+                return currentCount + 1;
+            });
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
+        },
+    });
 
     const handleNewNotification = useCallback((event) => {
         const messageData = event.data;
         console.log('Received SSE message:', messageData);
-
         if (messageData === 'EventStream Created') {
             console.log('EventStream connection established');
             return;
         }
-
-        if (batchUpdateTimeoutRef.current) {
-            clearTimeout(batchUpdateTimeoutRef.current);
+        try {
+            const parsedData = JSON.parse(messageData);
+            queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
+            queryClient.invalidateQueries({ queryKey: ['notifications', page] });
+        } catch (error) {
+            console.log('Error parsing SSE message:', error);
         }
-
-        batchUpdateTimeoutRef.current = setTimeout(() => {
-            queryClient.setQueryData(['notifications', page], (oldData) => {
-                if (!oldData) return oldData;
-
-                const newNotification = {
-                    id: messageData.id,
-                    content: messageData.content,
-                    createdAt: messageData.createdAt,
-                    isRead: false
-                };
-
-                return {
-                    ...oldData,
-                    content: [newNotification, ...oldData.content],
-                    unreadCount: oldData.unreadCount + 1
-                };
-            });
-        }, 100);
-    }, [queryClient, page]);
+    }, [queryClient]);
 
     useEventSource(`${basicURL}/notifications/subscribe`, handleNewNotification);
 
     const markAsRead = useCallback(async (notification) => {
         try {
-            await markNotificationAsRead(notification.id);
-            queryClient.setQueryData(['notifications', page], (oldData) => {
-                if (!oldData) return oldData;
-                return {
-                    ...oldData,
-                    content: oldData.content.map(n =>
-                        n.id === notification.id ? { ...n, isRead: true } : n
-                    ),
-                    unreadCount: Math.max(0, oldData.unreadCount - 1)
-                };
-            });
+            await markAsReadMutation.mutateAsync(notification.id);
             navigate(notification.goUrl);
+            setShowNotifications(false)
         } catch (error) {
             console.error("Failed to mark notification as read:", error);
         }
-    }, [queryClient, page, navigate]);
+    }, [markAsReadMutation, navigate]);
 
     const toggleNotifications = useCallback(() => {
         setShowNotifications(prev => !prev);
         if (!showNotifications) {
             setPage(0);
-            queryClient.invalidateQueries({ queryKey: ['notifications'] });
+            queryClient.invalidateQueries({ queryKey: ['notifications', 0] });
+            queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
         }
     }, [showNotifications, queryClient]);
+
+    const loadMore = () => {
+        setPage(prevPage => prevPage + 1);
+    };
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -93,13 +113,9 @@ const NotificationComponent = () => {
                 setShowNotifications(false);
             }
         };
-
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
-            if (batchUpdateTimeoutRef.current) {
-                clearTimeout(batchUpdateTimeoutRef.current);
-            }
         };
     }, []);
 
@@ -122,33 +138,36 @@ const NotificationComponent = () => {
             </button>
 
             {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-10 max-h-[80vh] overflow-y-auto">
-                    <div className="py-2">
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-10 max-h-[80vh] flex flex-col">
+                    <div className="py-2 flex-grow overflow-y-auto">
                         {isLoading ? (
                             <p className="text-center py-4">로딩 중...</p>
                         ) : notifications.length === 0 ? (
                             <p className="text-center py-4">알림이 없습니다.</p>
                         ) : (
-                            notifications.map((notification) => (
-                                <div
-                                    key={notification.id}
-                                    className={`px-4 py-2 hover:bg-gray-100 ${
-                                        notification.isRead ? 'bg-gray-50' : 'bg-white'
-                                    }`}
-                                    onClick={() => markAsRead(notification)}
-                                >
-                                    <p className="text-sm text-gray-600">{notification.content}</p>
-                                    <p className="text-xs text-gray-400">{new Date(notification.createdAt).toLocaleString()}</p>
-                                </div>
-                            ))
-                        )}
-                        {!isLoading && hasMore && (
-                            <button
-                                onClick={() => setPage(prev => prev + 1)}
-                                className="w-full px-4 py-2 bg-gray-100 text-gray-800 text-sm font-medium hover:bg-gray-200"
-                            >
-                                더 보기
-                            </button>
+                            <>
+                                {notifications.map((notification) => (
+                                    <div
+                                        key={notification.id}
+                                        className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${
+                                            notification.isRead ? 'bg-gray-50' : 'bg-white'
+                                        }`}
+                                        onClick={() => markAsRead(notification)}
+                                    >
+                                        <p className="text-sm text-gray-600">{notification.content}</p>
+                                        <p className="text-xs text-gray-400">{new Date(notification.createdAt).toLocaleString()}</p>
+                                    </div>
+                                ))}
+                                {hasNextPage && (
+                                    <button
+                                        onClick={loadMore}
+                                        disabled={isFetching}
+                                        className="w-full py-2 text-sm text-blue-500 hover:bg-gray-100"
+                                    >
+                                        {isFetching ? '로딩 중...' : '더 보기'}
+                                    </button>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>
