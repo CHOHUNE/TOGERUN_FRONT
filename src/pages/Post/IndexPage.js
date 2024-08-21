@@ -4,25 +4,25 @@ import BasicLayout from "../../layouts/BasicLayout";
 
 const IndexPage = () => {
 
-    const navigate = useNavigate();
-    const handleClickList = useCallback(() => {
-        navigate({pathname: 'list'}, [])
-    })
-
-    const handleClickAdd = useCallback(() => {  // useCallback : 함수를 캐싱해서 재사용할 수 있게 해준다.
-        navigate({pathname: 'write'}, [])
-    })
+    // const navigate = useNavigate();
+    // const handleClickList = useCallback(() => {
+    //     navigate({pathname: 'list'}, [])
+    // })
+    //
+    // const handleClickAdd = useCallback(() => {  // useCallback : 함수를 캐싱해서 재사용할 수 있게 해준다.
+    //     navigate({pathname: 'write'}, [])
+    // })
 
     return (
         <BasicLayout>
-            <div className={"w-full flex m-2 p-2"}>
-                <div className={"text-xl m-1 p-2 w-20 font-extrabold text-center underline"} onClick={handleClickList}>
-                    LIST
-                </div>
-                <div className={"text-xl m-1 p-2 w20 font-extrabold text-center underline"}
-                     onClick={handleClickAdd}>ADD
-                </div>
-            </div>
+            {/*<div className={"w-full flex m-2 p-2"}>*/}
+            {/*    <div className={"text-xl m-1 p-2 w-20 font-extrabold text-center underline"} onClick={handleClickList}>*/}
+            {/*        LIST*/}
+            {/*    </div>*/}
+            {/*    <div className={"text-xl m-1 p-2 w20 font-extrabold text-center underline"}*/}
+            {/*         onClick={handleClickAdd}>ADD*/}
+            {/*    </div>*/}
+            {/*</div>*/}
             <div className={"flex flex-wrap w-full"}>
                 <Outlet/>
                 {/*    라우터의 중첩을 정의 할때 OUTLET 사용 - 매치된 자식을 OutLet 에 렌더링 시킬 수 있다. */}

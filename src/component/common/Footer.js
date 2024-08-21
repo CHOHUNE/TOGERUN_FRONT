@@ -2,7 +2,7 @@ import React from 'react';
 
 function Footer(props) {
     return (
-        <footer className="footer footer-center p-10 bg-base-200 text-base-content rounded mt-48">
+        <footer className="footer footer-center p-10 bg-base-200 text-base-content rounded ">
             <nav className="grid grid-flow-col gap-4">
                 {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                 <a className="link link-hover">About us</a>

@@ -1,19 +1,19 @@
-import SideOpenDrawer from "../component/common/sideOpenDrawer";
-import {useNavigate} from "react-router-dom";
+import React, {useState} from 'react';
+import { useNavigate } from "react-router-dom";
 import useCustomLogin from "../hooks/useCustomLogin";
-import ResultModal from "../component/common/ResultModal";
-import React, {useCallback, useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {useRecoilState} from "recoil";
-import {initState, signInState} from "../atoms/singinState";
+import { useRecoilState } from "recoil";
+import { initState, signInState } from "../atoms/singinState";
 import NotificationIcon from "../component/notification/NotificationComponent";
-
+import { Bars3Icon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import SideOpenDrawer from "../component/common/sideOpenDrawer";
+import ResultModal from "../component/common/ResultModal";
 
 const BasicMenu = () => {
     const queryClient = useQueryClient;
     const navigate = useNavigate();
-    const { loginState } = useCustomLogin();
-    const { doLogout, moveToPath } = useCustomLogin();
+
+    const { doLogout, moveToPath,loginState } = useCustomLogin();
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [signIn, setSignIn] = useRecoilState(signInState);
 
@@ -41,83 +41,48 @@ const BasicMenu = () => {
 
 
     return (
-        <div className="navbar bg-base-100 px-7">
-            <div className="navbar-start">
-                <div className="dropdown">
-                    <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                             stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                  d="M4 6h16M4 12h8m-8 6h16"/>
-                        </svg>
+        <div className="bg-base-100">
+            <div className="navbar container mx-auto px-8 sm:px-13 lg:px-16">
+                <div className="navbar-start">
+                    <div className="dropdown">
+                        <label tabIndex={0} className="btn btn-ghost lg:hidden">
+                            <Bars3Icon className="h-5 w-5" />
+                        </label>
+                        <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                            {/*<li><a href="/">Main</a></li>*/}
+                            <li><a href="/post/list">Post</a></li>
+                            <li><a href="/member/modify">memberInfo</a></li>
+                            {/*<li><a href="/list">List</a></li>*/}
+                        </ul>
                     </div>
-                    <ul tabIndex={0}
-                        className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                        <li>
-                            <a href={"/"}>Main</a>
-                        </li>
-                        <li>
-                            <a>Parent</a>
-                            <ul className="p-2">
-                                <li>
-                                    <a href={"/post/"}>Post</a>
-                                </li>
-                                <li>
-                                    <a href={"/about"}>About</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a>Item 3</a>
-                        </li>
+                    <a className="btn btn-ghost normal-case text-xl">RunTogether</a>
+                </div>
+                <div className="navbar-center hidden lg:flex">
+                    <ul className="menu menu-horizontal px-1">
+                        {/*<li>    <a href="/">Main</a></li>*/}
+                        <li><a href="/post/list">Post</a></li>
+                        <li><a href="/member/modify">memberInfo</a></li>
+                        {/*<li><a href="/list">List</a></li>*/}
                     </ul>
                 </div>
-                <a className="btn btn-ghost text-xl">RunTogether</a>
-            </div>
-            <div className="navbar-center hidden lg:flex">
-                <ul className="menu menu-horizontal px-1">
-                    <li>
-                        <a href={"/"}>Main</a>
-                    </li>
-                    <li>
-                        <details>
-                            <summary>Parent</summary>
-                            <ul className="p-2">
-                                <li>
-                                    <a href={"/post/"}>Post</a>
-                                </li>
-                                <li>
-                                    <a href={"/about/"}>About</a>
-                                </li>
-                            </ul>
-                        </details>
-                    </li>
-                    <li>
-                        <a href={"/list"}>List</a>
-                    </li>
-                </ul>
-            </div>
+                <div className="navbar-end">
+                    <button className="btn btn-ghost btn-circle">
+                        <MagnifyingGlassIcon className="h-5 w-5"/>
+                    </button>
+                    <NotificationIcon/>
+                    <div className="mr-2">
+                        <SideOpenDrawer/>
+                    </div>
+                    {!loginState.email ?
+                        <button className="btn" onClick={() => navigate("/member/login")}>Login</button>
+                        :
+                        <button className="btn" onClick={toggleLogoutModal}>Logout</button>
+                    }
+                </div>
 
-            <div className="navbar-end">
-               <button className="btn btn-ghost btn-circle">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                </button>
-                <NotificationIcon/>
-            </div>
+        </div>
 
-            <div className={"join space-x-12"}>
-                <SideOpenDrawer/>
-                {!loginState.email ?
-                    <button className={"btn join-item"} onClick={() => navigate("/member/login")}>Login</button>
-                    :
-                    <button className={"btn join-item"} onClick={toggleLogoutModal}>Logout</button>
-                }
-            </div>
-            {showLogoutModal && (
+    {showLogoutModal && (
                 <div className="modal modal-open">
                     <div className="modal-box">
                         <h3 className="font-bold text-lg">로그아웃 하시겠습니까?</h3>
@@ -134,9 +99,7 @@ const BasicMenu = () => {
                              callbackFn={closeModal}/> : <></>}
 
         </div>
-
-
-    )
-}
+    );
+};
 
 export default BasicMenu;
