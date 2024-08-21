@@ -1,22 +1,33 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BellIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from "react-router-dom";
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { basicURL, fetchNotifications, markNotificationAsRead, fetchUnreadCount } from "../../api/api";
 import useEventSource from "../../hooks/useEventSource";
 
 const NotificationComponent = () => {
     const [showNotifications, setShowNotifications] = useState(false);
-    const [page, setPage] = useState(0);
     const navigate = useNavigate();
     const notificationRef = useRef(null);
     const queryClient = useQueryClient();
 
-    const { data: notificationsData, isLoading, error, isFetching } = useQuery({
-        queryKey: ['notifications', page],
-        queryFn: () => fetchNotifications(page),
-        keepPreviousData: true,
-        staleTime: 5000,
+    const {
+        data: notificationsData,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading,
+        error,
+        refetch
+    } = useInfiniteQuery({
+        queryKey: ['notifications'],
+        queryFn: ({ pageParam = 0 }) => fetchNotifications(pageParam),
+        getNextPageParam: (lastPage, allPages) => {
+            if (lastPage.currentPage < lastPage.totalPages - 1 && allPages.length < 5) {
+                return lastPage.currentPage + 1;
+            }
+            return undefined;
+        },
         enabled: showNotifications,
     });
 
@@ -26,34 +37,38 @@ const NotificationComponent = () => {
         refetchInterval: 60000,
     });
 
-    const notifications = notificationsData?.content || [];
+    const notifications = notificationsData?.pages.flatMap(page => page.content) || [];
     const unreadCount = typeof unreadCountData === 'number' ? unreadCountData : 0;
-    const hasNextPage = notificationsData.currentPage < notificationsData.totalPages - 1 || notifications.length < notificationsData.totalElements;
-
 
     const markAsReadMutation = useMutation({
         mutationFn: markNotificationAsRead,
         onMutate: async (notificationId) => {
-            await queryClient.cancelQueries({ queryKey: ['notifications', page] });
-            queryClient.setQueryData(['notifications', page], (old) => {
+            await queryClient.cancelQueries({ queryKey: ['notifications'] });
+            queryClient.setQueryData(['notifications'], (old) => {
                 if (!old) return old;
                 return {
                     ...old,
-                    content: old.content.map(n =>
-                        n.id === notificationId ? { ...n, isRead: true } : n
-                    ),
+                    pages: old.pages.map(page => ({
+                        ...page,
+                        content: page.content.map(n =>
+                            n.id === notificationId ? { ...n, isRead: true } : n
+                        ),
+                    })),
                 };
             });
             return { notificationId };
         },
         onError: (err, notificationId, context) => {
-            queryClient.setQueryData(['notifications', page], (old) => {
+            queryClient.setQueryData(['notifications'], (old) => {
                 if (!old) return old;
                 return {
                     ...old,
-                    content: old.content.map(n =>
-                        n.id === notificationId ? { ...n, isRead: false } : n
-                    ),
+                    pages: old.pages.map(page => ({
+                        ...page,
+                        content: page.content.map(n =>
+                            n.id === notificationId ? { ...n, isRead: false } : n
+                        ),
+                    })),
                 };
             });
             queryClient.setQueryData(['unreadCount'], (oldCount) => {
@@ -76,7 +91,7 @@ const NotificationComponent = () => {
         try {
             const parsedData = JSON.parse(messageData);
             queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
-            queryClient.invalidateQueries({ queryKey: ['notifications', page] });
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
         } catch (error) {
             console.log('Error parsing SSE message:', error);
         }
@@ -88,24 +103,22 @@ const NotificationComponent = () => {
         try {
             await markAsReadMutation.mutateAsync(notification.id);
             navigate(notification.goUrl);
-            setShowNotifications(false)
+            setShowNotifications(false);
         } catch (error) {
             console.error("Failed to mark notification as read:", error);
         }
     }, [markAsReadMutation, navigate]);
 
     const toggleNotifications = useCallback(() => {
-        setShowNotifications(prev => !prev);
-        if (!showNotifications) {
-            setPage(0);
-            queryClient.invalidateQueries({ queryKey: ['notifications', 0] });
-            queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
-        }
-    }, [showNotifications, queryClient]);
-
-    const loadMore = () => {
-        setPage(prevPage => prevPage + 1);
-    };
+        setShowNotifications(prev => {
+            if (!prev) {
+                queryClient.resetQueries({ queryKey: ['notifications'] });
+                refetch({ refetchPage: (page, index) => index === 0 });
+                queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
+            }
+            return !prev;
+        });
+    }, [queryClient, refetch]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -138,7 +151,7 @@ const NotificationComponent = () => {
             </button>
 
             {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-10 max-h-[80vh] flex flex-col">
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-10 max-h-[40vh] flex flex-col">
                     <div className="py-2 flex-grow overflow-y-auto">
                         {isLoading ? (
                             <p className="text-center py-4">로딩 중...</p>
@@ -160,11 +173,11 @@ const NotificationComponent = () => {
                                 ))}
                                 {hasNextPage && (
                                     <button
-                                        onClick={loadMore}
-                                        disabled={isFetching}
+                                        onClick={() => fetchNextPage()}
+                                        disabled={isFetchingNextPage}
                                         className="w-full py-2 text-sm text-blue-500 hover:bg-gray-100"
                                     >
-                                        {isFetching ? '로딩 중...' : '더 보기'}
+                                        {isFetchingNextPage ? '로딩 중...' : '더 보기'}
                                     </button>
                                 )}
                             </>
