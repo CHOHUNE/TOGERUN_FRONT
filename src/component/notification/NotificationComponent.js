@@ -83,7 +83,7 @@ const NotificationComponent = () => {
 
     const handleNewNotification = useCallback((event) => {
         const messageData = event.data;
-        console.log('Received SSE message:', messageData);
+        // console.log('Received SSE message:', messageData);
         if (messageData === 'EventStream Created') {
             console.log('EventStream connection established');
             return;
