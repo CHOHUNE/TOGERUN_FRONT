@@ -43,7 +43,8 @@ function ReadComponent({postId}) {
 
             queryClient.setQueryData(['post', postId], old => ({
                 ...old,
-                like: !old.like
+                like: !old.like,
+                likeCount: old.like ? old.likeCount - 1 : old.likeCount + 1
             }));
 
             return { previousPost };
@@ -119,8 +120,11 @@ function ReadComponent({postId}) {
                     <h3 className="text-xl">{postId} 번 게시물</h3>
                     <span className="text-sm text-gray-500">{post.localDate}</span>
                 </div>
+
                 <KakaoMapComponent placeName={post.placeName} latitude={post.latitude} longitude={post.longitude} />
+
                 <p className="mb-6">{post.content}</p>
+
                 <div className="card-actions justify-end space-x-2">
                     <button className="btn btn-outline btn-primary" onClick={() => navigate(`/post/${postId}/chat`)}>
                         <ChatBubbleLeftEllipsisIcon className="h-5 w-5 mr-2" />
