@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Client } from "@stomp/stompjs";
 import { fetchMessages, joinChatRoom } from "../../api/memberApi";
 
-// 상수
 const SCROLL_THRESHOLD = 100;
 const WEBSOCKET_URL = 'ws://localhost:8080/chat';
 
@@ -11,11 +10,12 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
     const [stompClient, setStompClient] = useState(null);
     const [newMessage, setNewMessage] = useState('');
     const [isNearBottom, setIsNearBottom] = useState(true);
+    const [offlineMessages, setOfflineMessages] = useState([]);
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
 
     const messagesEndRef = useRef(null);
     const scrollContainerRef = useRef(null);
 
-    // 웹소켓 연결 설정
     const setupWebSocket = useCallback(() => {
         const client = new Client({
             brokerURL: WEBSOCKET_URL,
@@ -30,14 +30,12 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
         setStompClient(client);
 
         return () => {
-            if (client && client.connected) {
-                client.deactivate();
-            }
+            client?.connected && client.deactivate();
         };
     }, [postId]);
 
-    // 초기 데이터 로드
     const loadInitialData = useCallback(async () => {
+        const startTime = performance.now();
         try {
             await joinChatRoom(postId, userEmail);
             const fetchedMessages = await fetchMessages(postId);
@@ -45,85 +43,147 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
         } catch (error) {
             console.error("Error loading initial data:", error);
         }
+        const endTime = performance.now();
+        console.log(`Initial data load time: ${endTime - startTime}ms`);
     }, [postId, userEmail]);
 
-    // 메시지 수신 처리
     const handleIncomingMessage = useCallback((message) => {
         const msg = JSON.parse(message.body);
-        const formattedMsg = {
-            id: msg.id,
-            content: msg.content,
-            email: msg.email,
-            createdAt: msg.createdAt,
-            chatMessageType: msg.chatMessageType
-        };
-        setMessages((prevMessages) => [...prevMessages, formattedMsg]);
+        setMessages((prevMessages) => {
+            if (!prevMessages.some(m => m.id === msg.id)) {
+                return [...prevMessages, formatMessage(msg)];
+            }
+            return prevMessages;
+        });
     }, []);
 
-    // 메시지 전송
-    const sendMessage = useCallback(() => {
-        if (stompClient && newMessage.trim()) {
+    const sendMessage = useCallback(async () => {
+        if (newMessage.trim()) {
             const messageDTO = {
                 content: newMessage.trim(),
                 email: userEmail,
-                createdAt: new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString(),
+                createdAt: new Date().toISOString(),
                 chatMessageType: 'NORMAL'
             };
-            stompClient.publish({
-                destination: `/app/chat/${postId}/send`,
-                body: JSON.stringify(messageDTO)
-            });
+
+            if (isOnline && stompClient) {
+                const startTime = performance.now();
+                stompClient.publish({
+                    destination: `/app/chat/${postId}/send`,
+                    body: JSON.stringify(messageDTO)
+                });
+                const endTime = performance.now();
+                console.log(`Message send time: ${endTime - startTime}ms`);
+            } else {
+                setOfflineMessages(prev => [...prev, messageDTO]);
+            }
             setNewMessage('');
         }
-    }, [stompClient, newMessage, postId, userEmail]);
+    }, [stompClient, newMessage, postId, userEmail, isOnline]);
 
-    // 스크롤 관련 함수들
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({behavior: "smooth"});
-    };
+    const scrollToBottom = useCallback(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, []);
 
-    const handleScroll = () => {
+    const handleScroll = useCallback(() => {
         if (scrollContainerRef.current) {
-            const {scrollTop, scrollHeight, clientHeight} = scrollContainerRef.current;
+            const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
             setIsNearBottom(scrollHeight - (scrollTop + clientHeight) < SCROLL_THRESHOLD);
         }
-    };
+    }, []);
 
-    // 키 입력 처리
-    const handleKeyPress = (e) => {
+    const handleKeyPress = useCallback((e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendMessage();
         }
-    };
+    }, [sendMessage]);
 
-    // 초기 설정 및 데이터 로드
     useEffect(() => {
         loadInitialData();
         return setupWebSocket();
     }, [loadInitialData, setupWebSocket]);
 
-    // 스크롤 이벤트 리스너 설정
     useEffect(() => {
         const scrollContainer = scrollContainerRef.current;
-        if (scrollContainer) {
-            scrollContainer.addEventListener('scroll', handleScroll);
-            return () => scrollContainer.removeEventListener('scroll', handleScroll);
-        }
+        scrollContainer?.addEventListener('scroll', handleScroll);
+        return () => scrollContainer?.removeEventListener('scroll', handleScroll);
+    }, [handleScroll]);
+
+    useEffect(() => {
+        isNearBottom && scrollToBottom();
+    }, [messages, isNearBottom, scrollToBottom]);
+
+    useEffect(() => {
+        const handleOnline = async () => {
+            setIsOnline(true);
+            console.log("Connection restored. Syncing messages.");
+            if (offlineMessages.length > 0) {
+                for (const msg of offlineMessages) {
+                    await sendMessage(msg);
+                }
+                setOfflineMessages([]);
+            }
+        };
+
+        const handleOffline = () => {
+            setIsOnline(false);
+            console.log("Connection lost. Switching to offline mode.");
+        };
+
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, [offlineMessages, sendMessage]);
+
+    const formatTime = useCallback((timestamp) => {
+        const date = new Date(timestamp);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }, []);
 
-    // 메시지 추가 시 스크롤 처리
-    useEffect(() => {
-        if (isNearBottom) {
-            scrollToBottom();
+    const formatMessage = useCallback((msg) => ({
+        id: msg.id,
+        content: msg.content,
+        email: msg.email,
+        createdAt: msg.createdAt,
+        chatMessageType: msg.chatMessageType
+    }), []);
+
+    const renderMessage = useCallback((message) => {
+        if (message.chatMessageType === 'SYSTEM') {
+            return (
+                <div key={message.id} className="w-full flex justify-center">
+                    <div className="bg-gray-300 text-gray-700 p-2 rounded">
+                        <p>{message.content}</p>
+                    </div>
+                </div>
+            );
         }
-    }, [messages]);
+        return (
+            <div
+                key={message.id}
+                className={`chat ${message.email === userEmail ? 'chat-end' : 'chat-start'}`}
+            >
+                <div className={`chat-bubble ${
+                    message.email === userEmail
+                        ? 'bg-white text-gray-900'
+                        : 'bg-gray-200 text-gray-900'
+                }`}>
+                    <p className="text-sm font-semibold mb-1">{message.email}</p>
+                    <p>{message.content}</p>
+                </div>
+                <div className="chat-footer text-xs opacity-50 mt-1">
+                    {formatTime(message.createdAt)}
+                </div>
+            </div>
+        );
+    }, [userEmail, formatTime]);
 
-    const formatTime = (timestamp) => {
-        const date = new Date(timestamp);
-        return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-    };
-
+    const memoizedMessages = useMemo(() => messages.map(renderMessage), [messages, renderMessage]);
 
     return (
         <div className="flex flex-col h-screen">
@@ -132,36 +192,8 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
                 className="flex-1 overflow-y-auto p-4"
                 onScroll={handleScroll}
             >
-                {messages.map((message) => (
-                    message.chatMessageType === 'SYSTEM' ? (
-                        <div
-                            key={message.id}
-                            className="w-full flex justify-center"
-                        >
-                            <div className="bg-gray-300 text-gray-700 p-2 rounded">
-                                <p>{message.content}</p>
-                            </div>
-                        </div>
-                    ) : (
-                        <div
-                            key={message.id}
-                            className={`chat ${message.email === userEmail ? 'chat-end' : 'chat-start'}`}
-                        >
-                            <div className={`chat-bubble ${
-                                message.email === userEmail
-                                    ? 'bg-white text-gray-900'
-                                    : 'bg-gray-200 text-gray-900'
-                            }`}>
-                                <p className="text-sm font-semibold mb-1">{message.email}</p>
-                                <p>{message.content}</p>
-                            </div>
-                            <div className="chat-footer text-xs opacity-50 mt-1">
-                                {formatTime(message.createdAt)}
-                            </div>
-                        </div>
-                    )
-                ))}
-                <div ref={messagesEndRef}/>
+                {memoizedMessages}
+                <div ref={messagesEndRef} />
             </div>
 
             {!isNearBottom && (
@@ -186,8 +218,13 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
                     <button onClick={sendMessage} className="btn btn-primary">Send</button>
                 </div>
             </div>
+            {!isOnline && (
+                <div className="bg-yellow-200 text-yellow-800 p-2 text-center">
+                    You are offline. Messages will be sent when you're back online.
+                </div>
+            )}
         </div>
     );
 }
 
-export default ChatRoomComponent;
+export default React.memo(ChatRoomComponent);
