@@ -9,6 +9,7 @@ import FetchingModal from "../common/FetchingModal";
 import { HeartIcon, StarIcon, ChatBubbleLeftEllipsisIcon, PencilSquareIcon, ArrowUturnLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import KakaoMapComponent from "../kakaoMap/KakaoMapComponent";
+import {CalendarIcon, ClockIcon, MapPinIcon, UserGroupIcon} from "@heroicons/react/20/solid";
 
 function ReadComponent({postId}) {
 
@@ -102,48 +103,88 @@ function ReadComponent({postId}) {
 
     return (
         <div className="card bg-base-100 shadow-xl relative z-0">
-            {isFetching ? <FetchingModal/> : null}
+            {isFetching ? <FetchingModal /> : null}
             <div className="card-body">
                 <div className="flex justify-between items-center mb-4">
                     <h1 className="card-title text-3xl">{post.title}</h1>
                     <div className="flex items-center space-x-2">
-
                         <button onClick={handleLikeToggle} className="btn btn-ghost btn-circle">
-                            {post.likeCount}  {post.like ? <HeartIconSolid className="h-6 w-6 text-red-500" /> : <HeartIcon className="h-6 w-6" />}
+                            {post.likeCount} {post.like ? <HeartIconSolid className="h-6 w-6 text-red-500" /> : <HeartIcon className="h-6 w-6" />}
                         </button>
                         <button onClick={handleFavoriteToggle} className="btn btn-ghost btn-circle">
                             {post.favorite ? <StarIconSolid className="h-6 w-6 text-yellow-500" /> : <StarIcon className="h-6 w-6" />}
                         </button>
                     </div>
                 </div>
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl">{postId} 번 게시물</h3>
-                    <span className="text-sm text-gray-500">{post.localDate}</span>
+
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="flex items-center">
+                        <UserGroupIcon className="h-5 w-5 mr-2 text-blue-500" />
+                        <span>모집 인원: {post.capacity}명</span>
+                    </div>
+                    <div className="flex items-center">
+                        <CalendarIcon className="h-5 w-5 mr-2 text-green-500" />
+                        <span>날짜: {new Date(post.meetingTime).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center">
+                        <ClockIcon className="h-5 w-5 mr-2 text-purple-500" />
+                        <span>시간: {new Date(post.meetingTime).toLocaleTimeString()}</span>
+                    </div>
+                    <div className="flex items-center">
+                        <MapPinIcon className="h-5 w-5 mr-2 text-red-500" />
+                        <span>장소: {post.placeName}</span>
+                    </div>
                 </div>
 
-                <KakaoMapComponent placeName={post.placeName} latitude={post.latitude} longitude={post.longitude} />
+                <div className="mb-6">
+                    <h3 className="text-xl font-semibold mb-2">활동 유형</h3>
+                    <div className="badge badge-lg">{post.activityType}</div>
+                </div>
 
-                <p className="mb-6">{post.content}</p>
+                <div className="mb-6">
+                    <h3 className="text-xl font-semibold mb-2">상세 내용</h3>
+                    <p>{post.content}</p>
+                </div>
 
-                <div className="card-actions justify-end space-x-2">
-                    <button className="btn btn-outline btn-primary" onClick={() => navigate(`/post/${postId}/chat`)}>
+                {post.imageList && post.imageList.length > 0 && (
+                    <div className="mb-6">
+                        <h3 className="text-xl font-semibold mb-2">이미지</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {post.imageList.map((image, index) => (
+                                <img key={index} src={image} alt={`Image ${index + 1}`} className="w-full h-48 object-cover rounded" />
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+
+                <div className="mb-6">
+                    <h3 className="text-xl font-semibold mb-2">집결 장소</h3>
+                    <KakaoMapComponent placeName={post.placeName} latitude={post.latitude} longitude={post.longitude} />
+                </div>
+
+
+
+                <div className="card-actions justify-end space-x-2 mt-6">
+                    <button className="btn btn-primary" onClick={() => navigate(`/post/${postId}/chat`)}>
                         <ChatBubbleLeftEllipsisIcon className="h-5 w-5 mr-2" />
                         채팅방 입장
                     </button>
-                    <button className="btn btn-outline btn-neutral" onClick={() => moveToModify(postId)}>
+                    <button className="btn btn-neutral" onClick={() => moveToModify(postId)}>
                         <PencilSquareIcon className="h-5 w-5 mr-2" />
-                        Modify
+                        수정
                     </button>
-                    <button className="btn btn-outline btn-secondary" onClick={moveToList}>
+                    <button className="btn btn-secondary" onClick={moveToList}>
                         <ArrowUturnLeftIcon className="h-5 w-5 mr-2" />
-                        Back
+                        목록
                     </button>
-                    <button className="btn btn-outline btn-error" onClick={toggleDeleteModal}>
+                    <button className="btn btn-error" onClick={toggleDeleteModal}>
                         <TrashIcon className="h-5 w-5 mr-2" />
-                        Delete
+                        삭제
                     </button>
                 </div>
             </div>
+
             {showDeleteModal && (
                 <div className="modal modal-open z-50">
                     <div className="modal-box">

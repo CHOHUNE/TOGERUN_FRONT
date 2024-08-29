@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
 import useCustomMove from "../../hooks/useCustomMove";
 import ResultModal from "../../component/common/ResultModal";
 import FetchingModal from "../common/FetchingModal";
@@ -9,34 +9,35 @@ import "react-datepicker/dist/react-datepicker.css";
 import {useDropzone} from "react-dropzone";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10;
-const ACCEPTED_FILE_TYPE = ['image/jpeg', 'image/png','image/jpg','image/gif'];
-const ACTIVITY_TYPES=[
+const ACCEPTED_FILE_TYPE = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+const ACTIVITY_TYPES = [
     'CLIMBING', 'RUNNING', 'HIKING', 'CYCLING', 'YOGA', 'PILATES', 'WEIGHT_TRAINING', 'SURFING'
 
 ]
 
-const PostFormComponent = ({ initialPost, onSubmit, submitButtonText, title }) => {
-    const [post, setPost] = useState({...initialPost,
-    files:initialPost.imageList
+const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => {
+    const [post, setPost] = useState({
+        ...initialPost,
+        images: initialPost.imageList ? initialPost.imageList.map(url => ({type: 'url', content: url})) : []
     });
-    const { moveToList } = useCustomMove();
+    const {moveToList} = useCustomMove();
     const queryClient = useQueryClient();
 
     const onDrop = useCallback(acceptedFiles => {
         const validFiles = acceptedFiles.filter(file =>
             file.size <= MAX_FILE_SIZE && ACCEPTED_FILE_TYPE.includes(file.type)
-        );
+        ).map(file => ({type: 'file', content: file}));
 
-        setPost(prevPost=>({
+        setPost(prevPost => ({
             ...prevPost,
-            files:[...prevPost.files, ...validFiles]
+            images: [...prevPost.images, ...validFiles]
         }))
-    },[]);
+    }, []);
 
-    const {getRootProps,getInputProps,isDragActive} = useDropzone({
+    const {getRootProps, getInputProps, isDragActive} = useDropzone({
         onDrop,
-        accept:ACCEPTED_FILE_TYPE.join(','),
-        maxSize:MAX_FILE_SIZE
+        accept: ACCEPTED_FILE_TYPE.join(','),
+        maxSize: MAX_FILE_SIZE
     });
 
 
@@ -44,12 +45,12 @@ const PostFormComponent = ({ initialPost, onSubmit, submitButtonText, title }) =
         mutationFn: onSubmit,
         onSuccess: () => {
             queryClient.invalidateQueries('post/List');
-            moveToList({ page: 1 });
+            moveToList({page: 1});
         }
     });
 
     const handleChangePost = (e) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setPost(prevState => ({
             ...prevState,
             [name]: value
@@ -75,21 +76,23 @@ const PostFormComponent = ({ initialPost, onSubmit, submitButtonText, title }) =
         formData.append('activityType', post.activityType);
         formData.append('capacity', post.capacity);
 
-        post.files.forEach((file,index)=>{
-            formData.append(`uploadFiles`,file)
-        })
-
+        post.images.forEach((image, index) => {
+            if (image.type === 'file') {
+                formData.append(`uploadFiles`, image.content);
+            } else {
+                formData.append(`existingImageUrls`, image.content);
+            }
+        });
         mutation.mutate(formData);
 
     };
 
-    const handleRemoveFile = (index) => {
+    const handleRemoveImage = (index) => {
         setPost(prevPost => ({
             ...prevPost,
-            files: prevPost.files.filter((_, i) => i !== index)
+            images: prevPost.images.filter((_, i) => i !== index)
         }));
-    }
-
+    };
     const handlePlaceSelect = (place) => {
         setPost(prevState => ({
             ...prevState,
@@ -101,12 +104,12 @@ const PostFormComponent = ({ initialPost, onSubmit, submitButtonText, title }) =
 
     return (
         <div className="container mx-auto p-4">
-            {mutation.isPending && <FetchingModal />}
+            {mutation.isPending && <FetchingModal/>}
             {mutation.isSuccess && (
                 <ResultModal
                     title={title}
                     content={`${title}이 완료되었습니다.`}
-                    callbackFn={() => moveToList({ page: 1 })}
+                    callbackFn={() => moveToList({page: 1})}
                 />
             )}
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -233,7 +236,7 @@ const PostFormComponent = ({ initialPost, onSubmit, submitButtonText, title }) =
                 <div className="mt-10">  {/* 여기에 mt-10을 추가했습니다 */}
                     <h2 className="text-2xl font-bold  mb-4">집결 장소 검색</h2>
                     <div className="bg-base-200 p-4 rounded-lg">
-                    <KakaoMapSearchComponent onPlaceSelect={handlePlaceSelect}/>
+                        <KakaoMapSearchComponent onPlaceSelect={handlePlaceSelect}/>
                     </div>
                 </div>
 
@@ -250,20 +253,25 @@ const PostFormComponent = ({ initialPost, onSubmit, submitButtonText, title }) =
                                 <p>파일을 여기에 놓으세요...</p> :
                                 <p>파일을 여기에 드래그하거나 클릭하여 선택하세요.
                                     <br/>
-                                    (최대 5MB, JPG/PNG/GIF)</p>
+                                    (최대 10MB, JPG/PNG/GIF)</p>
                             }
                         </div>
                     </div>
-                    {post.files.length > 0 && (
+                    {post.images.length > 0 && (
                         <div className="mt-2 max-h-48 overflow-y-auto">
-                            <h4>선택된 파일:</h4>
+                            <h4>이미지 목록:</h4>
                             <ul>
-                                {post.files.map((file, index) => (
+                                {post.images.map((image, index) => (
                                     <li key={index} className="flex items-center space-x-2 my-2">
-                                        <img src={URL.createObjectURL(file)} alt={file.name}
-                                             className="w-10 h-10 object-cover"/>
-                                        <span className="flex-grow">{file.name}</span>
-                                        <button type="button" onClick={() => handleRemoveFile(index)}
+                                        <img
+                                            src={image.type === 'file' ? URL.createObjectURL(image.content) : image.content}
+                                            alt={image.type === 'file' ? image.content.name : `Image ${index}`}
+                                            className="w-10 h-10 object-cover"
+                                        />
+                                        <span className="flex-grow">
+                                        {image.type === 'file' ? image.content.name : image.content.split('/').pop()}
+                                    </span>
+                                        <button type="button" onClick={() => handleRemoveImage(index)}
                                                 className="text-red-500 hover:text-red-700">삭제
                                         </button>
                                     </li>

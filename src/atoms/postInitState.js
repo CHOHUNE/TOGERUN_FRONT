@@ -7,7 +7,7 @@ export const postInitState = {
         longitude: '',
         latitude: '',
         placeName: '',
-        files:[],
+        images:[],
         capacity:2,
         activityType:'',
         meetingTime: new Date(Math.ceil((new Date()).getTime() / (15 * 60 * 1000)) * (15 * 60 * 1000))
