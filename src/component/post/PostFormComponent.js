@@ -72,7 +72,8 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
         formData.append('latitude', post.latitude);
         formData.append('longitude', post.longitude);
         formData.append('placeName', post.placeName);
-        formData.append('meetingTime', post.meetingTime.toISOString().slice(0, 19));
+        const offsetTime = new Date(post.meetingTime.getTime() - post.meetingTime.getTimezoneOffset() * 60000);
+        formData.append('meetingTime', offsetTime.toISOString().slice(0, 19));
         formData.append('activityType', post.activityType);
         formData.append('capacity', post.capacity);
 
@@ -157,6 +158,7 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
                         onChange={handleDateTimeChange}
                         showTimeSelect
                         timeFormat="HH:mm"
+                        timeZone={"Asia/Seoul"}
                         timeIntervals={15}
                         timeCaption="time"
                         dateFormat="MMMM d, yyyy h:mm aa"
