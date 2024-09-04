@@ -67,13 +67,14 @@ export const useCommentHook = (postId, setIsSubmitting, setIsEditing,setWriting)
         deleteComment.mutate(commentId);
     };
 
-    const handleEditComment = (commentId, content, event = null) => {
+    const handleEditComment = (commentId, content,event = null) => {
         if (!event || (event.key === "Enter" && !event.shiftKey)) {
             if (event) event.preventDefault(); // Enter key 이벤트 발생 시 preventDefault 호출
 
             setIsSubmitting(true);
             editComment.mutate({
                 id: commentId,
+                post_id: postId,
                 content: content,
             });
         }

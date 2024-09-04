@@ -21,7 +21,14 @@ function ReadComponent({postId}) {
 
     const queryClient = useQueryClient();
 
-    const post = data || postInitState;
+    const processPostData = (postData) => {
+        if (Array.isArray(postData) && postData.length === 2 && typeof postData[0] === 'string' && typeof postData[1] === 'object') {
+            return postData[1];  // 실제 PostDTO 데이터는 두 번째 요소
+        }
+        return postData;  // 이미 처리된 데이터인 경우 그대로 반환
+    };
+
+    const post = processPostData(data) || postInitState;
 
     const {moveToList, moveToModify} = useCustomMove();
 
@@ -35,7 +42,6 @@ function ReadComponent({postId}) {
             moveToList();
         }
     });
-
     const likeMutation = useMutation({
         mutationFn: (postId) => likeToggle(postId),
         onMutate: async () => {
