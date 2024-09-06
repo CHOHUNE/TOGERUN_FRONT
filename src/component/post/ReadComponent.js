@@ -60,7 +60,7 @@ function ReadComponent({postId}) {
             queryClient.setQueryData(['post', postId], context.previousPost);
         },
         // onSettled: () => {
-        //     queryClient.invalidateQueries(['post', postId]);
+        //     queryClient.invalidateQueries(['post', postId]); // 캐시된 데이터를 무효화
         // }
     });
 
