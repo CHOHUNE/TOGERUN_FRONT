@@ -13,7 +13,7 @@ import {CalendarIcon, ClockIcon, MapPinIcon, UserGroupIcon} from "@heroicons/rea
 
 function ReadComponent({postId}) {
 
-    const {data, isFetching} = useQuery({
+    const {data, isFetching,refetch} = useQuery({
         queryKey: ['post', postId],
         queryFn: () => getOne(postId),
         staleTime: 1000 * 60 * 30
@@ -42,48 +42,17 @@ function ReadComponent({postId}) {
             moveToList();
         }
     });
+
     const likeMutation = useMutation({
         mutationFn: (postId) => likeToggle(postId),
-        onMutate: async () => {
-            await queryClient.cancelQueries(['post', postId]);
-            const previousPost = queryClient.getQueryData(['post', postId]);
-
-            queryClient.setQueryData(['post', postId], old => ({
-                ...old,
-                like: !old.like,
-                likeCount: old.like ? old.likeCount - 1 : old.likeCount + 1
-            }));
-
-            return { previousPost };
-        },
-        onError: (err, postId, context) => {
-            queryClient.setQueryData(['post', postId], context.previousPost);
-        },
-        // onSettled: () => {
-        //     queryClient.invalidateQueries(['post', postId]); // 캐시된 데이터를 무효화
-        // }
+        onSuccess: () => refetch(),
     });
 
     const favoriteMutation = useMutation({
         mutationFn: (postId) => favoriteToggle(postId),
-        onMutate: async () => {
-            await queryClient.cancelQueries(['post', postId]);
-            const previousPost = queryClient.getQueryData(['post', postId]);
-
-            queryClient.setQueryData(['post', postId], old => ({
-                ...old,
-                favorite: !old.favorite
-            }));
-
-            return { previousPost };
-        },
-        onError: (err, postId, context) => {
-            queryClient.setQueryData(['post', postId], context.previousPost);
-        },
-        // onSettled: () => {
-        //     queryClient.invalidateQueries(['post', postId]);
-        // }
+        onSuccess: () => refetch(),
     });
+
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
