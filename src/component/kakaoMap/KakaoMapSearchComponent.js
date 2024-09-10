@@ -181,8 +181,7 @@ const KakaoMapSearch = ({onPlaceSelect}) => {
     };
 
     // 검색 폼 제출 핸들러
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const handleSearch = (e) => {
         if (mapLoaded && window.kakao && window.kakao.maps && map) {
             const ps = new window.kakao.maps.services.Places();
             searchPlaces(map, ps);
@@ -190,7 +189,10 @@ const KakaoMapSearch = ({onPlaceSelect}) => {
     };
 
     // 목록에서 장소 클릭 핸들러
-    const handlePlaceClick = (place) => {
+    const handlePlaceClick = (e,place) => {
+        e.preventDefault(); // 기본 동작 방지 : 폼 제출
+        e.stopPropagation(); //이벤트 전파 중지 : 부모요소로 이벤트 전파 방지
+
         if (map) {
             handlePlaceSelection(place, map);
         }
@@ -212,18 +214,25 @@ const KakaoMapSearch = ({onPlaceSelect}) => {
                         <div className="card-body flex-none">
                             <h2 className="card-title">장소 검색</h2>
                             {/* 검색 폼 */}
-                            <form onSubmit={handleSubmit} className="form-control">
+                            <div className="form-control">
                                 <div className="input-group">
                                     <input
                                         type="text"
                                         value={keyword}
                                         onChange={(e) => setKeyword(e.target.value)}
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                handleSearch();
+                                            }
+                                        }}
                                         className="input input-bordered flex-grow"
                                         placeholder="검색어를 입력하세요"
                                     />
-                                    <button type="submit" className="btn btn-primary">검색</button>
+                                    <button type="button" onClick={handleSearch} className="btn btn-primary">검색</button>
                                 </div>
-                            </form>
+                            </div>
+
                         </div>
                         <div className="divider my-0"></div>
                         {/* 검색 결과 목록 - 스크롤바 항상 표시 */}
@@ -235,7 +244,7 @@ const KakaoMapSearch = ({onPlaceSelect}) => {
                                 {places.map((place, index) => (
                                     <li key={place.id}>
                                         <button
-                                            onClick={() => handlePlaceClick(place)}
+                                            onClick={(e) => handlePlaceClick(e,place)}
                                             onMouseEnter={() => setHoveredMarker(markersRef.current[place.id])}
                                             onMouseLeave={() => setHoveredMarker(null)}
                                             className={`hover:bg-base-300 w-full text-left py-2 ${hoveredMarker === markersRef.current[place.id] ? 'bg-base-300' : ''}`}

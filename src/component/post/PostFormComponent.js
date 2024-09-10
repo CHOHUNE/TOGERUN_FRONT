@@ -9,7 +9,13 @@ import "react-datepicker/dist/react-datepicker.css";
 import {useDropzone} from "react-dropzone";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10;
-const ACCEPTED_FILE_TYPE = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+const ACCEPTED_FILE_TYPES = {
+    'image/jpeg': ['.jpeg', '.jpg'],
+    'image/png': ['.png'],
+    'image/gif': ['.gif']
+};
+
+
 const ACTIVITY_TYPES = [
     'CLIMBING', 'RUNNING', 'HIKING', 'CYCLING', 'YOGA', 'PILATES', 'WEIGHT_TRAINING', 'SURFING'
 
@@ -25,18 +31,18 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
 
     const onDrop = useCallback(acceptedFiles => {
         const validFiles = acceptedFiles.filter(file =>
-            file.size <= MAX_FILE_SIZE && ACCEPTED_FILE_TYPE.includes(file.type)
-        ).map(file => ({type: 'file', content: file}));
+            file.size <= MAX_FILE_SIZE && Object.keys(ACCEPTED_FILE_TYPES).includes(file.type)
+        ).map(file => ({ type: 'file', content: file }));
 
         setPost(prevPost => ({
             ...prevPost,
             images: [...prevPost.images, ...validFiles]
-        }))
+        }));
     }, []);
 
-    const {getRootProps, getInputProps, isDragActive} = useDropzone({
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
-        accept: ACCEPTED_FILE_TYPE.join(','),
+        accept: ACCEPTED_FILE_TYPES,
         maxSize: MAX_FILE_SIZE
     });
 
