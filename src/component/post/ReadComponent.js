@@ -10,6 +10,7 @@ import { HeartIcon, StarIcon, ChatBubbleLeftEllipsisIcon, PencilSquareIcon, Arro
 import { HeartIcon as HeartIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import KakaoMapComponent from "../kakaoMap/KakaoMapComponent";
 import {CalendarIcon, ClockIcon, MapPinIcon, UserGroupIcon} from "@heroicons/react/20/solid";
+import {EyeIcon} from "@heroicons/react/16/solid";
 
 function ReadComponent({postId}) {
 
@@ -94,26 +95,41 @@ function ReadComponent({postId}) {
 
                 <div className="grid grid-cols-2 gap-4 mb-6">
                     <div className="flex items-center">
-                        <UserGroupIcon className="h-5 w-5 mr-2 text-blue-500" />
+                        <UserGroupIcon className="h-5 w-5 mr-2 text-blue-500"/>
                         <span>모집 인원: {post.capacity}명</span>
                     </div>
                     <div className="flex items-center">
-                        <CalendarIcon className="h-5 w-5 mr-2 text-green-500" />
+                        <CalendarIcon className="h-5 w-5 mr-2 text-green-500"/>
                         <span>날짜: {new Date(post.meetingTime).toLocaleDateString()}</span>
                     </div>
                     <div className="flex items-center">
-                        <ClockIcon className="h-5 w-5 mr-2 text-purple-500" />
+                        <ClockIcon className="h-5 w-5 mr-2 text-purple-500"/>
                         <span>시간: {new Date(post.meetingTime).toLocaleTimeString()}</span>
                     </div>
                     <div className="flex items-center">
-                        <MapPinIcon className="h-5 w-5 mr-2 text-red-500" />
+                        <MapPinIcon className="h-5 w-5 mr-2 text-red-500"/>
                         <span>장소: {post.placeName}</span>
                     </div>
+                    <div className="flex items-center">
+                        <EyeIcon className="h-5 w-5 mr-2 text-red-500"/>
+                        <span>조회수: {post.viewCount}</span>
+                    </div>
+                    <div className="flex items-center">
+                        <MapPinIcon className="h-5 w-5 mr-2 text-red-500"/>
+                        <span>도로명 주소: {post.roadName}</span>
+                    </div>
+
                 </div>
 
                 <div className="mb-6">
                     <h3 className="text-xl font-semibold mb-2">활동 유형</h3>
                     <div className="badge badge-lg">{post.activityType}</div>
+                </div>
+                <div className="mb-6">
+                    <h3 className="text-xl font-semibold mb-2">참가 가능 여부</h3>
+                    <div className={`badge badge-lg ${post.participateFlag ? 'badge-success' : 'badge-error'}`}>
+                        {post.participateFlag ? '참여가능' : '마감'}
+                    </div>
                 </div>
 
                 <div className="mb-6">

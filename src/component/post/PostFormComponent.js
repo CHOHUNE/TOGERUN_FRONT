@@ -78,6 +78,7 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
         formData.append('latitude', post.latitude);
         formData.append('longitude', post.longitude);
         formData.append('placeName', post.placeName);
+        formData.append('roadName', post.roadName);
         const offsetTime = new Date(post.meetingTime.getTime() - post.meetingTime.getTimezoneOffset() * 60000);
         formData.append('meetingTime', offsetTime.toISOString().slice(0, 19));
         formData.append('activityType', post.activityType);
@@ -107,7 +108,8 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
             ...prevState,
             latitude: parseFloat(place.y),
             longitude: parseFloat(place.x),
-            placeName: place.place_name
+            placeName: place.place_name,
+            roadName:place.road_address_name
         }));
     }
 

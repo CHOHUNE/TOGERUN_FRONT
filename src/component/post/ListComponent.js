@@ -5,6 +5,8 @@ import useCustomMove from "../../hooks/useCustomMove";
 import { getList} from "../../api/api";
 import {useQuery, useQueryClient} from "@tanstack/react-query";
 import FetchingModal from "../common/FetchingModal";
+import {EyeIcon} from "@heroicons/react/16/solid";
+import {MapPinIcon} from "@heroicons/react/20/solid";
 
 const initState ={
 
@@ -23,53 +25,71 @@ const initState ={
 }
 
 function ListComponent(props) {
-    const {page, refresh, size, moveToList,keyword} = useCustomMove();
+    const {page, refresh, size, moveToList, keyword} = useCustomMove();
 
-
-    const {data,isFetching,error,isError} = useQuery({
-        queryKey: ['post/List', {page,size,refresh,keyword}], //쿼리를 식별자와 쿼리의 파라미터 ( queryFn 에 전달되는 데이터다. )
-        queryFn:()=> getList({page,size,keyword}), // queryKey 의 파라메터가 바뀌면 자동으로 refresh 된다.
-            staleTime:1000 * 60 * 5
+    const {data, isFetching} = useQuery({
+        queryKey: ['post/List', {page, size, refresh, keyword}],
+        queryFn: () => getList({page, size, keyword}),
+        staleTime: 1000 * 60 * 5
     });
 
-    //useQuery 는 쿼리를 실행하면 컴포넌트가 실행될 때 자동으로 데이터를 fetch 한다 -> useEffect 를 쓰지 않아도 되는 이유
-    //useQuery 는 자동으로 상태관리 ( 로딩,성공,에러 (fetching,success,error) ) 를 해주므로 따로 상태관리 하는 별도의 코드가 필요가 없다
-
-    const queryClient = useQueryClient();
-
-    const handleClickPage = (pageParam)=>{
-
+    const handleClickPage = (pageParam) => {
         moveToList(pageParam)
     }
 
-    const serverData =data || initState
+    const formatRoadName = (roadName) => {
+        const parts = roadName.split(' ');
+        if (parts.length >= 2) {
+            return `${parts[0]} ${parts[1]}`;
+        }
+        return roadName;
+    };
+
+    const serverData = data || initState
 
     return (
         <div className="overflow-x-auto">
-            {isFetching? <FetchingModal/>:<></>}
-            {keyword&&<p className={"my-4"}>검색어 : {keyword}</p> }
+            {isFetching ? <FetchingModal/> : <></>}
+            {keyword && <p className={"my-4"}>검색어 : {keyword}</p>}
             <table className="table w-full">
                 <thead>
                 <tr>
-                    <th className="text-center">ID</th>
                     <th className="text-center">Title</th>
-                    <th className="text-center">Actions</th>
                     <th className="text-center">Writer</th>
+                    <th className="text-center">Info</th>
                     <th className="text-center">Date</th>
+                    <th className="text-center">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 {serverData.dtoList.map((post) => (
                     <tr key={post.id}>
-                        <td className="text-center">{post.id}</td>
-                        <td className="text-center">
-                            <Link to={`/post/${post.id}`} className="link link-primary">{post.title}</Link>
-                        </td>
-                        <td className="text-center">
-                            <Link to={`/post/${post.id}`} className="btn btn-outline btn-primary">Read More</Link>
+                        <td className="text-left">
+                            <Link to={`/post/${post.id}`} className="link link-primary font-semibold">{post.title}</Link>
                         </td>
                         <td className="text-center">{post.nickname}</td>
+                        <td className="text-center">
+                            <div className="flex flex-wrap justify-center gap-2">
+                                <span className={`badge ${post.participateFlag ? 'badge-success' : 'badge-error'}`}>
+                                    {post.participateFlag ? '참여가능' : '마감'}
+                                </span>
+                                <span className="badge badge-info">
+                                    <EyeIcon className="h-5 w-5 mr-2 text-red-500"/>
+                                    {post.viewCount}
+                                </span>
+                                <span className="badge badge-warning">
+                                    ❤ {post.likeCount}
+                                </span>
+                                <span className="badge badge-info">
+                                    <MapPinIcon className="h-5 w-5 mr-2 text-red-500"/>
+                                    {formatRoadName(post.roadName)}
+                                </span>
+                            </div>
+                        </td>
                         <td className="text-center">{post.localDate}</td>
+                        <td className="text-center">
+                            <Link to={`/post/${post.id}`} className="btn btn-sm btn-outline btn-primary">Read More</Link>
+                        </td>
                     </tr>
                 ))}
                 </tbody>
