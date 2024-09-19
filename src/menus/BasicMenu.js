@@ -17,12 +17,12 @@ const BasicMenu = () => {
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [signIn, setSignIn] = useRecoilState(signInState);
 
-    const [searchKeyword, setSearchKeyword] = useState()
+    const [searchKeyword, setSearchKeyword] = useState("")
 
-    const handleSearch =(e)=>{
+    const handleSearch = (e) => {
         e.preventDefault() // form 태그의 기본 이벤트를 막는다.
-        if (searchKeyword.trim()) {
-            navigate(`/post/list?keyword=${searchKeyword}`)
+        if (searchKeyword && searchKeyword.trim() !== "") {
+            navigate(`/post/list?keyword=${encodeURIComponent(searchKeyword.trim())}`)
         }
     }
 
@@ -86,7 +86,7 @@ const BasicMenu = () => {
                     <form onSubmit={handleSearch} className="flex items-center">
                         <input
                             type="text"
-                            placeholder="검색..."
+                            placeholder="제목,내용,장소 검색"
                             value={searchKeyword}
                             onChange={(e) => setSearchKeyword(e.target.value)}
                             className="input input-bordered w-full max-w-xs"
