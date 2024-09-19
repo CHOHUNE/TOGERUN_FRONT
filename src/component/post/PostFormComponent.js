@@ -82,6 +82,8 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
         formData.append('meetingTime', offsetTime.toISOString().slice(0, 19));
         formData.append('activityType', post.activityType);
         formData.append('capacity', post.capacity);
+        formData.append('participateFlag', post.participateFlag);
+        formData.append('viewCount', post.viewCount);
 
         post.images.forEach((image, index) => {
             if (image.type === 'file') {
