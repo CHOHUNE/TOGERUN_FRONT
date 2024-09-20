@@ -55,7 +55,7 @@ const beforeRes = async (res) => {
 
         const memberCookieValue = getCookie("member")
 
-        const result = await refreshJWT()
+        const result = await refreshJWT(memberCookieValue.accessToken)
         console.log("refreshJWT RESULT", result)
 
         memberCookieValue.accessToken = result.accessToken
