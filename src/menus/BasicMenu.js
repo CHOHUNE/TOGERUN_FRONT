@@ -1,7 +1,7 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import useCustomLogin from "../hooks/useCustomLogin";
-import {useMutation, useQueryClient} from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useRecoilState } from "recoil";
 import { initState, signInState } from "../atoms/singinState";
 import NotificationIcon from "../component/notification/NotificationComponent";
@@ -10,28 +10,26 @@ import SideOpenDrawer from "../component/common/sideOpenDrawer";
 import ResultModal from "../component/common/ResultModal";
 
 const BasicMenu = () => {
-    const queryClient = useQueryClient;
     const navigate = useNavigate();
-
-    const { doLogout, moveToPath,loginState } = useCustomLogin();
+    const { doLogout, moveToPath, loginState } = useCustomLogin();
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [signIn, setSignIn] = useRecoilState(signInState);
-
-    const [searchKeyword, setSearchKeyword] = useState("")
+    const [searchKeyword, setSearchKeyword] = useState("");
+    const [isSideDrawerOpen, setIsSideDrawerOpen] = useState(false);
 
     const handleSearch = (e) => {
-        e.preventDefault() // form 태그의 기본 이벤트를 막는다.
+        e.preventDefault();
         if (searchKeyword && searchKeyword.trim() !== "") {
-            navigate(`/post/list?keyword=${encodeURIComponent(searchKeyword.trim())}`)
+            navigate(`/post/list?keyword=${encodeURIComponent(searchKeyword.trim())}`);
         }
     }
 
-    const logoutMutation = useMutation(
-        { mutationFn: () => doLogout(),
-            onSuccess: () => {
-                setSignIn(initState);
-            }
-        });
+    const logoutMutation = useMutation({
+        mutationFn: () => doLogout(),
+        onSuccess: () => {
+            setSignIn(initState);
+        }
+    });
 
     function handleClickLogout() {
         logoutMutation.mutate();
@@ -45,8 +43,7 @@ const BasicMenu = () => {
     }
 
     const toggleLogoutModal = () => setShowLogoutModal(!showLogoutModal);
-
-
+    const toggleSideDrawer = () => setIsSideDrawerOpen(!isSideDrawerOpen);
 
     return (
         <div className="bg-base-100">
@@ -58,28 +55,24 @@ const BasicMenu = () => {
                         </label>
                         <ul tabIndex={0}
                             className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                            {/*<li><a href="/">Main</a></li>*/}
                             <li>
                                 <a href="/post/list">Post</a>
                             </li>
                             <li>
                                 <a href="/member/modify">memberInfo</a>
                             </li>
-                            {/*<li><a href="/list">List</a></li>*/}
                         </ul>
                     </div>
                     <a className="btn btn-ghost normal-case text-xl">RunTogether</a>
                 </div>
                 <div className="navbar-center hidden lg:flex">
                     <ul className="menu menu-horizontal px-1">
-                        {/*<li>    <a href="/">Main</a></li>*/}
                         <li>
                             <a href="/post/list">Post</a>
                         </li>
                         <li>
                             <a href="/member/modify">memberInfo</a>
                         </li>
-                        {/*<li><a href="/list">List</a></li>*/}
                     </ul>
                 </div>
                 <div className="navbar-end">
@@ -96,18 +89,18 @@ const BasicMenu = () => {
                         </button>
                     </form>
                     <NotificationIcon/>
-                    <div className="mr-2">
-                        <SideOpenDrawer/>
-                    </div>
-
+                    <button onClick={toggleSideDrawer} className="btn btn-ghost btn-circle ml-2">
+                        Chat
+                    </button>
                     {!loginState.email ?
                         <button className="btn" onClick={() => navigate("/member/login")}>Login</button>
                         :
                         <button className="btn" onClick={toggleLogoutModal}>Logout</button>
                     }
                 </div>
-
             </div>
+
+            <SideOpenDrawer isOpen={isSideDrawerOpen} onClose={toggleSideDrawer} />
 
             {showLogoutModal && (
                 <div className="modal modal-open">
@@ -126,7 +119,6 @@ const BasicMenu = () => {
             {logoutMutation.isSuccess ?
                 <ResultModal title={'로그아웃'} content={`로그아웃이 완료 되었습니다.`}
                              callbackFn={closeModal}/> : <></>}
-
         </div>
     );
 };

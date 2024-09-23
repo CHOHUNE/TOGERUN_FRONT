@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {deleteOne, favoriteToggle, getOne, likeToggle,} from "../../api/api";
+import React, {useEffect, useState} from 'react';
+import {deleteOne, favoriteToggle, getChatRoomStatus, getOne, likeToggle,} from "../../api/api";
 import {useNavigate} from "react-router-dom";
 import useCustomMove from "../../hooks/useCustomMove";
 import ResultModal from "../common/ResultModal";
@@ -14,13 +14,38 @@ import {EyeIcon} from "@heroicons/react/16/solid";
 
 function ReadComponent({postId}) {
 
+    const queryClient = useQueryClient();
+    const [chatRoomStatus, setChatRoomStatus] = useState(null);
+
     const {data, isFetching,refetch} = useQuery({
         queryKey: ['post', postId],
         queryFn: () => getOne(postId),
         staleTime: 1000 * 60 * 30
     });
 
-    const queryClient = useQueryClient();
+    useEffect(() => {
+        const fetchChatRoomStatus = async () => {
+            try {
+                const status = await getChatRoomStatus(postId);
+                setChatRoomStatus(status);
+            } catch (error) {
+                console.error("Error fetching chat room status:", error);
+            }
+        }
+
+        fetchChatRoomStatus();
+    }, [postId]);
+
+    const handleChatRoomEntry =()=>{
+        if (chatRoomStatus && chatRoomStatus.canJoin){
+
+            navigate(`/post/${postId}/chat`)
+        }else{
+            alert(' 현재 채팅방에 참여할 수 없습니다.')
+        }
+    }
+
+
 
     const processPostData = (postData) => {
         if (Array.isArray(postData) && postData.length === 2 && typeof postData[0] === 'string' && typeof postData[1] === 'object') {
@@ -155,22 +180,25 @@ function ReadComponent({postId}) {
                 </div>
 
 
-
                 <div className="card-actions justify-end space-x-2 mt-6">
-                    <button className="btn btn-primary" onClick={() => navigate(`/post/${postId}/chat`)}>
-                        <ChatBubbleLeftEllipsisIcon className="h-5 w-5 mr-2" />
-                        채팅방 입장
+                    <button
+                        className={`btn ${chatRoomStatus && chatRoomStatus.canJoin ? 'btn-primary' : 'btn-disabled'}`}
+                        onClick={handleChatRoomEntry}
+                        disabled={!chatRoomStatus || !chatRoomStatus.canJoin}
+                    >
+                        <ChatBubbleLeftEllipsisIcon className="h-5 w-5 mr-2"/>
+                        {chatRoomStatus && chatRoomStatus.canJoin ? '채팅방 입장' : '입장 불가'}
                     </button>
                     <button className="btn btn-neutral" onClick={() => moveToModify(postId)}>
-                        <PencilSquareIcon className="h-5 w-5 mr-2" />
+                        <PencilSquareIcon className="h-5 w-5 mr-2"/>
                         수정
                     </button>
                     <button className="btn btn-secondary" onClick={moveToList}>
-                        <ArrowUturnLeftIcon className="h-5 w-5 mr-2" />
+                        <ArrowUturnLeftIcon className="h-5 w-5 mr-2"/>
                         목록
                     </button>
                     <button className="btn btn-error" onClick={toggleDeleteModal}>
-                        <TrashIcon className="h-5 w-5 mr-2" />
+                        <TrashIcon className="h-5 w-5 mr-2"/>
                         삭제
                     </button>
                 </div>
