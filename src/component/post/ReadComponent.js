@@ -103,11 +103,11 @@ function ReadComponent({postId}) {
     }
 
     return (
-        <div className="card bg-base-100 shadow-xl relative z-0">
+        <div className="bg-base-100 relative z-0">
             {isFetching ? <FetchingModal /> : null}
-            <div className="card-body">
+            <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                    <h1 className="card-title text-3xl">{post.title}</h1>
+                    <h1 className="text-3xl font-bold">{post.title}</h1>
                     <div className="flex items-center space-x-2">
                         <button onClick={handleLikeToggle} className="btn btn-ghost btn-circle">
                             {post.likeCount} {post.like ? <HeartIconSolid className="h-6 w-6 text-red-500" /> : <HeartIcon className="h-6 w-6" />}
@@ -179,8 +179,7 @@ function ReadComponent({postId}) {
                     <KakaoMapComponent placeName={post.placeName} latitude={post.latitude} longitude={post.longitude} />
                 </div>
 
-
-                <div className="card-actions justify-end space-x-2 mt-6">
+                <div className="flex justify-end space-x-2 mt-6">
                     <button
                         className={`btn ${chatRoomStatus && chatRoomStatus.canJoin ? 'btn-primary' : 'btn-disabled'}`}
                         onClick={handleChatRoomEntry}
