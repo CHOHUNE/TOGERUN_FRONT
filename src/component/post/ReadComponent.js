@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {deleteOne, favoriteToggle, getChatRoomStatus, getOne, likeToggle,} from "../../api/api";
+import {likeToggle,} from "../../api/api";
 import {useNavigate} from "react-router-dom";
 import useCustomMove from "../../hooks/useCustomMove";
 import ResultModal from "../common/ResultModal";
@@ -11,6 +11,8 @@ import { HeartIcon as HeartIconSolid, StarIcon as StarIconSolid } from '@heroico
 import KakaoMapComponent from "../kakaoMap/KakaoMapComponent";
 import {CalendarIcon, ClockIcon, MapPinIcon, UserGroupIcon} from "@heroicons/react/20/solid";
 import {EyeIcon} from "@heroicons/react/16/solid";
+import {deleteOne, favoriteToggle, getOne} from "../../api/postAPI";
+import {getChatRoomStatus} from "../../api/chatAPI";
 
 function ReadComponent({postId}) {
 

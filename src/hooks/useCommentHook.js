@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addCommentAPI, deleteCommentAPI, modifyCommentAPI } from "../api/api";
+
+import {addCommentAPI, deleteCommentAPI, modifyCommentAPI} from "../api/commentAPI";
 
 export const useCommentHook = (postId, setIsSubmitting, setIsEditing,setWriting) => {
 

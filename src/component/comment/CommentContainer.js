@@ -2,9 +2,9 @@ import React, {useEffect, useState} from "react";
 // import { useQuery, useMutation, useQueryClient } from "react-query"; 구버전의 react-query 를 import 하면 에러가 발생
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {CommentForm} from "./CommentForm";
-import { fetchCommentList} from "../../api/api";
 import {CommentList} from "./CommentList";
 import {useCommentHook} from "../../hooks/useCommentHook";
+import {fetchCommentList} from "../../api/commentAPI";
 
 export function CommentContainer({postId}) {
 
