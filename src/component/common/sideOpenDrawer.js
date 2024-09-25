@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getJoinedChatRoom } from "../../api/api";
 import { UserGroupIcon, ClockIcon, ChatBubbleLeftEllipsisIcon } from '@heroicons/react/24/solid';
+
+
+import {getJoinedChatRoom} from "../../api/memberAPI";
 
 function SideOpenDrawer({ isOpen, onClose }) {
     const [chatRooms, setChatRooms] = useState([]);

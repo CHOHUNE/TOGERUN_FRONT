@@ -2,7 +2,7 @@ import React from 'react';
 import {Navigate, useNavigate} from "react-router-dom";
 import {useRecoilState, useResetRecoilState} from "recoil";
 import {signInState} from "../atoms/singinState";
-import {loginPost} from "../api/memberApi";
+import {loginPost} from "../api/memberAPI";
 import {removeCookie, setCookie} from "../util/cookieUtil";
 import axios from "axios";
 

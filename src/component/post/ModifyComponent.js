@@ -1,8 +1,8 @@
 import React from 'react';
 import { useQuery } from "@tanstack/react-query";
-import { getOne, putOne } from "../../api/api";
 import PostFormComponent from "./PostFormComponent";
 import FetchingModal from "../common/FetchingModal";
+import {getOne, putOne} from "../../api/postAPI";
 
 const ModifyComponent = ({ postId }) => {
 

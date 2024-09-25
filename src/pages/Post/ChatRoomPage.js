@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { getChatRoom, leaveChatRoom } from "../../api/api";
 import ChatRoomComponent from '../../component/post/ChatRoomComponent';
 import useCustomLogin from "../../hooks/useCustomLogin";
 import { useNavigate, useParams } from "react-router-dom";
+import {getChatRoom, leaveChatRoom} from "../../api/chatAPI";
 
 const ChatRoomPage = () => {
     const { postId } = useParams();

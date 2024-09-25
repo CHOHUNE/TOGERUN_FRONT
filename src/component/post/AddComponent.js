@@ -1,7 +1,7 @@
 import React from 'react';
-import { postAdd } from "../../api/api";
 import { postInitState } from "../../atoms/postInitState";
 import PostFormComponent from "./PostFormComponent";
+import {postAdd} from "../../api/postAPI";
 
 const AddComponent = () => {
     return (

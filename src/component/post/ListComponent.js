@@ -2,11 +2,11 @@ import React, {useEffect} from 'react';
 import {Link, useLocation} from "react-router-dom";
 import PageComponent from "../common/PageComponent";
 import useCustomMove from "../../hooks/useCustomMove";
-import { getList} from "../../api/api";
 import {useQuery, useQueryClient} from "@tanstack/react-query";
 import FetchingModal from "../common/FetchingModal";
 import {EyeIcon} from "@heroicons/react/16/solid";
 import {MapPinIcon} from "@heroicons/react/20/solid";
+import {getList} from "../../api/postAPI";
 
 const initState ={
 
