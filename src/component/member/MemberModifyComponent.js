@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-
 import ResultModal from "../common/ResultModal";
 import useCustomLogin from "../../hooks/useCustomLogin";
 import { getMember, modifyMember } from "../../api/memberAPI";
-import {UserCircleIcon} from "@heroicons/react/20/solid";
+import { UserCircleIcon } from "@heroicons/react/20/solid";
 
 const initState = {
     id: '',
@@ -14,7 +13,9 @@ const initState = {
     social: false,
     gender: '',
     age: '',
-    mobile: '',
+    phone1: '',
+    phone2: '',
+    phone3: '',
     img: '',
 };
 
@@ -22,15 +23,20 @@ function MemberModifyComponent() {
     const [user, setUser] = useState(initState);
     const { loginState, moveToLogin } = useCustomLogin();
     const [result, setResult] = useState('');
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         const fetchMemberData = async () => {
             if (loginState) {
                 try {
                     const memberData = await getMember();
+                    const [phone1, phone2, phone3] = memberData.mobile ? memberData.mobile.split('-') : ['', '', ''];
                     setUser({
                         ...initState,
-                        ...memberData
+                        ...memberData,
+                        phone1,
+                        phone2,
+                        phone3,
                     });
                 } catch (error) {
                     console.error("회원 데이터 가져오기 오류:", error);
@@ -42,17 +48,56 @@ function MemberModifyComponent() {
     }, [loginState]);
 
     const handleChange = (e) => {
-        setUser({ ...user, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setUser({ ...user, [name]: value });
+        if (name === 'nickname') {
+            validateNickname(value);
+        }
+    };
+
+    const validateNickname = (nickname) => {
+        if (/[!@#$%^&*(),.?":{}|<>]/.test(nickname)) {
+            setErrors(prev => ({ ...prev, nickname: '특수문자는 사용할 수 없습니다.' }));
+        } else {
+            setErrors(prev => ({ ...prev, nickname: '' }));
+        }
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        const requiredFields = ['nickname', 'gender', 'age', 'phone1', 'phone2', 'phone3'];
+        requiredFields.forEach(field => {
+            if (!user[field]) {
+                newErrors[field] = '필수 입력 항목입니다.';
+            }
+        });
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleClickModify = async (e) => {
         e.preventDefault();
-        try {
-            await modifyMember(user);
-            setResult("Modified");
-        } catch (error) {
-            console.error("Error modifying user:", error);
-            setResult("Error");
+        if (validateForm()) {
+            try {
+                const updatedUser = {
+
+                    email: user.email,
+                    nickname: user.nickname,
+                    gender:user.gender,
+                    age: user.age,
+                    mobile: `${user.phone1}-${user.phone2}-${user.phone3}`,
+
+                };
+                delete updatedUser.phone1;
+                delete updatedUser.phone2;
+                delete updatedUser.phone3;
+
+                await modifyMember(updatedUser);
+                setResult("Modified");
+            } catch (error) {
+                console.error("Error modifying user:", error);
+                setResult("Error");
+            }
         }
     };
 
@@ -111,8 +156,8 @@ function MemberModifyComponent() {
                             type="password"
                             name="pw"
                             value={user.pw}
-                            onChange={handleChange}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                            readOnly
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline bg-gray-100"
                         />
                     </div>
 
@@ -125,8 +170,8 @@ function MemberModifyComponent() {
                             type="text"
                             name="name"
                             value={user.name}
-                            onChange={handleChange}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            readOnly
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-gray-100"
                         />
                     </div>
 
@@ -142,6 +187,7 @@ function MemberModifyComponent() {
                             onChange={handleChange}
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         />
+                        {errors.nickname && <p className="text-red-500 text-xs italic">{errors.nickname}</p>}
                     </div>
 
                     <div className="mb-4">
@@ -159,34 +205,62 @@ function MemberModifyComponent() {
                             <option value="M">남성</option>
                             <option value="F">여성</option>
                         </select>
+                        {errors.gender && <p className="text-red-500 text-xs italic">{errors.gender}</p>}
                     </div>
 
                     <div className="mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="age">
                             연령대
                         </label>
-                        <input
+                        <select
                             id="age"
-                            type="text"
                             name="age"
                             value={user.age}
                             onChange={handleChange}
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        />
+                        >
+                            <option value="">선택</option>
+                            <option value="20-29">20~29</option>
+                            <option value="30-39">30~39</option>
+                            <option value="40-49">40~49</option>
+                        </select>
+                        {errors.age && <p className="text-red-500 text-xs italic">{errors.age}</p>}
                     </div>
 
                     <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="mobile">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="phone1">
                             전화번호
                         </label>
-                        <input
-                            id="mobile"
-                            type="tel"
-                            name="mobile"
-                            value={user.mobile}
-                            onChange={handleChange}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        />
+                        <div className="flex">
+                            <input
+                                id="phone1"
+                                type="text"
+                                name="phone1"
+                                value={user.phone1}
+                                onChange={handleChange}
+                                className="shadow appearance-none border rounded w-1/3 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2"
+                                maxLength="3"
+                            />
+                            <input
+                                id="phone2"
+                                type="text"
+                                name="phone2"
+                                value={user.phone2}
+                                onChange={handleChange}
+                                className="shadow appearance-none border rounded w-1/3 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2"
+                                maxLength="4"
+                            />
+                            <input
+                                id="phone3"
+                                type="text"
+                                name="phone3"
+                                value={user.phone3}
+                                onChange={handleChange}
+                                className="shadow appearance-none border rounded w-1/3 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                maxLength="4"
+                            />
+                        </div>
+                        {(errors.phone1 || errors.phone2 || errors.phone3) && <p className="text-red-500 text-xs italic">전화번호를 모두 입력해주세요.</p>}
                     </div>
                 </div>
 
