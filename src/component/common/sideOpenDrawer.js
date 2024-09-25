@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserGroupIcon, ClockIcon, ChatBubbleLeftEllipsisIcon } from '@heroicons/react/24/solid';
+import {getJoinedChatRoom} from "../../api/chatAPI";
 
 
 import {getJoinedChatRoom} from "../../api/memberAPI";

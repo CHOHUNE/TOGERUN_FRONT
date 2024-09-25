@@ -20,3 +20,7 @@ export const getChatRoomStatus = async (postId) => {
     return response.data;
 }
 
+export const getJoinedChatRoom = async () => {
+    const response = await jwtAxios.get(`/user/joined`);
+    return response.data;
+}
