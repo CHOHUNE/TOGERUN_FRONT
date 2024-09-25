@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRecoilState } from "recoil";
 import { initState, signInState } from "../atoms/singinState";
 import NotificationIcon from "../component/notification/NotificationComponent";
-import { Bars3Icon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, MagnifyingGlassIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import SideOpenDrawer from "../component/common/sideOpenDrawer";
 import ResultModal from "../component/common/ResultModal";
 
@@ -58,9 +58,11 @@ const BasicMenu = () => {
                             <li>
                                 <a href="/post/list">Post</a>
                             </li>
-                            <li>
-                                <a href="/member/modify">memberInfo</a>
-                            </li>
+                            {loginState.email && (
+                                <li>
+                                    <a href="/member/modify">My Profile</a>
+                                </li>
+                            )}
                         </ul>
                     </div>
                     <a className="btn btn-ghost normal-case text-xl">RunTogether</a>
@@ -69,9 +71,6 @@ const BasicMenu = () => {
                     <ul className="menu menu-horizontal px-1">
                         <li>
                             <a href="/post/list">Post</a>
-                        </li>
-                        <li>
-                            <a href="/member/modify">memberInfo</a>
                         </li>
                     </ul>
                 </div>
@@ -92,6 +91,15 @@ const BasicMenu = () => {
                     <button onClick={toggleSideDrawer} className="btn btn-ghost btn-circle ml-2">
                         Chat
                     </button>
+                    {loginState.email && (
+                        <a href="/member/modify" className="btn btn-ghost btn-circle ml-2">
+                            {loginState.img ? (
+                                <img src={loginState.img} alt="Profile" className="w-8 h-8 rounded-full" />
+                            ) : (
+                                <UserCircleIcon className="h-8 w-8" />
+                            )}
+                        </a>
+                    )}
                     {!loginState.email ?
                         <button className="btn" onClick={() => navigate("/member/login")}>Login</button>
                         :
