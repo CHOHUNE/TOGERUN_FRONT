@@ -12,7 +12,7 @@ const Main = lazy(() => import("../pages/MainPage"));
 const About = lazy(() => import("../pages/About"));
 const Home = lazy(() => import("../pages/Home"));
 
-const Notifications = lazy(()=>import("../pages/NotificationPage"));
+
 
 const root = createBrowserRouter([
     {
@@ -39,10 +39,6 @@ const root = createBrowserRouter([
     }, {
         path: '/member',
         children: memberRouter()
-    },{
-
-    path:'/notifications/subscribe/:id',
-        element:<Suspense fallback={Loading}><Notifications/></Suspense>
     }
 ])
 

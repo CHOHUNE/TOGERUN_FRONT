@@ -1,5 +1,4 @@
 import React from 'react';
-import BasicMenu from "../../menus/BasicMenu";
 import LoginComponent from "../../component/member/LoginComponent";
 import BasicLayout from "../../layouts/BasicLayout";
 

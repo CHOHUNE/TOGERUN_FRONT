@@ -8,7 +8,6 @@ const AddPage = () => {
     return (
         <div className="container mx-auto p-4">
             <AddComponent/>
-            {/*<KakaoMapSearchComponent/>*/}
         </div>
     );
 };

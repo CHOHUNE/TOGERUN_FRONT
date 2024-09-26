@@ -13,7 +13,6 @@ const ReadPage = () => {
 
         <div className="container mx-auto p-4">
             <ReadComponent postId={postId}/>
-
             <CommentContainer postId={postId}/>
         </div>
 
