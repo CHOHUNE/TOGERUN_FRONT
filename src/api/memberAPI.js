@@ -24,6 +24,22 @@ export const modifyMember = async (member) => {
 }
 
 export const getJoinedChatRoom = async () => {
-    const response = await jwtAxios.get('/user/joined');
-    return response.data;
+    const res = await jwtAxios.get('/user/joined');
+    return res.data;
 }
+
+export const getAllMember = async () => {
+    const res = await jwtAxios.get(`/admin/users`)
+    return res.data;
+};
+
+export const deleteMember =async(userId)=>{
+    const res = await jwtAxios.put(`/admin/users/${userId}/delete`)
+    return res.data
+}
+
+export const restoreMember = async(userId)=>{
+    const res = await jwtAxios.put(`/admin/users/${userId}/restore`)
+    return res.data
+}
+

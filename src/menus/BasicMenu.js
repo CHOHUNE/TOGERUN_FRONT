@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import useCustomLogin from "../hooks/useCustomLogin";
-import { useMutation } from "@tanstack/react-query";
+import {useMutation} from "@tanstack/react-query";
 import { useRecoilState } from "recoil";
 import { initState, signInState } from "../atoms/singinState";
 import NotificationIcon from "../component/notification/NotificationComponent";
 import { Bars3Icon, MagnifyingGlassIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import SideOpenDrawer from "../component/common/sideOpenDrawer";
 import ResultModal from "../component/common/ResultModal";
+
 
 const BasicMenu = () => {
     const navigate = useNavigate();
@@ -58,6 +59,12 @@ const BasicMenu = () => {
                             <li>
                                 <a href="/post/list">Post</a>
                             </li>
+                            {loginState.roleNames && loginState.roleNames.some(role => role === "ADMIN") && (
+                                <li>
+                                    <a href="/member/admin">Admin</a>
+                                </li>
+                            )}
+
                             {loginState.email && (
                                 <li>
                                     <a href="/member/modify">My Profile</a>
@@ -69,9 +76,17 @@ const BasicMenu = () => {
                 </div>
                 <div className="navbar-center hidden lg:flex">
                     <ul className="menu menu-horizontal px-1">
+
+                        {loginState.roleNames && loginState.roleNames.some(role => role === "ADMIN")&&(
+                            <li>
+                                <button onClick={()=>navigate("/member/admin")}>ADMIN </button>
+                            </li>
+                            )}
+
                         <li>
                             <a href="/post/list">Post</a>
                         </li>
+
                     </ul>
                 </div>
                 <div className="navbar-end">
@@ -107,6 +122,8 @@ const BasicMenu = () => {
                     }
                 </div>
             </div>
+
+
 
             <SideOpenDrawer isOpen={isSideDrawerOpen} onClose={toggleSideDrawer} />
 

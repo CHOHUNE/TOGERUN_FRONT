@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import ResultModal from "../common/ResultModal";
 import useCustomLogin from "../../hooks/useCustomLogin";
-import { getMember, modifyMember } from "../../api/memberAPI";
-import { UserCircleIcon } from "@heroicons/react/20/solid";
+import {getMember, modifyMember} from "../../api/memberAPI";
+import {UserCircleIcon} from "@heroicons/react/20/solid";
 
 const initState = {
     id: '',
@@ -21,7 +21,7 @@ const initState = {
 
 function MemberModifyComponent() {
     const [user, setUser] = useState(initState);
-    const { loginState, moveToLogin } = useCustomLogin();
+    const {loginState, moveToLogin} = useCustomLogin();
     const [result, setResult] = useState('');
     const [errors, setErrors] = useState({});
 
@@ -32,11 +32,7 @@ function MemberModifyComponent() {
                     const memberData = await getMember();
                     const [phone1, phone2, phone3] = memberData.mobile ? memberData.mobile.split('-') : ['', '', ''];
                     setUser({
-                        ...initState,
-                        ...memberData,
-                        phone1,
-                        phone2,
-                        phone3,
+                        ...initState, ...memberData, phone1, phone2, phone3,
                     });
                 } catch (error) {
                     console.error("회원 데이터 가져오기 오류:", error);
@@ -48,8 +44,8 @@ function MemberModifyComponent() {
     }, [loginState]);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setUser({ ...user, [name]: value });
+        const {name, value} = e.target;
+        setUser({...user, [name]: value});
         if (name === 'nickname') {
             validateNickname(value);
         }
@@ -57,9 +53,9 @@ function MemberModifyComponent() {
 
     const validateNickname = (nickname) => {
         if (/[!@#$%^&*(),.?":{}|<>]/.test(nickname)) {
-            setErrors(prev => ({ ...prev, nickname: '특수문자는 사용할 수 없습니다.' }));
+            setErrors(prev => ({...prev, nickname: '특수문자는 사용할 수 없습니다.'}));
         } else {
-            setErrors(prev => ({ ...prev, nickname: '' }));
+            setErrors(prev => ({...prev, nickname: ''}));
         }
     };
 
@@ -83,7 +79,7 @@ function MemberModifyComponent() {
 
                     email: user.email,
                     nickname: user.nickname,
-                    gender:user.gender,
+                    gender: user.gender,
                     age: user.age,
                     mobile: `${user.phone1}-${user.phone2}-${user.phone3}`,
 
@@ -106,30 +102,21 @@ function MemberModifyComponent() {
         moveToLogin();
     };
 
-    return (
-        <div className="container mx-auto p-4">
-            {result && (
-                <ResultModal
+    return (<div className="container mx-auto p-4">
+            {result && (<ResultModal
                     title={'회원정보 수정'}
-                    content={result === "Modified"
-                        ? `${user.email} 님의 회원정보가 수정되었습니다.`
-                        : "회원정보 수정 중 오류가 발생했습니다."}
+                    content={result === "Modified" ? `${user.name} 님의 회원정보가 수정되었습니다.` : "회원정보 수정 중 오류가 발생했습니다."}
                     callbackFn={closeModal}
-                />
-            )}
+                />)}
             <form onSubmit={handleClickModify} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
                 <h1 className="text-3xl font-bold mb-6 text-center">회원정보 수정</h1>
 
                 <div className="flex justify-center mb-6">
-                    {user.img ? (
-                        <img
+                    {user.img ? (<img
                             src={user.img}
                             alt="Profile"
                             className="w-32 h-32 rounded-full object-cover border-4 border-blue-500"
-                        />
-                    ) : (
-                        <UserCircleIcon className="w-32 h-32 text-blue-500" />
-                    )}
+                        />) : (<UserCircleIcon className="w-32 h-32 text-blue-500"/>)}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -260,18 +247,19 @@ function MemberModifyComponent() {
                                 maxLength="4"
                             />
                         </div>
-                        {(errors.phone1 || errors.phone2 || errors.phone3) && <p className="text-red-500 text-xs italic">전화번호를 모두 입력해주세요.</p>}
+                        {(errors.phone1 || errors.phone2 || errors.phone3) &&
+                            <p className="text-red-500 text-xs italic">전화번호를 모두 입력해주세요.</p>}
                     </div>
                 </div>
 
                 <div className="flex items-center justify-center mt-6">
-                    <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    <button type="submit"
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                         수정하기
                     </button>
                 </div>
             </form>
-        </div>
-    );
+        </div>);
 }
 
 export default MemberModifyComponent;
