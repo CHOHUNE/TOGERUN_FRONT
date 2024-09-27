@@ -1,35 +1,49 @@
-import React, {useEffect} from 'react';
-import {Link, useLocation} from "react-router-dom";
+import React, { useState } from 'react';
+import { Link } from "react-router-dom";
 import PageComponent from "../common/PageComponent";
 import useCustomMove from "../../hooks/useCustomMove";
-import {useQuery, useQueryClient} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import FetchingModal from "../common/FetchingModal";
-import {EyeIcon} from "@heroicons/react/16/solid";
-import {MapPinIcon} from "@heroicons/react/20/solid";
-import {getList} from "../../api/postAPI";
+import { EyeIcon, MapPinIcon, HeartIcon, UserIcon, CalendarIcon } from "@heroicons/react/24/outline";
+import { getList } from "../../api/postAPI";
 
-const initState ={
-
-    dtoList:[],
+const initState = {
+    dtoList: [],
     pageNumList: [],
     pageRequestDTO: [],
-    prev:false,
-    next:false,
+    prev: false,
+    next: false,
     totalCount: 0,
     prevPage: 0,
-    nextPage:0,
-    totalPage:0,
-    current:0,
+    nextPage: 0,
+    totalPage: 0,
+    current: 0,
+};
 
+const REGIONS = ['서울', '경기', '인천', '강원', '충북', '충남', '대전', '세종', '경북', '경남', '대구', '울산', '부산', '전북', '전남', '광주', '제주'];
+const ACTIVITIES = [
+    { name: '등산', value: 'CLIMBING' },
+    { name: '달리기', value: 'RUNNING' },
+    { name: '하이킹', value: 'HIKING' },
+    { name: '자전거', value: 'CYCLING' },
+    { name: '요가', value: 'YOGA' },
+    { name: '필라테스', value: 'PILATES' },
+    { name: '웨이트 트레이닝', value: 'WEIGHT_TRAINING' },
+    { name: '서핑', value: 'SURFING' }
+];
 
-}
+function ListComponent() {
+    const { page, refresh, size, moveToList, keyword } = useCustomMove();
+    const [selectedRegion, setSelectedRegion] = useState('');
+    const [selectedActivity, setSelectedActivity] = useState('');
 
-function ListComponent(props) {
-    const {page, refresh, size, moveToList, keyword} = useCustomMove();
-
-    const {data, isFetching} = useQuery({
-        queryKey: ['post/List', {page, size, refresh, keyword}],
-        queryFn: () => getList({page, size, keyword}),
+    const { data, isFetching } = useQuery({
+        queryKey: ['post/List', { page, size, refresh, keyword, selectedRegion, selectedActivity }],
+        queryFn: () => getList({
+            page,
+            size,
+            keyword: `${keyword || ''} ${selectedRegion} ${selectedActivity}`.trim()
+        }),
         staleTime: 1000 * 60 * 5
     });
 
@@ -45,56 +59,112 @@ function ListComponent(props) {
         return roadName;
     };
 
-    const serverData = data || initState
+    const handleRegionSelect = (region) => {
+        setSelectedRegion(region === selectedRegion ? '' : region);
+    }
+
+    const handleActivitySelect = (activity) => {
+        setSelectedActivity(activity.value === selectedActivity ? '' : activity.value);
+    }
+
+    const getActivityName = (value) => {
+        const activity = ACTIVITIES.find(a => a.value === value);
+        return activity ? activity.name : value;
+    }
+
+    const serverData = data || initState;
 
     return (
-        <div className="overflow-x-auto">
-            {isFetching ? <FetchingModal/> : <></>}
-            {keyword && <p className={"my-4"}>검색어 : {keyword}</p>}
-            <table className="table w-full">
-                <thead>
-                <tr>
-                    <th className="text-center">Title</th>
-                    <th className="text-center">Writer</th>
-                    <th className="text-center">Info</th>
-                    <th className="text-center">Date</th>
-                    <th className="text-center">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
+        <div className="container mx-auto px-4 py-8">
+            {isFetching && <FetchingModal />}
+
+            <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-4">지역 선택</h2>
+                <div className="flex flex-wrap gap-2">
+                    {REGIONS.map(region => (
+                        <button
+                            key={region}
+                            onClick={() => handleRegionSelect(region)}
+                            className={`btn btn-sm ${selectedRegion === region ? 'btn-primary' : 'btn-outline'}`}
+                        >
+                            {region}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-4">종목 선택</h2>
+                <div className="flex flex-wrap gap-2">
+                    {ACTIVITIES.map(activity => (
+                        <button
+                            key={activity.value}
+                            onClick={() => handleActivitySelect(activity)}
+                            className={`btn btn-sm ${selectedActivity === activity.value ? 'btn-secondary' : 'btn-outline'}`}
+                        >
+                            {activity.name}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {(keyword || selectedRegion || selectedActivity) && (
+                <p className="text-lg font-semibold mb-4">
+                    검색 조건: {[
+                    keyword,
+                    selectedRegion,
+                    selectedActivity ? getActivityName(selectedActivity) : ''
+                ].filter(Boolean).join(', ')}
+                </p>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {serverData.dtoList.map((post) => (
-                    <tr key={post.id}>
-                        <td className="text-left">
-                            <Link to={`/post/${post.id}`} className="link link-primary font-semibold">{post.title}</Link>
-                        </td>
-                        <td className="text-center">{post.nickname}</td>
-                        <td className="text-center">
-                            <div className="flex flex-wrap justify-center gap-2">
+                    <div key={post.id} className="card bg-base-100 shadow-xl">
+                        <div className="card-body">
+                            <h2 className="card-title">
+                                <Link to={`/post/${post.id}`} className="link link-primary">
+                                    {post.title}
+                                </Link>
+                            </h2>
+                            <div className="flex items-center text-sm text-gray-500 mb-2">
+                                <UserIcon className="h-4 w-4 mr-1" />
+                                <span>{post.nickname}</span>
+                                <CalendarIcon className="h-4 w-4 ml-4 mr-1" />
+                                <span>{post.localDate}</span>
+                            </div>
+                            <div className="flex flex-wrap gap-2 mb-4">
                                 <span className={`badge ${post.participateFlag ? 'badge-success' : 'badge-error'}`}>
                                     {post.participateFlag ? '참여가능' : '마감'}
                                 </span>
                                 <span className="badge badge-info">
-                                    <EyeIcon className="h-5 w-5 mr-2 text-red-500"/>
+                                    <EyeIcon className="h-4 w-4 mr-1" />
                                     {post.viewCount}
                                 </span>
                                 <span className="badge badge-warning">
-                                    ❤ {post.likeCount}
+                                    <HeartIcon className="h-4 w-4 mr-1" />
+                                    {post.likeCount}
                                 </span>
-                                <span className="badge badge-info">
-                                    <MapPinIcon className="h-5 w-5 mr-2 text-red-500"/>
-                                    {formatRoadName(post.roadName)}
+                                <span className="badge badge-accent">
+                                    {getActivityName(post.activityType)}
                                 </span>
                             </div>
-                        </td>
-                        <td className="text-center">{post.localDate}</td>
-                        <td className="text-center">
-                            <Link to={`/post/${post.id}`} className="btn btn-sm btn-outline btn-primary">Read More</Link>
-                        </td>
-                    </tr>
+                            <div className="flex items-center text-sm text-gray-500 mb-4">
+                                <MapPinIcon className="h-4 w-4 mr-1" />
+                                <span>{formatRoadName(post.roadName)}</span>
+                            </div>
+                            <div className="card-actions justify-end">
+                                <Link to={`/post/${post.id}`} className="btn btn-primary btn-sm">
+                                    자세히 보기
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
                 ))}
-                </tbody>
-            </table>
-            <PageComponent serverData={serverData} movePage={handleClickPage}/>
+            </div>
+            <div className="mt-8">
+                <PageComponent serverData={serverData} movePage={handleClickPage} />
+            </div>
         </div>
     );
 }

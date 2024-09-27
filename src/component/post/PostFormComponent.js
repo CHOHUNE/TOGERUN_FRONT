@@ -15,11 +15,9 @@ const ACCEPTED_FILE_TYPES = {
     'image/gif': ['.gif']
 };
 
-
 const ACTIVITY_TYPES = [
-    'CLIMBING', 'RUNNING', 'HIKING', 'CYCLING', 'YOGA', 'PILATES', 'WEIGHT_TRAINING', 'SURFING'
-
-]
+    '등산', '달리기', '하이킹', '자전거', '요가', '필라테스', '웨이트 트레이닝', '서핑'
+];
 
 const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => {
     const [post, setPost] = useState({
@@ -45,7 +43,6 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
         accept: ACCEPTED_FILE_TYPES,
         maxSize: MAX_FILE_SIZE
     });
-
 
     const mutation = useMutation({
         mutationFn: onSubmit,
@@ -73,18 +70,13 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
     const handleSubmit = (e) => {
         e.preventDefault();
         const formData = new FormData();
-        formData.append('title', post.title);
-        formData.append('content', post.content);
-        formData.append('latitude', post.latitude);
-        formData.append('longitude', post.longitude);
-        formData.append('placeName', post.placeName);
-        formData.append('roadName', post.roadName);
+        Object.keys(post).forEach(key => {
+            if (key !== 'images') {
+                formData.append(key, post[key]);
+            }
+        });
         const offsetTime = new Date(post.meetingTime.getTime() - post.meetingTime.getTimezoneOffset() * 60000);
         formData.append('meetingTime', offsetTime.toISOString().slice(0, 19));
-        formData.append('activityType', post.activityType);
-        formData.append('capacity', post.capacity);
-        formData.append('participateFlag', post.participateFlag);
-        formData.append('viewCount', post.viewCount);
 
         post.images.forEach((image, index) => {
             if (image.type === 'file') {
@@ -94,7 +86,6 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
             }
         });
         mutation.mutate(formData);
-
     };
 
     const handleRemoveImage = (index) => {
@@ -103,13 +94,14 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
             images: prevPost.images.filter((_, i) => i !== index)
         }));
     };
+
     const handlePlaceSelect = (place) => {
         setPost(prevState => ({
             ...prevState,
             latitude: parseFloat(place.y),
             longitude: parseFloat(place.x),
             placeName: place.place_name,
-            roadName:place.road_address_name
+            roadName: place.road_address_name
         }));
     }
 
@@ -123,12 +115,12 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
                     callbackFn={() => moveToList({page: 1})}
                 />
             )}
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <h1 className="text-3xl font-bold mb-4">게시글 작성</h1>
+            <form onSubmit={handleSubmit} className="space-y-6">
+                <h1 className="text-3xl font-bold mb-6">게시글 작성</h1>
 
                 <div className="form-control">
                     <label htmlFor="title" className="label">
-                        <span className="label-text">제목</span>
+                        <span className="label-text font-semibold">제목</span>
                     </label>
                     <input
                         id="title"
@@ -137,13 +129,14 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
                         value={post.title}
                         onChange={handleChangePost}
                         required
-                        className="input input-bordered"
+                        className="input input-bordered w-full"
+                        placeholder="제목을 입력하세요"
                     />
                 </div>
 
                 <div className="form-control">
                     <label htmlFor="content" className="label">
-                        <span className="label-text">내용</span>
+                        <span className="label-text font-semibold">내용</span>
                     </label>
                     <textarea
                         id="content"
@@ -151,16 +144,14 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
                         value={post.content}
                         onChange={handleChangePost}
                         required
-                        className="textarea textarea-bordered"
-                        rows="5"
+                        className="textarea textarea-bordered h-24"
+                        placeholder="내용을 입력하세요"
                     />
                 </div>
 
-                {/*데이트 피커 */}
-
-                <div className="form-control ">
+                <div className="form-control">
                     <label htmlFor="meetingTime" className="label">
-                        <span className="label-text">집결 시간</span>
+                        <span className="label-text font-semibold">집결 시간</span>
                     </label>
                     <DatePicker
                         id="meetingTime"
@@ -170,8 +161,8 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
                         timeFormat="HH:mm"
                         timeZone={"Asia/Seoul"}
                         timeIntervals={15}
-                        timeCaption="time"
-                        dateFormat="MMMM d, yyyy h:mm aa"
+                        timeCaption="시간"
+                        dateFormat="yyyy년 MM월 dd일 HH:mm"
                         minDate={new Date()}
                         minTime={new Date(new Date().setHours(0, 0, 0, 0))}
                         maxTime={new Date(new Date().setHours(23, 59, 59, 999))}
@@ -187,10 +178,9 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
                     />
                 </div>
 
-                {/* 액티비티 타입 */}
                 <div className="form-control">
                     <label htmlFor="activityType" className="label">
-                        <span className="label-text">활동 유형</span>
+                        <span className="label-text font-semibold">활동 유형</span>
                     </label>
                     <select
                         id="activityType"
@@ -207,11 +197,9 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
                     </select>
                 </div>
 
-
-                {/*모집 정원*/}
                 <div className="form-control">
                     <label htmlFor="capacity" className="label">
-                        <span className="label-text">모집 정원</span>
+                        <span className="label-text font-semibold">모집 정원</span>
                     </label>
                     <select
                         id="capacity"
@@ -228,11 +216,9 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
                     </select>
                 </div>
 
-
-                {/* 장소 검색*/}
                 <div className="form-control">
                     <label htmlFor="placeName" className="label">
-                        <span className="label-text">집결장소</span>
+                        <span className="label-text font-semibold">집결장소</span>
                     </label>
                     <input
                         id="placeName"
@@ -240,59 +226,57 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
                         name="placeName"
                         value={post.placeName}
                         readOnly
-                        className="input input-bordered"
+                        className="input input-bordered w-full"
+                        placeholder="아래 지도에서 장소를 선택하세요"
                     />
                 </div>
 
-
-                <div className="mt-10">  {/* 여기에 mt-10을 추가했습니다 */}
-                    <h2 className="text-2xl font-bold  mb-4">집결 장소 검색</h2>
-                    <div className="bg-base-200 p-4 rounded-lg">
+                <div className="mt-6">
+                    <h2 className="text-2xl font-bold mb-4">집결 장소 검색</h2>
+                    <div className="bg-base-200 p-4 rounded-lg shadow-inner">
                         <KakaoMapSearchComponent onPlaceSelect={handlePlaceSelect}/>
                     </div>
                 </div>
 
-                {/*파입 업로드 */}
-                <div className="form-control">
+                <div className="form-control mt-6">
                     <label className="label">
-                        <span className="label-text">이미지 업로드</span>
+                        <span className="label-text font-semibold">이미지 업로드</span>
                     </label>
                     <div {...getRootProps()}
-                         className={`p-4 border-2 border-dashed rounded-md h-48 flex items-center justify-center ${isDragActive ? 'border-primary' : 'border-gray-300'}`}>
+                         className={`p-6 border-2 border-dashed rounded-lg h-40 flex items-center justify-center cursor-pointer transition-colors ${isDragActive ? 'border-primary bg-primary/10' : 'border-gray-300 hover:border-primary hover:bg-primary/5'}`}>
                         <input {...getInputProps()} />
                         <div className="text-center">
                             {isDragActive ?
-                                <p>파일을 여기에 놓으세요...</p> :
-                                <p>파일을 여기에 드래그하거나 클릭하여 선택하세요.
-                                    <br/>
-                                    (최대 10MB, JPG/PNG/GIF)</p>
+                                <p className="text-primary">파일을 여기에 놓으세요...</p> :
+                                <p>파일을 여기에 드래그하거나 클릭하여 선택하세요.<br/>
+                                    <span className="text-sm text-gray-500">(최대 10MB, JPG/PNG/GIF)</span></p>
                             }
                         </div>
                     </div>
                     {post.images.length > 0 && (
-                        <div className="mt-2 max-h-48 overflow-y-auto">
-                            <h4>이미지 목록:</h4>
-                            <ul>
+                        <div className="mt-4 max-h-60 overflow-y-auto p-4 bg-base-200 rounded-lg">
+                            <h4 className="font-semibold mb-2">이미지 미리보기:</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                 {post.images.map((image, index) => (
-                                    <li key={index} className="flex items-center space-x-2 my-2">
+                                    <div key={index} className="relative group">
                                         <img
                                             src={image.type === 'file' ? URL.createObjectURL(image.content) : image.content}
                                             alt={image.type === 'file' ? image.content.name : `Image ${index}`}
-                                            className="w-10 h-10 object-cover"
+                                            className="w-full h-24 object-cover rounded"
                                         />
-                                        <span className="flex-grow">
-                                        {image.type === 'file' ? image.content.name : image.content.split('/').pop()}
-                                    </span>
-                                        <button type="button" onClick={() => handleRemoveImage(index)}
-                                                className="text-red-500 hover:text-red-700">삭제
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveImage(index)}
+                                            className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            삭제
                                         </button>
-                                    </li>
+                                    </div>
                                 ))}
-                            </ul>
+                            </div>
                         </div>
                     )}
                 </div>
-
 
                 <button type="submit" className="btn btn-primary w-full">게시글 작성</button>
             </form>

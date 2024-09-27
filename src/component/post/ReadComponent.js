@@ -1,25 +1,26 @@
-import React, {useEffect, useState} from 'react';
-import {likeToggle,} from "../../api/api";
-import {useNavigate} from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { likeToggle } from "../../api/api";
+import { useNavigate } from "react-router-dom";
 import useCustomMove from "../../hooks/useCustomMove";
 import ResultModal from "../common/ResultModal";
-import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {postInitState} from "../../atoms/postInitState";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { postInitState } from "../../atoms/postInitState";
 import FetchingModal from "../common/FetchingModal";
 import { HeartIcon, StarIcon, ChatBubbleLeftEllipsisIcon, PencilSquareIcon, ArrowUturnLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import KakaoMapComponent from "../kakaoMap/KakaoMapComponent";
-import {CalendarIcon, ClockIcon, MapPinIcon, UserGroupIcon} from "@heroicons/react/20/solid";
-import {EyeIcon} from "@heroicons/react/16/solid";
-import {deleteOne, favoriteToggle, getOne} from "../../api/postAPI";
-import {getChatRoomStatus} from "../../api/chatAPI";
+import { CalendarIcon, ClockIcon, MapPinIcon, UserGroupIcon, EyeIcon } from "@heroicons/react/20/solid";
+import { deleteOne, favoriteToggle, getOne } from "../../api/postAPI";
+import { getChatRoomStatus } from "../../api/chatAPI";
 
 function ReadComponent({postId}) {
-
     const queryClient = useQueryClient();
     const [chatRoomStatus, setChatRoomStatus] = useState(null);
+    const {moveToList, moveToModify} = useCustomMove();
+    const navigate = useNavigate();
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-    const {data, isFetching,refetch} = useQuery({
+    const {data, isFetching, refetch} = useQuery({
         queryKey: ['post', postId],
         queryFn: () => getOne(postId),
         staleTime: 1000 * 60 * 30
@@ -31,36 +32,28 @@ function ReadComponent({postId}) {
                 const status = await getChatRoomStatus(postId);
                 setChatRoomStatus(status);
             } catch (error) {
-                console.error("Error fetching chat room status:", error);
+                console.error("채팅방 상태 조회 중 오류 발생:", error);
             }
         }
-
         fetchChatRoomStatus();
     }, [postId]);
 
-    const handleChatRoomEntry =()=>{
-        if (chatRoomStatus && chatRoomStatus.canJoin){
-
+    const handleChatRoomEntry = () => {
+        if (chatRoomStatus && chatRoomStatus.canJoin) {
             navigate(`/post/${postId}/chat`)
-        }else{
-            alert(' 현재 채팅방에 참여할 수 없습니다.')
+        } else {
+            alert('현재 채팅방에 참여할 수 없습니다.')
         }
     }
 
-
-
     const processPostData = (postData) => {
         if (Array.isArray(postData) && postData.length === 2 && typeof postData[0] === 'string' && typeof postData[1] === 'object') {
-            return postData[1];  // 실제 PostDTO 데이터는 두 번째 요소
+            return postData[1];
         }
-        return postData;  // 이미 처리된 데이터인 경우 그대로 반환
+        return postData;
     };
 
     const post = processPostData(data) || postInitState;
-
-    const {moveToList, moveToModify} = useCustomMove();
-
-    const navigate = useNavigate();
 
     const delMutation = useMutation({
         mutationFn: (postId) => deleteOne(postId),
@@ -81,9 +74,6 @@ function ReadComponent({postId}) {
         onSuccess: () => refetch(),
     });
 
-
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-
     const closeModal = () => {
         queryClient.invalidateQueries(['post/List']);
         if(delMutation.isSuccess){
@@ -91,135 +81,133 @@ function ReadComponent({postId}) {
         }
     }
 
-    const handleClickDelete = ()=>delMutation.mutate(postId)
-
+    const handleClickDelete = () => delMutation.mutate(postId)
     const toggleDeleteModal = () => setShowDeleteModal(!showDeleteModal)
-
     const handleLikeToggle = () => likeMutation.mutate(postId)
-
     const handleFavoriteToggle = () => favoriteMutation.mutate(postId)
 
-
     if (!post) {
-        return <div>Loading..</div>;
+        return <div className="flex justify-center items-center h-screen">Loading...</div>;
     }
 
     return (
-        <div className="bg-base-100 relative z-0">
-            {isFetching ? <FetchingModal /> : null}
-            <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-3xl font-bold">{post.title}</h1>
-                    <div className="flex items-center space-x-2">
-                        <button onClick={handleLikeToggle} className="btn btn-ghost btn-circle">
-                            {post.likeCount} {post.like ? <HeartIconSolid className="h-6 w-6 text-red-500" /> : <HeartIcon className="h-6 w-6" />}
-                        </button>
-                        <button onClick={handleFavoriteToggle} className="btn btn-ghost btn-circle">
-                            {post.favorite ? <StarIconSolid className="h-6 w-6 text-yellow-500" /> : <StarIcon className="h-6 w-6" />}
-                        </button>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="flex items-center">
-                        <UserGroupIcon className="h-5 w-5 mr-2 text-blue-500"/>
-                        <span>모집 인원: {post.capacity}명</span>
-                    </div>
-                    <div className="flex items-center">
-                        <CalendarIcon className="h-5 w-5 mr-2 text-green-500"/>
-                        <span>날짜: {new Date(post.meetingTime).toLocaleDateString()}</span>
-                    </div>
-                    <div className="flex items-center">
-                        <ClockIcon className="h-5 w-5 mr-2 text-purple-500"/>
-                        <span>시간: {new Date(post.meetingTime).toLocaleTimeString()}</span>
-                    </div>
-                    <div className="flex items-center">
-                        <MapPinIcon className="h-5 w-5 mr-2 text-red-500"/>
-                        <span>장소: {post.placeName}</span>
-                    </div>
-                    <div className="flex items-center">
-                        <EyeIcon className="h-5 w-5 mr-2 text-red-500"/>
-                        <span>조회수: {post.viewCount}</span>
-                    </div>
-                    <div className="flex items-center">
-                        <MapPinIcon className="h-5 w-5 mr-2 text-red-500"/>
-                        <span>도로명 주소: {post.roadName}</span>
-                    </div>
-
-                </div>
-
-                <div className="mb-6">
-                    <h3 className="text-xl font-semibold mb-2">활동 유형</h3>
-                    <div className="badge badge-lg">{post.activityType}</div>
-                </div>
-                <div className="mb-6">
-                    <h3 className="text-xl font-semibold mb-2">참가 가능 여부</h3>
-                    <div className={`badge badge-lg ${post.participateFlag ? 'badge-success' : 'badge-error'}`}>
-                        {post.participateFlag ? '참여가능' : '마감'}
-                    </div>
-                </div>
-
-                <div className="mb-6">
-                    <h3 className="text-xl font-semibold mb-2">상세 내용</h3>
-                    <p>{post.content}</p>
-                </div>
-
-                {post.imageList && post.imageList.length > 0 && (
-                    <div className="mb-6">
-                        <h3 className="text-xl font-semibold mb-2">이미지</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            {post.imageList.map((image, index) => (
-                                <img key={index} src={image} alt={`Image ${index + 1}`} className="w-full h-48 object-cover rounded" />
-                            ))}
+        <div className="bg-gray-100 min-h-screen py-8">
+            {isFetching && <FetchingModal />}
+            <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+                <div className="p-6">
+                    <div className="flex justify-between items-center mb-6">
+                        <h1 className="text-3xl font-bold text-gray-800">{post.title}</h1>
+                        <div className="flex items-center space-x-2">
+                            <button onClick={handleLikeToggle} className="btn btn-circle btn-ghost">
+                                {post.like ? <HeartIconSolid className="h-6 w-6 text-red-500" /> : <HeartIcon className="h-6 w-6" />}
+                                <span className="ml-1">{post.likeCount}</span>
+                            </button>
+                            <button onClick={handleFavoriteToggle} className="btn btn-circle btn-ghost">
+                                {post.favorite ? <StarIconSolid className="h-6 w-6 text-yellow-500" /> : <StarIcon className="h-6 w-6" />}
+                            </button>
                         </div>
                     </div>
-                )}
 
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div className="flex items-center bg-gray-100 p-3 rounded-lg">
+                            <UserGroupIcon className="h-5 w-5 mr-2 text-blue-500"/>
+                            <span className="text-gray-700">모집 인원: {post.capacity}명</span>
+                        </div>
+                        <div className="flex items-center bg-gray-100 p-3 rounded-lg">
+                            <CalendarIcon className="h-5 w-5 mr-2 text-green-500"/>
+                            <span className="text-gray-700">날짜: {new Date(post.meetingTime).toLocaleDateString()}</span>
+                        </div>
+                        <div className="flex items-center bg-gray-100 p-3 rounded-lg">
+                            <ClockIcon className="h-5 w-5 mr-2 text-purple-500"/>
+                            <span className="text-gray-700">시간: {new Date(post.meetingTime).toLocaleTimeString()}</span>
+                        </div>
+                        <div className="flex items-center bg-gray-100 p-3 rounded-lg">
+                            <MapPinIcon className="h-5 w-5 mr-2 text-red-500"/>
+                            <span className="text-gray-700">장소: {post.placeName}</span>
+                        </div>
+                        <div className="flex items-center bg-gray-100 p-3 rounded-lg">
+                            <EyeIcon className="h-5 w-5 mr-2 text-indigo-500"/>
+                            <span className="text-gray-700">조회수: {post.viewCount}</span>
+                        </div>
+                        <div className="flex items-center bg-gray-100 p-3 rounded-lg">
+                            <MapPinIcon className="h-5 w-5 mr-2 text-orange-500"/>
+                            <span className="text-gray-700">도로명 주소: {post.roadName}</span>
+                        </div>
+                    </div>
 
-                <div className="mb-6">
-                    <h3 className="text-xl font-semibold mb-2">집결 장소</h3>
-                    <KakaoMapComponent placeName={post.placeName} latitude={post.latitude} longitude={post.longitude} />
-                </div>
+                    <div className="mb-6">
+                        <h3 className="text-xl font-semibold mb-2 text-gray-800">활동 유형</h3>
+                        <div className="badge badge-lg badge-primary">{post.activityType}</div>
+                    </div>
+                    <div className="mb-6">
+                        <h3 className="text-xl font-semibold mb-2 text-gray-800">참가 가능 여부</h3>
+                        <div className={`badge badge-lg ${post.participateFlag ? 'badge-success' : 'badge-error'}`}>
+                            {post.participateFlag ? '참여가능' : '마감'}
+                        </div>
+                    </div>
 
-                <div className="flex justify-end space-x-2 mt-6">
-                    <button
-                        className={`btn ${chatRoomStatus && chatRoomStatus.canJoin ? 'btn-primary' : 'btn-disabled'}`}
-                        onClick={handleChatRoomEntry}
-                        disabled={!chatRoomStatus || !chatRoomStatus.canJoin}
-                    >
-                        <ChatBubbleLeftEllipsisIcon className="h-5 w-5 mr-2"/>
-                        {chatRoomStatus && chatRoomStatus.canJoin ? '채팅방 입장' : '입장 불가'}
-                    </button>
-                    <button className="btn btn-neutral" onClick={() => moveToModify(postId)}>
-                        <PencilSquareIcon className="h-5 w-5 mr-2"/>
-                        수정
-                    </button>
-                    <button className="btn btn-secondary" onClick={moveToList}>
-                        <ArrowUturnLeftIcon className="h-5 w-5 mr-2"/>
-                        목록
-                    </button>
-                    <button className="btn btn-error" onClick={toggleDeleteModal}>
-                        <TrashIcon className="h-5 w-5 mr-2"/>
-                        삭제
-                    </button>
+                    <div className="mb-6">
+                        <h3 className="text-xl font-semibold mb-2 text-gray-800">상세 내용</h3>
+                        <p className="text-gray-700 whitespace-pre-line">{post.content}</p>
+                    </div>
+
+                    {post.imageList && post.imageList.length > 0 && (
+                        <div className="mb-6">
+                            <h3 className="text-xl font-semibold mb-2 text-gray-800">이미지</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                {post.imageList.map((image, index) => (
+                                    <img key={index} src={image} alt={`Image ${index + 1}`} className="w-full h-48 object-cover rounded-lg shadow-md" />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="mb-6">
+                        <h3 className="text-xl font-semibold mb-2 text-gray-800">집결 장소</h3>
+                        <div className="rounded-lg overflow-hidden shadow-md">
+                            <KakaoMapComponent placeName={post.placeName} latitude={post.latitude} longitude={post.longitude} />
+                        </div>
+                    </div>
+
+                    <div className="flex flex-wrap justify-end space-x-2 mt-6">
+                        <button
+                            className={`btn ${chatRoomStatus && chatRoomStatus.canJoin ? 'btn-primary' : 'btn-disabled'}`}
+                            onClick={handleChatRoomEntry}
+                            disabled={!chatRoomStatus || !chatRoomStatus.canJoin}
+                        >
+                            <ChatBubbleLeftEllipsisIcon className="h-5 w-5 mr-2"/>
+                            {chatRoomStatus && chatRoomStatus.canJoin ? '채팅방 입장' : '입장 불가'}
+                        </button>
+                        <button className="btn btn-outline btn-info" onClick={() => moveToModify(postId)}>
+                            <PencilSquareIcon className="h-5 w-5 mr-2"/>
+                            수정
+                        </button>
+                        <button className="btn btn-outline btn-warning" onClick={moveToList}>
+                            <ArrowUturnLeftIcon className="h-5 w-5 mr-2"/>
+                            목록
+                        </button>
+                        <button className="btn btn-outline btn-error" onClick={toggleDeleteModal}>
+                            <TrashIcon className="h-5 w-5 mr-2"/>
+                            삭제
+                        </button>
+                    </div>
                 </div>
             </div>
 
             {showDeleteModal && (
-                <div className="modal modal-open z-50">
-                    <div className="modal-box">
-                        <h3 className="font-bold text-lg">게시물을 삭제 하시겠습니까?</h3>
-                        <div className="modal-action py-5">
-                            <button className="btn btn-outline btn-error" onClick={handleClickDelete}>Yes</button>
-                            <button className="btn btn-outline btn-neutral" onClick={toggleDeleteModal}>No</button>
-                            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={toggleDeleteModal}>✕</button>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+                        <h3 className="font-bold text-lg mb-4">게시물을 삭제하시겠습니까?</h3>
+                        <div className="flex justify-end space-x-2">
+                            <button className="btn btn-error" onClick={handleClickDelete}>삭제</button>
+                            <button className="btn btn-ghost" onClick={toggleDeleteModal}>취소</button>
                         </div>
                     </div>
                 </div>
             )}
-            {delMutation.isSuccess ?
-                <ResultModal title={'게시글 삭제'} content={`게시물 삭제가 완료 되었습니다.`}
-                             callbackFn={closeModal}/> : null}
+            {delMutation.isSuccess && (
+                <ResultModal title={'게시글 삭제'} content={`게시물 삭제가 완료되었습니다.`} callbackFn={closeModal} />
+            )}
         </div>
     );
 }
