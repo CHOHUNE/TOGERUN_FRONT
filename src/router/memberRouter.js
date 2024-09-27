@@ -9,6 +9,7 @@ const MemberModify = lazy(() => import("../pages/member/MemberModifyPage"));
 
 const AdminPage = lazy(() => import("../pages/member/AdminPage"));
 
+const RestorePage = lazy(()=>import("../pages/member/RestorePage"));
 
 const memberRouter = () => {
 
@@ -22,6 +23,9 @@ const memberRouter = () => {
     },{
         path:"admin",
             element: <Suspense fallback={Loading}><AdminPage/></Suspense>
+        },{
+        path:"restore/:userId"
+            ,element: <Suspense fallback={Loading}><RestorePage/></Suspense>
         }]
 }
 
