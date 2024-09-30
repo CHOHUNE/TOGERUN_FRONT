@@ -1,8 +1,8 @@
 import jwtAxios from "../util/JwtUtil";
 
 export const getList = async (pageParams) => {
-    const {page, size, keyword} = pageParams;
-    const res = await jwtAxios.get(`/post/list`, {params: {page, size, keyword}})
+    const {page, size, keyword,region,activityType} = pageParams;
+    const res = await jwtAxios.get(`/post/list`, {params: {page, size, keyword,region,activityType}})
     return res.data
 }
 

@@ -42,8 +42,12 @@ function ListComponent() {
         queryFn: () => getList({
             page,
             size,
-            keyword: `${keyword || ''} ${selectedRegion} ${selectedActivity}`.trim()
+            // keyword: `${keyword || ''} ${selectedRegion} ${selectedActivity}`.trim()
+            keyword: keyword || undefined,
+            region: selectedRegion || undefined,
+            activityType: selectedActivity || undefined
         }),
+
         staleTime: 1000 * 60 * 5
     });
 
@@ -59,12 +63,13 @@ function ListComponent() {
         return roadName;
     };
 
+
     const handleRegionSelect = (region) => {
-        setSelectedRegion(region === selectedRegion ? '' : region);
+        setSelectedRegion(prev => prev === region ? '' : region);
     }
 
     const handleActivitySelect = (activity) => {
-        setSelectedActivity(activity.value === selectedActivity ? '' : activity.value);
+        setSelectedActivity(prev => prev === activity.value ? '' : activity.value);
     }
 
     const getActivityName = (value) => {
