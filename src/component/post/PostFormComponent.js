@@ -16,7 +16,14 @@ const ACCEPTED_FILE_TYPES = {
 };
 
 const ACTIVITY_TYPES = [
-    '등산', '달리기', '하이킹', '자전거', '요가', '필라테스', '웨이트 트레이닝', '서핑'
+    {name: '등산', value: 'CLIMBING'},
+    {name: '달리기', value: 'RUNNING'},
+    {name: '하이킹', value: 'HIKING'},
+    {name: '자전거', value: 'CYCLING'},
+    {name: '요가', value: 'YOGA'},
+    {name: '필라테스', value: 'PILATES'},
+    {name: '웨이트 트레이닝', value: 'WEIGHT_TRAINING'},
+    {name: '서핑', value: 'SURFING'}
 ];
 
 const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => {
@@ -68,15 +75,20 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
     }
 
     const handleSubmit = (e) => {
+
         e.preventDefault();
+
         const formData = new FormData();
         Object.keys(post).forEach(key => {
             if (key !== 'images') {
-                formData.append(key, post[key]);
+                if (key === 'meetingTime') {
+                    const isoString = post[key].toISOString();
+                    formData.append(key, isoString);
+                } else {
+                    formData.append(key, post[key]);
+                }
             }
         });
-        const offsetTime = new Date(post.meetingTime.getTime() - post.meetingTime.getTimezoneOffset() * 60000);
-        formData.append('meetingTime', offsetTime.toISOString().slice(0, 19));
 
         post.images.forEach((image, index) => {
             if (image.type === 'file') {
@@ -192,10 +204,11 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
                     >
                         <option value="">활동 유형을 선택하세요</option>
                         {ACTIVITY_TYPES.map(type => (
-                            <option key={type} value={type}>{type}</option>
+                            <option key={type.value} value={type.value}>{type.name}</option>
                         ))}
                     </select>
                 </div>
+
 
                 <div className="form-control">
                     <label htmlFor="capacity" className="label">
