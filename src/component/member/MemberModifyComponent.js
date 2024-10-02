@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import ResultModal from "../common/ResultModal";
 import useCustomLogin from "../../hooks/useCustomLogin";
-import {getMember, modifyMember} from "../../api/memberAPI";
+import {checkMemberNickname, getMember, modifyMember} from "../../api/memberAPI";
 import {UserCircleIcon} from "@heroicons/react/20/solid";
 
 const initState = {
@@ -25,6 +25,9 @@ function MemberModifyComponent() {
     const {loginState, moveToLogin} = useCustomLogin();
     const [result, setResult] = useState('');
     const [errors, setErrors] = useState({});
+
+    const [isNicknameAvailable, setIsNicknameAvailable] = useState(null);
+    const [isCheckingNickname, setIsCheckingNickname] = useState(false);
 
     useEffect(() => {
         const fetchMemberData = async () => {
@@ -51,6 +54,7 @@ function MemberModifyComponent() {
         setUser({...user, [name]: value});
         if (name === 'nickname') {
             validateNickname(value);
+            setIsNicknameAvailable(null); // 닉네임이 변경될 때마다 중복 확인 상태 초기화
         } else if (name === 'phone1') {
             validatePhone1(value);
         }
@@ -71,6 +75,26 @@ function MemberModifyComponent() {
             setErrors(prev => ({...prev, phone1: ''}));
         }
     };
+
+    const checkNicknameAvailability = async () => {
+        if (!user.nickname || user.nickname === originalUser.nickname) {
+            return;
+        }
+        setIsCheckingNickname(true);
+        try {
+            const response = await checkMemberNickname(user.nickname);
+            setIsNicknameAvailable(response.available);  // 직접 available 값을 사용
+
+            console.log("Checking nickname:", user.nickname);
+            console.log("API response:", response);
+        } catch (error) {
+            console.error("닉네임 중복 확인 오류:", error);
+            setIsNicknameAvailable(false);
+        } finally {
+            setIsCheckingNickname(false);
+        }
+    };
+
 
     const validateForm = () => {
         const newErrors = {};
@@ -95,6 +119,10 @@ function MemberModifyComponent() {
             newErrors.age = '연령대를 선택 해주세요.';
         }
 
+        if (user.nickname !== originalUser.nickname && isNicknameAvailable !== true) {
+            newErrors.nickname = '사용 가능한 닉네임이어야 합니다.';
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -102,6 +130,10 @@ function MemberModifyComponent() {
     const handleClickModify = async (e) => {
         e.preventDefault();
         if (validateForm()) {
+            if (user.nickname !== originalUser.nickname && isNicknameAvailable !== true) {
+                setErrors(prev => ({...prev, nickname: '사용 가능한 닉네임이어야 합니다.'}));
+                return;
+            }
             try {
                 const updatedUser = {
                     email: user.email,
@@ -119,6 +151,8 @@ function MemberModifyComponent() {
             }
         }
     };
+
+
 
     const closeModal = () => {
         setResult(null);
@@ -196,16 +230,33 @@ function MemberModifyComponent() {
                         <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nickname">
                             닉네임
                         </label>
-                        <input
-                            id="nickname"
-                            type="text"
-                            name="nickname"
-                            value={user.nickname}
-                            onChange={handleChange}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        />
+                        <div className="flex items-center">
+                            <input
+                                id="nickname"
+                                type="text"
+                                name="nickname"
+                                value={user.nickname}
+                                onChange={handleChange}
+                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2"
+                            />
+                            <button
+                                type="button"
+                                onClick={checkNicknameAvailability}
+                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                disabled={isCheckingNickname || !user.nickname || user.nickname === originalUser.nickname}
+                            >
+                                {isCheckingNickname ? '확인 중...' : '중복 확인'}
+                            </button>
+                        </div>
                         {errors.nickname && <p className="text-red-500 text-xs italic">{errors.nickname}</p>}
+                        {isNicknameAvailable !== null && !errors.nickname && (
+                            <p className={`text-xs italic ${isNicknameAvailable ? 'text-green-500' : 'text-red-500'}`}>
+                                {isNicknameAvailable ? '사용 가능한 닉네임입니다.' : '이미 사용 중인 닉네임입니다.'}
+                            </p>
+                        )}
                     </div>
+
+
 
                     <div className="mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="gender">
@@ -278,7 +329,8 @@ function MemberModifyComponent() {
                             />
                         </div>
                         {errors.phone1 && <p className="text-red-500 text-xs italic">{errors.phone1}</p>}
-                        {(errors.phone2 || errors.phone3) && <p className="text-red-500 text-xs italic">전화번호를 모두 입력해주세요.</p>}
+                        {(errors.phone2 || errors.phone3) &&
+                            <p className="text-red-500 text-xs italic">전화번호를 모두 입력해주세요.</p>}
                     </div>
                 </div>
 

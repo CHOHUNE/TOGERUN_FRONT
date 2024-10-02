@@ -34,10 +34,11 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
     const {moveToList} = useCustomMove();
     const queryClient = useQueryClient();
 
+
     const onDrop = useCallback(acceptedFiles => {
         const validFiles = acceptedFiles.filter(file =>
             file.size <= MAX_FILE_SIZE && Object.keys(ACCEPTED_FILE_TYPES).includes(file.type)
-        ).map(file => ({ type: 'file', content: file }));
+        ).map(file => ({type: 'file', content: file}));
 
         setPost(prevPost => ({
             ...prevPost,
@@ -45,7 +46,7 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
         }));
     }, []);
 
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    const {getRootProps, getInputProps, isDragActive} = useDropzone({
         onDrop,
         accept: ACCEPTED_FILE_TYPES,
         maxSize: MAX_FILE_SIZE
@@ -261,8 +262,10 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
                         <div className="text-center">
                             {isDragActive ?
                                 <p className="text-primary">파일을 여기에 놓으세요...</p> :
-                                <p>파일을 여기에 드래그하거나 클릭하여 선택하세요.<br/>
-                                    <span className="text-sm text-gray-500">(최대 10MB, JPG/PNG/GIF)</span></p>
+                                <p>파일을 여기에 드래그하거나 클릭하여 선택하세요.
+                                    <br/>
+                                    <span className="text-sm text-gray-500">(최대 10MB, JPG/PNG/GIF)</span>
+                                </p>
                             }
                         </div>
                     </div>

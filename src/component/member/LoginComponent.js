@@ -1,17 +1,11 @@
 import React from 'react';
 import { SiKakaotalk, SiNaver } from "react-icons/si";
 import { FaGoogle } from "react-icons/fa";
-import { IoMdClose } from "react-icons/io";
 
-const LoginComponent = ({ onClose }) => {
+
+const LoginComponent = () => {
     return (
-        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md mx-auto relative">
-            <button
-                onClick={onClose}
-                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-            >
-                <IoMdClose size={24} />
-            </button>
+        <div className="bg-white p-8 rounded-lg shadow-md w-full mx-auto">
             <h2 className="text-2xl font-bold text-center mb-8 text-gray-800">로그인</h2>
 
             <div className="space-y-4">

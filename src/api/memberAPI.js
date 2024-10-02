@@ -43,3 +43,8 @@ export const restoreMember = async(userId)=>{
     return res.data
 }
 
+export const checkMemberNickname = async(nickname)=>{
+    const res = await jwtAxios.get(`/user/check/${nickname}`,nickname)
+    return res.data
+}
+
