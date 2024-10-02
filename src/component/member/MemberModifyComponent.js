@@ -85,14 +85,14 @@ function MemberModifyComponent() {
             newErrors.phone1 = '전화번호는 010으로 시작해야 합니다.';
         }
 
-        if (user.nickname === originalUser.nickname) {
-            newErrors.nickname = '닉네임이 변경되지 않았습니다.';
+        if (user.nickname === ''|| user.nickname === "DefaultUser") {
+            newErrors.nickname = '닉네임을 입력 해주세요.';
         }
-        if (user.gender === originalUser.gender) {
-            newErrors.gender = '성별이 변경되지 않았습니다.';
+        if (user.gender === "Unspecified" || user.gender === "") {
+            newErrors.gender = '성별을 선택 해주세요.';
         }
-        if (user.age === originalUser.age) {
-            newErrors.age = '연령대가 변경되지 않았습니다.';
+        if (user.age === "0"|| user.age === "") {
+            newErrors.age = '연령대를 선택 해주세요.';
         }
 
         setErrors(newErrors);
