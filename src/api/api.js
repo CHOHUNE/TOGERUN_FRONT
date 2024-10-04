@@ -30,3 +30,9 @@ export const fetchUnreadCount=async ()=>{
 
 }
 
+export const clearNotification = async()=>{
+    const response = await jwtAxios.post(`/notifications/clear`)
+    return response.data
+}
+
+

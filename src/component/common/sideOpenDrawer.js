@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { UserGroupIcon, ClockIcon, ChatBubbleLeftEllipsisIcon } from '@heroicons/react/24/solid';
+import { UserGroupIcon, ClockIcon, ChatBubbleLeftEllipsisIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import { getJoinedChatRoom } from "../../api/memberAPI";
+import {leaveChatRoom} from "../../api/chatAPI";
 
 const style = `
   .drawer-container {
@@ -46,6 +47,8 @@ function SideOpenDrawer({ isOpen, onClose }) {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [isActive, setIsActive] = useState(false);
+    const [showLeaveModal, setShowLeaveModal] = useState(false);
+    const [selectedRoomId, setSelectedRoomId] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -75,8 +78,6 @@ function SideOpenDrawer({ isOpen, onClose }) {
         setTimeout(onClose, 300); // Wait for the animation to complete
     };
 
-    if (!isOpen) return null;
-
     const formatDate = (dateString) => {
         const options = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
         return new Date(dateString).toLocaleDateString('ko-KR', options);
@@ -87,18 +88,43 @@ function SideOpenDrawer({ isOpen, onClose }) {
         handleClose();
     };
 
+    const handleLeaveChatRoom = async () => {
+        if (selectedRoomId) {
+            try {
+                await leaveChatRoom(selectedRoomId);
+                setChatRooms(chatRooms.filter(room => room.postId !== selectedRoomId));
+                setShowLeaveModal(false);
+            } catch (err) {
+                console.error("채팅방 나가기 실패", err);
+                setError("채팅방 나가기에 실패했습니다.");
+            }
+        }
+    };
+
+    const openLeaveModal = (postId) => {
+        setSelectedRoomId(postId);
+        setShowLeaveModal(true);
+    };
+
+    if (!isOpen) return null;
+
     const drawerContent = (
         <div className="drawer-container">
             <style>{style}</style>
             <div className={`drawer-overlay ${isActive ? 'active' : ''}`} onClick={handleClose}></div>
             <div className={`drawer-content ${isActive ? 'active' : ''}`}>
-                <h2 className="text-lg font-bold mb-4 text-center">참여 중인 채팅방</h2>
+                <div className="flex justify-between items-center p-4 border-b">
+                    <h2 className="text-lg font-bold">참여 중인 채팅방</h2>
+                    <button onClick={handleClose} className="btn btn-ghost btn-circle">
+                        <XMarkIcon className="h-6 w-6" />
+                    </button>
+                </div>
                 {isLoading && <div className="flex justify-center items-center h-24">
                     <div className="loading loading-spinner loading-md"></div>
                 </div>}
                 {error && <div className="alert alert-error text-sm">{error}</div>}
                 {chatRooms.map((room) => (
-                    <div key={room.chatRoomId} className="card bg-base-100 shadow-sm mb-3 hover:shadow-md transition-shadow duration-300">
+                    <div key={room.chatRoomId} className="card bg-base-100 shadow-sm m-3 hover:shadow-md transition-shadow duration-300">
                         <div className="card-body p-3">
                             <h3 className="card-title text-sm font-semibold mb-2">{room.postTitle}</h3>
                             <div className="space-y-1 text-xs">
@@ -124,17 +150,38 @@ function SideOpenDrawer({ isOpen, onClose }) {
                                         {room.activityType}
                                     </span>
                                 </div>
-                                <button
-                                    onClick={() => handleChatRoomEntry(room.postId)}
-                                    className="btn btn-primary btn-xs"
-                                >
-                                    채팅방 입장
-                                </button>
+                                <div className="flex space-x-2">
+                                    <button
+                                        onClick={() => handleChatRoomEntry(room.postId)}
+                                        className="btn btn-primary btn-xs"
+                                    >
+                                        채팅방 입장
+                                    </button>
+                                    <button
+                                        onClick={() => openLeaveModal(room.postId)}
+                                        className="btn btn-error btn-xs"
+                                    >
+                                        나가기
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
+
+            {showLeaveModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white p-6 rounded-lg shadow-xl">
+                        <h3 className="text-lg font-bold mb-4">채팅방을 나가시겠습니까?</h3>
+                        <p className="mb-4">채팅방을 나가면 대화 내용이 모두 삭제됩니다.</p>
+                        <div className="flex justify-end space-x-2">
+                            <button className="btn btn-error" onClick={handleLeaveChatRoom}>나가기</button>
+                            <button className="btn btn-ghost" onClick={() => setShowLeaveModal(false)}>취소</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 

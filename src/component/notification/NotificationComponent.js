@@ -2,11 +2,13 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BellIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from "react-router-dom";
 import { useInfiniteQuery, useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
-import { basicURL, fetchNotifications, markNotificationAsRead, fetchUnreadCount } from "../../api/api";
+import { basicURL, fetchNotifications, markNotificationAsRead, fetchUnreadCount, clearNotification } from "../../api/api";
 import useEventSource from "../../hooks/useEventSource";
+import ResultModal from "../common/ResultModal";
 
 const NotificationComponent = () => {
     const [showNotifications, setShowNotifications] = useState(false);
+    const [showClearModal, setShowClearModal] = useState(false);
     const navigate = useNavigate();
     const notificationRef = useRef(null);
     const queryClient = useQueryClient();
@@ -81,9 +83,19 @@ const NotificationComponent = () => {
         },
     });
 
+    const clearAllNotificationsMutation = useMutation({
+        mutationFn: clearNotification,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
+            queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
+        },
+        onError: (error) => {
+            console.error("Failed to clear all notifications:", error);
+        }
+    });
+
     const handleNewNotification = useCallback((event) => {
         const messageData = event.data;
-        // console.log('Received SSE message:', messageData);
         if (messageData === 'EventStream Created') {
             console.log('EventStream connection established');
             return;
@@ -119,6 +131,21 @@ const NotificationComponent = () => {
             return !prev;
         });
     }, [queryClient, refetch]);
+
+    const handleClearAllNotifications = useCallback(async () => {
+        try {
+            await clearAllNotificationsMutation.mutateAsync();
+            setShowClearModal(true);  // 성공 메시지를 표시하기 위해 모달을 열어둡니다.
+        } catch (error) {
+            console.error("Failed to clear all notifications:", error);
+            setShowClearModal(true);  // 에러 메시지를 표시하기 위해 모달을 열어둡니다.
+        }
+    }, [clearAllNotificationsMutation]);
+
+    const closeClearModal = useCallback(() => {
+        setShowClearModal(false);
+        setShowNotifications(false);
+    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -171,19 +198,42 @@ const NotificationComponent = () => {
                                         <p className="text-xs text-gray-400">{new Date(notification.createdAt).toLocaleString()}</p>
                                     </div>
                                 ))}
-                                {hasNextPage && (
+                                <div className="flex justify-between px-4 py-2 border-t">
+                                    {hasNextPage && (
+                                        <button
+                                            onClick={() => fetchNextPage()}
+                                            disabled={isFetchingNextPage}
+                                            className="text-sm text-blue-500 hover:text-blue-700"
+                                        >
+                                            {isFetchingNextPage ? '로딩 중...' : '더 보기'}
+                                        </button>
+                                    )}
                                     <button
-                                        onClick={() => fetchNextPage()}
-                                        disabled={isFetchingNextPage}
-                                        className="w-full py-2 text-sm text-blue-500 hover:bg-gray-100"
+                                        onClick={() => setShowClearModal(true)}
+                                        disabled={clearAllNotificationsMutation.isLoading}
+                                        className="text-sm text-red-500 hover:text-red-700"
                                     >
-                                        {isFetchingNextPage ? '로딩 중...' : '더 보기'}
+                                        {clearAllNotificationsMutation.isLoading ? '처리 중...' : '모두 읽기'}
                                     </button>
-                                )}
+                                </div>
                             </>
                         )}
                     </div>
                 </div>
+            )}
+
+            {showClearModal && (
+                <ResultModal
+                    title="알림 모두 읽기"
+                    content={clearAllNotificationsMutation.isSuccess
+                        ? "모든 알림을 읽음 처리했습니다."
+                        : clearAllNotificationsMutation.isError
+                            ? "알림 처리 중 오류가 발생했습니다."
+                            : "모든 알림을 읽음 처리하시겠습니까?"}
+                    callbackFn={clearAllNotificationsMutation.isSuccess || clearAllNotificationsMutation.isError
+                        ? closeClearModal
+                        : handleClearAllNotifications}
+                />
             )}
         </div>
     );
