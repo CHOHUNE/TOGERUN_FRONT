@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import React, {useState} from 'react';
+import {useNavigate} from "react-router-dom";
 import useCustomLogin from "../hooks/useCustomLogin";
-import { useMutation } from "@tanstack/react-query";
-import { useRecoilState } from "recoil";
-import { initState, signInState } from "../atoms/singinState";
+import {useMutation} from "@tanstack/react-query";
+import {useRecoilState} from "recoil";
+import {initState, signInState} from "../atoms/singinState";
 import NotificationIcon from "../component/notification/NotificationComponent";
-import { Bars3Icon, MagnifyingGlassIcon, UserCircleIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import {Bars3Icon, MagnifyingGlassIcon, UserCircleIcon, ChatBubbleLeftRightIcon} from '@heroicons/react/24/outline';
 import SideOpenDrawer from "../component/common/sideOpenDrawer";
 import ResultModal from "../component/common/ResultModal";
 
 const BasicMenu = () => {
     const navigate = useNavigate();
-    const { doLogout, moveToPath, loginState } = useCustomLogin();
+    const {doLogout, moveToPath, loginState} = useCustomLogin();
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [signIn, setSignIn] = useRecoilState(signInState);
     const [searchKeyword, setSearchKeyword] = useState("");
@@ -53,24 +53,35 @@ const BasicMenu = () => {
                         <label tabIndex={0} className="btn btn-ghost lg:hidden">
                             <Bars3Icon className="h-5 w-5"/>
                         </label>
-                        <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                            <li><a href="/post/list">게시글</a></li>
+                        <ul tabIndex={0}
+                            className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                            <li>
+                                <button onClick={() => navigate('/post/list')}>게시글</button>
+                            </li>
                             {loginState.roleNames && loginState.roleNames.includes("ADMIN") && (
-                                <li><a href="/member/admin">관리자</a></li>
+                                <li>
+                                    <button onClick={() => navigate("/member/admin")}>관리자</button>
+                                </li>
                             )}
                             {loginState.email && (
-                                <li><a href="/member/modify">내 프로필</a></li>
+                                <li>
+                                    <button onClick={() => navigate("/member/modify")}>내 프로필</button>
+                                </li>
                             )}
                         </ul>
                     </div>
-                    <a href="/" className="btn btn-ghost normal-case text-xl">같이달려요</a>
+                    <button onClick={() => navigate('/')} className="btn btn-ghost normal-case text-xl">같이달려요</button>
                 </div>
                 <div className="navbar-center hidden lg:flex">
                     <ul className="menu menu-horizontal px-1">
                         {loginState.roleNames && loginState.roleNames.includes("ADMIN") && (
-                            <li><button onClick={() => navigate("/member/admin")}>관리자</button></li>
+                            <li>
+                                <button onClick={() => navigate("/member/admin")}>관리자</button>
+                            </li>
                         )}
-                        <li><a href="/post/list">게시글</a></li>
+                        <li>
+                            <button onClick={() => navigate('/post/list')}>게시글</button>
+                        </li>
                     </ul>
                 </div>
                 <div className="navbar-end">
@@ -97,15 +108,23 @@ const BasicMenu = () => {
                             <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
                                 <div className="w-10 rounded-full">
                                     {loginState.img ? (
-                                        <img src={loginState.img} alt="프로필" />
+                                        <img src={loginState.img} alt="프로필"/>
                                     ) : (
-                                        <UserCircleIcon className="h-10 w-10" />
+                                        <UserCircleIcon className="h-10 w-10"/>
                                     )}
                                 </div>
                             </label>
-                            <ul tabIndex={0} className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-                                <li><a href="/member/modify">프로필</a></li>
-                                <li><a onClick={toggleLogoutModal}>로그아웃</a></li>
+                            <ul tabIndex={0}
+                                className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+                                <li>
+                                    <button onClick={() => navigate('/member/modify')}>프로필</button>
+                                </li>
+                                <li>
+                                    <button onClick={() => navigate('/member/favorites')}>즐겨 찾기</button>
+                                </li>
+                                <li>
+                                    <button onClick={toggleLogoutModal}>로그아웃</button>
+                                </li>
                             </ul>
                         </div>
                     )}
@@ -115,7 +134,7 @@ const BasicMenu = () => {
                 </div>
             </div>
 
-            <SideOpenDrawer isOpen={isSideDrawerOpen} onClose={toggleSideDrawer} />
+            <SideOpenDrawer isOpen={isSideDrawerOpen} onClose={toggleSideDrawer}/>
 
             {showLogoutModal && (
                 <div className="modal modal-open">

@@ -1,23 +1,16 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { addCommentAPI, deleteCommentAPI, modifyCommentAPI } from "../api/commentAPI";
 
-import {addCommentAPI, deleteCommentAPI, modifyCommentAPI} from "../api/commentAPI";
-
-export const useCommentHook = (postId, setIsSubmitting, setIsEditing,setWriting) => {
-
+export const useCommentHook = (postId) => {
     const queryClient = useQueryClient();
 
     const addComment = useMutation({
         mutationFn: (newComment) => addCommentAPI(newComment),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["comments", postId] });
-            // alert("등록 성공");
-            setIsSubmitting(false);
-            setWriting(false);
         },
-        onError: () => {
-            // alert("로그인 후 이용 해주세요.");
-            setIsSubmitting(false);
-
+        onError: (error) => {
+            console.error("댓글 추가 실패:", error);
         },
     });
 
@@ -26,12 +19,10 @@ export const useCommentHook = (postId, setIsSubmitting, setIsEditing,setWriting)
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["comments", postId] });
             alert("삭제 성공");
-            setIsSubmitting(false);
         },
-        onError: () => {
-            alert("실패");
-            setIsSubmitting(false);
-
+        onError: (error) => {
+            console.error("댓글 삭제 실패:", error);
+            alert("삭제 실패");
         },
     });
 
@@ -39,53 +30,62 @@ export const useCommentHook = (postId, setIsSubmitting, setIsEditing,setWriting)
         mutationFn: (editedComment) => modifyCommentAPI(editedComment),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["comments", postId] });
-            // alert("댓글이 성공적으로 수정되었습니다.");
         },
-        onError: () => {
+        onError: (error) => {
+            console.error("댓글 수정 실패:", error);
             alert("댓글 수정 중 오류가 발생했습니다.");
-        },
-        onSettled: () => {
-            setIsSubmitting(false);
-            setIsEditing(false);
         },
     });
 
-    const handleAddComment = (content, parentId, event = null) => {
+    const handleAddComment = async (content, parentId, event = null) => {
         if (!event || (event.key === "Enter" && !event.shiftKey)) {
-            if (event) event.preventDefault(); // Enter key 이벤트 발생 시 preventDefault 호출
+            if (event) event.preventDefault();
 
-            setIsSubmitting(true);
-            addComment.mutate({
-                post_id: postId,
-                content: content,
-                parent_id: parentId,
-            });
+            try {
+                await addComment.mutateAsync({
+                    post_id: postId,
+                    content: content,
+                    parent_id: parentId,
+                });
+                return true; // 성공 시 true 반환
+            } catch (error) {
+                return false; // 실패 시 false 반환
+            }
         }
     };
 
-    const handleDeleteComment = (commentId) => {
-        setIsSubmitting(true);
-        deleteComment.mutate(commentId);
+    const handleDeleteComment = async (commentId) => {
+        try {
+            await deleteComment.mutateAsync(commentId);
+            return true; // 성공 시 true 반환
+        } catch (error) {
+            return false; // 실패 시 false 반환
+        }
     };
 
-    const handleEditComment = (commentId, content,event = null) => {
+    const handleEditComment = async (commentId, content, event = null) => {
         if (!event || (event.key === "Enter" && !event.shiftKey)) {
-            if (event) event.preventDefault(); // Enter key 이벤트 발생 시 preventDefault 호출
+            if (event) event.preventDefault();
 
-            setIsSubmitting(true);
-            editComment.mutate({
-                id: commentId,
-                post_id: postId,
-                content: content,
-            });
+            try {
+                await editComment.mutateAsync({
+                    id: commentId,
+                    post_id: postId,
+                    content: content,
+                });
+                return true; // 성공 시 true 반환
+            } catch (error) {
+                return false; // 실패 시 false 반환
+            }
         }
     };
 
     return {
-
         handleAddComment,
         handleDeleteComment,
         handleEditComment,
-
+        isAddingComment: addComment.isLoading,
+        isDeletingComment: deleteComment.isLoading,
+        isEditingComment: editComment.isLoading,
     };
 };

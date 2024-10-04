@@ -9,6 +9,7 @@ export function CommentItem({ comment, postId, submittingState }) {
     const [commentEdited, setCommentEdited] = useState(comment.content);
     const [replyComment, setReplyComment] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(submittingState);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const { isLogin, loginState } = useCustomLogin();
 
     const {
@@ -17,10 +18,16 @@ export function CommentItem({ comment, postId, submittingState }) {
         handleEditComment,
     } = useCommentHook(postId, setIsSubmitting, setIsEditing, setIsWriting);
 
+    const toggleDeleteModal = () => setShowDeleteModal(!showDeleteModal);
+
+    const confirmDelete = () => {
+        handleDeleteComment(comment.id);
+        toggleDeleteModal();
+    };
+
     return (
         <div className="ml-4 mt-4">
             <div className="flex items-start space-x-3">
-                {/* 프로필 이미지 */}
                 <div className="flex-shrink-0">
                     {comment.img ? (
                         <img
@@ -33,7 +40,6 @@ export function CommentItem({ comment, postId, submittingState }) {
                     )}
                 </div>
 
-                {/* 댓글 본문 */}
                 <div className="flex-grow">
                     <div className="flex justify-between items-center">
                         <h3 className="text-lg font-bold">{comment.name}</h3>
@@ -76,7 +82,7 @@ export function CommentItem({ comment, postId, submittingState }) {
                                         </button>
                                     )}
                                     <button
-                                        onClick={() => handleDeleteComment(comment.id)}
+                                        onClick={toggleDeleteModal}
                                         className="btn btn-error btn-xs"
                                     >
                                         <TrashIcon className="h-4 w-4" />
@@ -129,7 +135,6 @@ export function CommentItem({ comment, postId, submittingState }) {
                 </div>
             </div>
 
-            {/* 자식 댓글 */}
             {comment.children && comment.children.length > 0 && (
                 <div className="mt-4 space-y-4 ml-10">
                     {comment.children.map((childComment) => (
@@ -141,6 +146,18 @@ export function CommentItem({ comment, postId, submittingState }) {
                             setIsSubmitting={setIsSubmitting}
                         />
                     ))}
+                </div>
+            )}
+
+            {showDeleteModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+                        <h3 className="font-bold text-lg mb-4">댓글을 삭제하시겠습니까?</h3>
+                        <div className="flex justify-end space-x-2">
+                            <button className="btn btn-error" onClick={confirmDelete}>삭제</button>
+                            <button className="btn btn-ghost" onClick={toggleDeleteModal}>취소</button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

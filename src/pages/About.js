@@ -6,7 +6,6 @@ import {
     MapPinIcon,
     HeartIcon,
     UserPlusIcon,
-    ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 
 function About() {
