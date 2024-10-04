@@ -48,3 +48,8 @@ export const checkMemberNickname = async(nickname)=>{
     return res.data
 }
 
+export const getAllFavorites = async()=>{
+    const res = await jwtAxios.get(`/user/favorites`)
+    return res.data
+}
+
