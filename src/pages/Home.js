@@ -69,7 +69,7 @@ function MainPage() {
                     }}
                     navigation={true}
                     modules={[Autoplay, Pagination, Navigation]}
-                    className="w-full h-[650px] mb-12"
+                    className="w-full h-[650px] mb-12 relative z-0"
                 >
                     {images.map((image, index) => (
                         <SwiperSlide key={index}>

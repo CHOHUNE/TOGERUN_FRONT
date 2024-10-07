@@ -47,7 +47,7 @@ const BasicMenu = () => {
     const toggleSideDrawer = () => setIsSideDrawerOpen(!isSideDrawerOpen);
 
     return (
-        <div className="bg-base-100 shadow-md">
+        <div className="bg-base-100 shadow-md relative z-50">
             <div className="navbar container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="navbar-start">
                     <div className="dropdown">
@@ -93,7 +93,7 @@ const BasicMenu = () => {
                     <ul className="menu menu-horizontal px-1">
                         {loginState.roleNames && loginState.roleNames.includes("ADMIN") && (
                             <li>
-                            <button onClick={() => navigate("/member/admin")}>관리자</button>
+                                <button onClick={() => navigate("/member/admin")}>관리자</button>
                             </li>
                         )}
                         <li>
