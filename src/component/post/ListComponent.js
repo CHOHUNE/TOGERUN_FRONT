@@ -25,15 +25,12 @@ const initState = {
     current: 0,
 };
 
-const REGIONS = ['서울', '경기', '인천', '강원', '충북', '충남', '대전', '세종', '경북', '경남', '대구', '울산', '부산', '전북', '전남', '광주', '제주'];
+const REGIONS = ['서울', '경기', '강원', '충청', '경상', '부산', '전라', '제주'];
 const ACTIVITIES = [
     { name: '등산', value: 'CLIMBING' },
     { name: '달리기', value: 'RUNNING' },
     { name: '하이킹', value: 'HIKING' },
     { name: '자전거', value: 'CYCLING' },
-    { name: '요가', value: 'YOGA' },
-    { name: '필라테스', value: 'PILATES' },
-    { name: '웨이트 트레이닝', value: 'WEIGHT_TRAINING' },
     { name: '서핑', value: 'SURFING' }
 ];
 

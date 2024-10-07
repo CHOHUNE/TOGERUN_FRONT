@@ -14,7 +14,7 @@ export const likeToggle =async (postId)=>{
     return response.data
 }
 
-export const fetchNotifications = async ( page=0, size=7)=>{
+export const fetchNotifications = async ( page=0, size=5)=>{
     const response = await jwtAxios.get(`/notifications/all?page=${page}&size=${size}`)
     return response.data
 }
