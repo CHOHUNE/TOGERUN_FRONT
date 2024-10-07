@@ -5,6 +5,8 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+import { useSpring, animated } from 'react-spring';
+import { useInView } from 'react-intersection-observer';
 import PageComponent from "../common/PageComponent";
 import useCustomMove from "../../hooks/useCustomMove";
 import FetchingModal from "../common/FetchingModal";
@@ -53,6 +55,70 @@ function ListComponent() {
         staleTime: 1000 * 60 * 5
     });
 
+    const serverData = data || initState;
+
+    const AnimatedRow = ({ posts, rowIndex }) => {
+        const [ref, inView] = useInView({
+            triggerOnce: true,
+            threshold: 0.1,
+        });
+
+        const animationProps = useSpring({
+            opacity: inView ? 1 : 0,
+            transform: inView ? 'translateY(0px)' : 'translateY(50px)',
+            delay: rowIndex * 200,
+        });
+
+        return (
+            <animated.div ref={ref} style={animationProps} className="flex flex-wrap -mx-2 mb-4">
+                {posts.map((post) => (
+                    <div key={post.id} className="w-full sm:w-1/2 lg:w-1/3 px-2 mb-4">
+                        <div className="card bg-base-100 shadow-xl h-full">
+                            <div className="card-body">
+                                <h2 className="card-title">
+                                    <Link to={`/post/${post.id}`} className="link link-primary">
+                                        {post.title}
+                                    </Link>
+                                </h2>
+                                <div className="flex items-center text-sm text-gray-500 mb-2">
+                                    <UserIcon className="h-4 w-4 mr-1"/>
+                                    <span>{post.nickname}</span>
+                                    <CalendarIcon className="h-4 w-4 ml-4 mr-1"/>
+                                    <span>{post.localDate}</span>
+                                </div>
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    <span className={`badge ${post.participateFlag ? 'badge-success' : 'badge-error'}`}>
+                                        {post.participateFlag ? '참여가능' : '마감'}
+                                    </span>
+                                    <span className="badge badge-info">
+                                        <EyeIcon className="h-4 w-4 mr-1"/>
+                                        {post.viewCount}
+                                    </span>
+                                    <span className="badge badge-warning">
+                                        <HeartIcon className="h-4 w-4 mr-1"/>
+                                        {post.likeCount}
+                                    </span>
+                                    <span className="badge badge-accent">
+                                        {getActivityName(post.activityType)}
+                                    </span>
+                                </div>
+                                <div className="flex items-center text-sm text-gray-500 mb-4">
+                                    <MapPinIcon className="h-4 w-4 mr-1"/>
+                                    <span>{formatRoadName(post.roadName)}</span>
+                                </div>
+                                <div className="card-actions justify-end mt-auto">
+                                    <Link to={`/post/${post.id}`} className="btn btn-primary btn-sm">
+                                        자세히 보기
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </animated.div>
+        );
+    };
+
     const handleClickPage = (pageParam) => {
         moveToList(pageParam)
     }
@@ -78,7 +144,17 @@ function ListComponent() {
         return activity ? activity.name : value;
     }
 
-    const serverData = data || initState;
+    // 게시글 목록을 3개씩 그룹화하는 함수
+    const groupPosts = (posts, size) => {
+        return posts.reduce((acc, _, index) => {
+            if (index % size === 0) {
+                acc.push(posts.slice(index, index + size));
+            }
+            return acc;
+        }, []);
+    };
+
+    const groupedPosts = groupPosts(serverData.dtoList, 3);
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -114,7 +190,7 @@ function ListComponent() {
                             navigation
                             pagination={{
                                 clickable: true,
-                                el: ".swiper-pagination", // Assign a custom class for pagination
+                                el: ".swiper-pagination",
                             }}
                             spaceBetween={10}
                             slidesPerView={2}
@@ -131,7 +207,7 @@ function ListComponent() {
                             }}
                             className="mySwiper"
                             style={{
-                                padding: '20px 40px', // Add padding to ensure arrows don’t overlap the content
+                                padding: '20px 40px',
                             }}
                         >
                             {REGIONS.map(region => (
@@ -145,7 +221,6 @@ function ListComponent() {
                                 </SwiperSlide>
                             ))}
                         </Swiper>
-
                     )}
                     {activeTab === 'activity' && (
                         <Swiper
@@ -153,7 +228,7 @@ function ListComponent() {
                             navigation
                             pagination={{
                                 clickable: true,
-                                el: ".swiper-pagination", // Assign a custom class for pagination
+                                el: ".swiper-pagination",
                             }}
                             spaceBetween={10}
                             slidesPerView={2}
@@ -170,7 +245,7 @@ function ListComponent() {
                             }}
                             className="mySwiper"
                             style={{
-                                padding: '20px 40px', // Add padding to ensure arrows don’t overlap the content
+                                padding: '20px 40px',
                             }}
                         >
                             {ACTIVITIES.map(activity => (
@@ -198,48 +273,9 @@ function ListComponent() {
                 </p>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {serverData.dtoList.map((post) => (
-                    <div key={post.id} className="card bg-base-100 shadow-xl">
-                        <div className="card-body">
-                            <h2 className="card-title">
-                                <Link to={`/post/${post.id}`} className="link link-primary">
-                                    {post.title}
-                                </Link>
-                            </h2>
-                            <div className="flex items-center text-sm text-gray-500 mb-2">
-                                <UserIcon className="h-4 w-4 mr-1"/>
-                                <span>{post.nickname}</span>
-                                <CalendarIcon className="h-4 w-4 ml-4 mr-1"/>
-                                <span>{post.localDate}</span>
-                            </div>
-                            <div className="flex flex-wrap gap-2 mb-4">
-                                <span className={`badge ${post.participateFlag ? 'badge-success' : 'badge-error'}`}>
-                                    {post.participateFlag ? '참여가능' : '마감'}
-                                </span>
-                                <span className="badge badge-info">
-                                    <EyeIcon className="h-4 w-4 mr-1"/>
-                                    {post.viewCount}
-                                </span>
-                                <span className="badge badge-warning">
-                                    <HeartIcon className="h-4 w-4 mr-1"/>
-                                    {post.likeCount}
-                                </span>
-                                <span className="badge badge-accent">
-                                    {getActivityName(post.activityType)}
-                                </span>
-                            </div>
-                            <div className="flex items-center text-sm text-gray-500 mb-4">
-                                <MapPinIcon className="h-4 w-4 mr-1"/>
-                                <span>{formatRoadName(post.roadName)}</span>
-                            </div>
-                            <div className="card-actions justify-end">
-                                <Link to={`/post/${post.id}`} className="btn btn-primary btn-sm">
-                                    자세히 보기
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
+            <div>
+                {groupedPosts.map((row, index) => (
+                    <AnimatedRow key={index} posts={row} rowIndex={index} />
                 ))}
             </div>
 

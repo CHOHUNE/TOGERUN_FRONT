@@ -18,7 +18,7 @@ const useCustomMove = () => {
     const [queryParams] = useSearchParams();
 
     const page = getNum(queryParams.get("page"), 1);
-    const size = getNum(queryParams.get("size"), 10)
+    const size = getNum(queryParams.get("size"), 9)
     const keyword = queryParams.get("keyword") || "";
 
     const queryDefault = createSearchParams({page, size,keyword}).toString();
@@ -30,7 +30,7 @@ const useCustomMove = () => {
         if (pageParam) {
 
             const pageNum = getNum(pageParam.page, 1)
-            const sizeNum = getNum(pageParam.size, 10)
+            const sizeNum = getNum(pageParam.size, 9)
             const keywordStr= pageParam.keyword  !== undefined? pageParam.keyword : keyword
 
             queryStr = createSearchParams({
