@@ -75,15 +75,19 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
         }));
     }
 
-    const handleSubmit = (e) => {
 
+
+
+    const handleSubmit = (e) => {
         e.preventDefault();
 
         const formData = new FormData();
         Object.keys(post).forEach(key => {
             if (key !== 'images') {
                 if (key === 'meetingTime') {
-                    const isoString = post[key].toISOString();
+                    const localDateTime = post[key];
+                    const utcDateTime = new Date(localDateTime.getTime() - (localDateTime.getTimezoneOffset() * 60000));
+                    const isoString = utcDateTime.toISOString();
                     formData.append(key, isoString);
                 } else {
                     formData.append(key, post[key]);
@@ -98,8 +102,10 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
                 formData.append(`existingImageUrls`, image.content);
             }
         });
+
         mutation.mutate(formData);
     };
+
 
     const handleRemoveImage = (index) => {
         setPost(prevPost => ({
