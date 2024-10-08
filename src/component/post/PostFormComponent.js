@@ -19,12 +19,9 @@ const ACCEPTED_FILE_TYPES = {
 const ACTIVITY_TYPES = [
     {name: '등산', value: 'CLIMBING'},
     {name: '달리기', value: 'RUNNING'},
-    {name: '하이킹', value: 'HIKING'},
     {name: '자전거', value: 'CYCLING'},
-    {name: '요가', value: 'YOGA'},
-    {name: '필라테스', value: 'PILATES'},
-    {name: '웨이트 트레이닝', value: 'WEIGHT_TRAINING'},
-    {name: '서핑', value: 'SURFING'}
+    {name:'클라이밍', value:'CLIMBING'},
+    {name:'크로스핏', value:'CROSSFIT'},
 ];
 
 const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => {

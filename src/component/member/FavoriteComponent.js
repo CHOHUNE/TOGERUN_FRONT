@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
-import {CalendarIcon, ClockIcon, UserGroupIcon, MapPinIcon, UserIcon, HeartIcon} from '@heroicons/react/24/outline';
+import { CalendarIcon, ClockIcon, UserGroupIcon, MapPinIcon, UserIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { getAllFavorites } from "../../api/memberAPI";
 import { useNavigate } from 'react-router-dom';
 import { favoriteToggle } from "../../api/postAPI";
 import AnimatedRowComponent from "../common/AnimatedRowComponent";
+import CustomModal from "../common/CustomModal";
+
 
 const FavoriteComponent = () => {
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [modalConfig, setModalConfig] = useState({ show: false, title: '', content: '', onConfirm: null });
     const [selectedPostId, setSelectedPostId] = useState(null);
     const navigate = useNavigate();
 
@@ -35,17 +37,26 @@ const FavoriteComponent = () => {
 
     const toggleDeleteModal = (postId) => {
         setSelectedPostId(postId);
-        setShowDeleteModal(!showDeleteModal);
+        setModalConfig({
+            show: true,
+            title: '즐겨찾기 삭제',
+            content: '즐겨찾기에서 삭제하시겠습니까?',
+            onConfirm: handleRemove
+        });
     };
 
     const handleRemove = async () => {
         try {
             await favoriteToggle(selectedPostId);
             setFavorites(favorites.filter(fav => fav.postId !== selectedPostId));
-            setShowDeleteModal(false);
+            setModalConfig({ show: false });
         } catch (err) {
             console.error("Error removing favorite:", err);
         }
+    };
+
+    const closeModal = () => {
+        setModalConfig({ show: false });
     };
 
     const groupFavorites = (favorites, size) => {
@@ -134,17 +145,13 @@ const FavoriteComponent = () => {
                 ))}
             </div>
 
-            {showDeleteModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                    <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-                        <h3 className="font-bold text-lg mb-4">즐겨찾기에서 삭제하시겠습니까?</h3>
-                        <div className="flex justify-end space-x-2">
-                            <button className="btn btn-error btn-sm" onClick={handleRemove}>삭제</button>
-                            <button className="btn btn-ghost btn-sm" onClick={() => setShowDeleteModal(false)}>취소
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            {modalConfig.show && (
+                <CustomModal
+                    title={modalConfig.title}
+                    content={modalConfig.content}
+                    onClose={closeModal}
+                    onConfirm={modalConfig.onConfirm}
+                />
             )}
         </div>
     );

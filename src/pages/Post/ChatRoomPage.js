@@ -4,13 +4,14 @@ import useCustomLogin from "../../hooks/useCustomLogin";
 import { useNavigate, useParams } from "react-router-dom";
 import { getChatRoom, leaveChatRoom } from "../../api/chatAPI";
 import { ArrowLeftIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import CustomModal from "../../component/common/CustomModal";
 
 const ChatRoomPage = () => {
     const { postId } = useParams();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const { loginState } = useCustomLogin();
-    const [showLeaveModal, setShowLeaveModal] = useState(false);
+    const [modalConfig, setModalConfig] = useState({ show: false, title: '', content: '', onConfirm: null });
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -31,8 +32,17 @@ const ChatRoomPage = () => {
         navigate(-1);
     };
 
-    const toggleLeaveModal = () => {
-        setShowLeaveModal(!showLeaveModal);
+    const openLeaveModal = () => {
+        setModalConfig({
+            show: true,
+            title: '채팅방 나가기',
+            content: '채팅방을 나가면 대화 내용이 삭제되며 다시 입장할 수 없습니다. 정말 나가시겠습니까?',
+            onConfirm: handleLeaveChatRoom
+        });
+    };
+
+    const closeModal = () => {
+        setModalConfig({ show: false });
     };
 
     const handleLeaveChatRoom = async () => {
@@ -42,7 +52,7 @@ const ChatRoomPage = () => {
         } catch (err) {
             setError("채팅방을 나가는데 실패했습니다.");
         } finally {
-            toggleLeaveModal();
+            closeModal();
         }
     };
 
@@ -53,7 +63,7 @@ const ChatRoomPage = () => {
     );
 
     if (error) return (
-        <div className="flex justify-center items-center h-screen">
+        <div className="container mx-auto px-4 py-8">
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
                 <strong className="font-bold">오류!</strong>
                 <span className="block sm:inline"> {error}</span>
@@ -62,8 +72,8 @@ const ChatRoomPage = () => {
     );
 
     return (
-        <div className="container mx-auto p-4 min-h-screen bg-gray-100">
-            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="container mx-auto px-4 py-8">
+            <div className="shadow-lg rounded-lg overflow-hidden">
                 <div className="flex justify-between items-center p-4 bg-blue-500 text-white">
                     <h1 className="text-2xl font-bold">채팅방</h1>
                     <div>
@@ -76,7 +86,7 @@ const ChatRoomPage = () => {
                         </button>
                         <button
                             className="btn btn-error btn-sm text-white"
-                            onClick={toggleLeaveModal}
+                            onClick={openLeaveModal}
                         >
                             <ExclamationTriangleIcon className="h-5 w-5 mr-1" />
                             나가기
@@ -88,17 +98,13 @@ const ChatRoomPage = () => {
                 </div>
             </div>
 
-            {showLeaveModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                    <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-                        <h3 className="font-bold text-lg mb-4">채팅방에서 나가시겠습니까?</h3>
-                        <p className="mb-4">채팅방을 나가면 대화 내용이 삭제되며 다시 입장할 수 없습니다.</p>
-                        <div className="flex justify-end gap-2">
-                            <button className="btn btn-error" onClick={handleLeaveChatRoom}>나가기</button>
-                            <button className="btn btn-ghost" onClick={toggleLeaveModal}>취소</button>
-                        </div>
-                    </div>
-                </div>
+            {modalConfig.show && (
+                <CustomModal
+                    title={modalConfig.title}
+                    content={modalConfig.content}
+                    onClose={closeModal}
+                    onConfirm={modalConfig.onConfirm}
+                />
             )}
         </div>
     );

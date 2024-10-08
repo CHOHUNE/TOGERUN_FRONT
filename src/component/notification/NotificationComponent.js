@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useInfiniteQuery, useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { basicURL, fetchNotifications, markNotificationAsRead, fetchUnreadCount, clearNotification } from "../../api/api";
 import useEventSource from "../../hooks/useEventSource";
-import ResultModal from "../common/ResultModal";
+import CustomModal from "../common/CustomModal";
 
 const NotificationComponent = () => {
     const [showNotifications, setShowNotifications] = useState(false);
@@ -19,7 +19,6 @@ const NotificationComponent = () => {
         hasNextPage,
         isFetchingNextPage,
         isLoading,
-        error,
         refetch
     } = useInfiniteQuery({
         queryKey: ['notifications'],
@@ -33,50 +32,32 @@ const NotificationComponent = () => {
         enabled: showNotifications,
     });
 
-    const { data: unreadCountData } = useQuery({
+    const { data: unreadCount = 0 } = useQuery({
         queryKey: ['unreadCount'],
         queryFn: fetchUnreadCount,
         refetchInterval: 60000,
     });
 
     const notifications = notificationsData?.pages.flatMap(page => page.content) || [];
-    const unreadCount = typeof unreadCountData === 'number' ? unreadCountData : 0;
 
     const markAsReadMutation = useMutation({
         mutationFn: markNotificationAsRead,
         onMutate: async (notificationId) => {
             await queryClient.cancelQueries({ queryKey: ['notifications'] });
-            queryClient.setQueryData(['notifications'], (old) => {
-                if (!old) return old;
-                return {
-                    ...old,
-                    pages: old.pages.map(page => ({
-                        ...page,
-                        content: page.content.map(n =>
-                            n.id === notificationId ? { ...n, isRead: true } : n
-                        ),
-                    })),
-                };
-            });
-            return { notificationId };
+            const previousNotifications = queryClient.getQueryData(['notifications']);
+            queryClient.setQueryData(['notifications'], (old) => ({
+                ...old,
+                pages: old.pages.map(page => ({
+                    ...page,
+                    content: page.content.map(n =>
+                        n.id === notificationId ? { ...n, isRead: true } : n
+                    ),
+                })),
+            }));
+            return { previousNotifications };
         },
         onError: (err, notificationId, context) => {
-            queryClient.setQueryData(['notifications'], (old) => {
-                if (!old) return old;
-                return {
-                    ...old,
-                    pages: old.pages.map(page => ({
-                        ...page,
-                        content: page.content.map(n =>
-                            n.id === notificationId ? { ...n, isRead: false } : n
-                        ),
-                    })),
-                };
-            });
-            queryClient.setQueryData(['unreadCount'], (oldCount) => {
-                const currentCount = typeof oldCount === 'number' ? oldCount : 0;
-                return currentCount + 1;
-            });
+            queryClient.setQueryData(['notifications'], context.previousNotifications);
         },
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
@@ -89,23 +70,13 @@ const NotificationComponent = () => {
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
             queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
         },
-        onError: (error) => {
-            console.error("Failed to clear all notifications:", error);
-        }
     });
 
     const handleNewNotification = useCallback((event) => {
         const messageData = event.data;
-        if (messageData === 'EventStream Created') {
-            console.log('EventStream connection established');
-            return;
-        }
-        try {
-            const parsedData = JSON.parse(messageData);
+        if (messageData !== 'EventStream Created') {
             queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
-        } catch (error) {
-            console.log('Error parsing SSE message:', error);
         }
     }, [queryClient]);
 
@@ -124,7 +95,6 @@ const NotificationComponent = () => {
     const toggleNotifications = useCallback(() => {
         setShowNotifications(prev => {
             if (!prev) {
-                queryClient.resetQueries({ queryKey: ['notifications'] });
                 refetch({ refetchPage: (page, index) => index === 0 });
                 queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
             }
@@ -135,17 +105,12 @@ const NotificationComponent = () => {
     const handleClearAllNotifications = useCallback(async () => {
         try {
             await clearAllNotificationsMutation.mutateAsync();
-            setShowClearModal(true);  // 성공 메시지를 표시하기 위해 모달을 열어둡니다.
+            setShowClearModal(false);
+            setShowNotifications(false);
         } catch (error) {
             console.error("Failed to clear all notifications:", error);
-            setShowClearModal(true);  // 에러 메시지를 표시하기 위해 모달을 열어둡니다.
         }
     }, [clearAllNotificationsMutation]);
-
-    const closeClearModal = useCallback(() => {
-        setShowClearModal(false);
-        setShowNotifications(false);
-    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -154,14 +119,8 @@ const NotificationComponent = () => {
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-
-    if (error) {
-        console.error("Failed to fetch notifications:", error);
-    }
 
     return (
         <div className="relative mr-4" ref={notificationRef}>
@@ -210,10 +169,9 @@ const NotificationComponent = () => {
                                     )}
                                     <button
                                         onClick={() => setShowClearModal(true)}
-                                        disabled={clearAllNotificationsMutation.isLoading}
                                         className="text-sm text-red-500 hover:text-red-700"
                                     >
-                                        {clearAllNotificationsMutation.isLoading ? '처리 중...' : '모두 읽기'}
+                                        모두 읽기
                                     </button>
                                 </div>
                             </>
@@ -223,16 +181,11 @@ const NotificationComponent = () => {
             )}
 
             {showClearModal && (
-                <ResultModal
+                <CustomModal
                     title="알림 모두 읽기"
-                    content={clearAllNotificationsMutation.isSuccess
-                        ? "모든 알림을 읽음 처리했습니다."
-                        : clearAllNotificationsMutation.isError
-                            ? "알림 처리 중 오류가 발생했습니다."
-                            : "모든 알림을 읽음 처리하시겠습니까?"}
-                    callbackFn={clearAllNotificationsMutation.isSuccess || clearAllNotificationsMutation.isError
-                        ? closeClearModal
-                        : handleClearAllNotifications}
+                    content="모든 알림을 읽음 처리하시겠습니까?"
+                    onClose={() => setShowClearModal(false)}
+                    onConfirm={handleClearAllNotifications}
                 />
             )}
         </div>

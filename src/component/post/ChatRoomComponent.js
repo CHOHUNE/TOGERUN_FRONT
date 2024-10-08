@@ -1,22 +1,17 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Client } from "@stomp/stompjs";
-import {PaperAirplaneIcon} from "@heroicons/react/16/solid";
-import {ChatBubbleLeftEllipsisIcon} from "@heroicons/react/24/solid";
-import { getChatRoom, joinChatRoom} from "../../api/chatAPI";
+import { PaperAirplaneIcon } from "@heroicons/react/16/solid";
+import { getChatRoom, joinChatRoom } from "../../api/chatAPI";
 
-const SCROLL_THRESHOLD = 100;
 const WEBSOCKET_URL = 'ws://localhost:8080/chat';
 
 const ChatRoomComponent = ({ postId, userEmail }) => {
     const [messages, setMessages] = useState([]);
     const [stompClient, setStompClient] = useState(null);
     const [newMessage, setNewMessage] = useState('');
-    const [isNearBottom, setIsNearBottom] = useState(true);
-    const [offlineMessages, setOfflineMessages] = useState([]);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
 
-    const messagesEndRef = useRef(null);
-    const scrollContainerRef = useRef(null);
+    const chatContainerRef = useRef(null);
 
     const setupWebSocket = useCallback(() => {
         const client = new Client({
@@ -37,7 +32,6 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
     }, [postId]);
 
     const loadInitialData = useCallback(async () => {
-        const startTime = performance.now();
         try {
             await joinChatRoom(postId, userEmail);
             const fetchedMessages = await getChatRoom(postId);
@@ -45,8 +39,6 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
         } catch (error) {
             console.error("Error loading initial data:", error);
         }
-        const endTime = performance.now();
-        console.log(`Initial data load time: ${endTime - startTime}ms`);
     }, [postId, userEmail]);
 
     const handleIncomingMessage = useCallback((message) => {
@@ -59,8 +51,8 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
         });
     }, []);
 
-    const sendMessage = useCallback(async () => {
-        if (newMessage.trim()) {
+    const sendMessage = useCallback(() => {
+        if (newMessage.trim() && stompClient?.connected) {
             const messageDTO = {
                 content: newMessage.trim(),
                 email: userEmail,
@@ -68,31 +60,13 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
                 chatMessageType: 'NORMAL'
             };
 
-            if (isOnline && stompClient) {
-                const startTime = performance.now();
-                stompClient.publish({
-                    destination: `/app/chat/${postId}/send`,
-                    body: JSON.stringify(messageDTO)
-                });
-                const endTime = performance.now();
-                console.log(`Message send time: ${endTime - startTime}ms`);
-            } else {
-                setOfflineMessages(prev => [...prev, messageDTO]);
-            }
+            stompClient.publish({
+                destination: `/app/chat/${postId}/send`,
+                body: JSON.stringify(messageDTO)
+            });
             setNewMessage('');
         }
-    }, [stompClient, newMessage, postId, userEmail, isOnline]);
-
-    const scrollToBottom = useCallback(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, []);
-
-    const handleScroll = useCallback(() => {
-        if (scrollContainerRef.current) {
-            const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
-            setIsNearBottom(scrollHeight - (scrollTop + clientHeight) < SCROLL_THRESHOLD);
-        }
-    }, []);
+    }, [stompClient, newMessage, postId, userEmail]);
 
     const handleKeyPress = useCallback((e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -107,31 +81,15 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
     }, [loadInitialData, setupWebSocket]);
 
     useEffect(() => {
-        const scrollContainer = scrollContainerRef.current;
-        scrollContainer?.addEventListener('scroll', handleScroll);
-        return () => scrollContainer?.removeEventListener('scroll', handleScroll);
-    }, [handleScroll]);
+        // 채팅 컨테이너의 스크롤을 맨 아래로 이동
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    }, [messages]);
 
     useEffect(() => {
-        isNearBottom && scrollToBottom();
-    }, [messages, isNearBottom, scrollToBottom]);
-
-    useEffect(() => {
-        const handleOnline = async () => {
-            setIsOnline(true);
-            console.log("Connection restored. Syncing messages.");
-            if (offlineMessages.length > 0) {
-                for (const msg of offlineMessages) {
-                    await sendMessage(msg);
-                }
-                setOfflineMessages([]);
-            }
-        };
-
-        const handleOffline = () => {
-            setIsOnline(false);
-            console.log("Connection lost. Switching to offline mode.");
-        };
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
 
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
@@ -140,7 +98,7 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
-    }, [offlineMessages, sendMessage]);
+    }, []);
 
     const formatTime = useCallback((timestamp) => {
         const date = new Date(timestamp);
@@ -186,46 +144,31 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
         );
     }, [userEmail, formatTime]);
 
-    const memoizedMessages = useMemo(() => messages.map(renderMessage), [messages, renderMessage]);
-
     return (
-        <div className="flex flex-col bg-base-100 shadow-xl rounded-lg overflow-hidden" style={{ maxWidth: '1000px', margin: '0 auto' }}>
-            <div className="bg-base-200 p-4">
-                <h2 className="text-xl font-bold">채팅방</h2>
-            </div>
-            <div className="flex-1 flex flex-col h-[calc(100vh-250px)]">
+        <div className="flex flex-col rounded-lg overflow-hidden" style={{ height: '600px', maxWidth: '1000px', margin: '0 auto' }}>
+
+            <div className="flex-1 flex flex-col" style={{ height: 'calc(100% - 116px)' }}>
                 <div
-                    ref={scrollContainerRef}
+                    ref={chatContainerRef}
                     className="flex-1 overflow-y-auto p-4"
-                    onScroll={handleScroll}
+                    style={{ maxHeight: '100%' }}
                 >
-                    {memoizedMessages}
-                    <div ref={messagesEndRef} />
+                    {messages.map(renderMessage)}
                 </div>
-
-                {!isNearBottom && (
-                    <button
-                        onClick={scrollToBottom}
-                        className="btn btn-circle btn-sm fixed bottom-24 right-8 bg-primary text-white"
-                    >
-                        <ChatBubbleLeftEllipsisIcon className="h-5 w-5" />
+            </div>
+            <div className="p-4 bg-white">
+                <div className="flex items-center space-x-2">
+                    <input
+                        type="text"
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        className="flex-1 input input-bordered"
+                        placeholder="메시지를 입력하세요"
+                        onKeyPress={handleKeyPress}
+                    />
+                    <button onClick={sendMessage} className="btn btn-primary">
+                        <PaperAirplaneIcon className="h-5 w-5" />
                     </button>
-                )}
-
-                <div className="bg-base-200 p-4">
-                    <div className="flex items-center space-x-2">
-                        <input
-                            type="text"
-                            value={newMessage}
-                            onChange={(e) => setNewMessage(e.target.value)}
-                            className="flex-1 input input-bordered"
-                            placeholder="메시지를 입력하세요"
-                            onKeyPress={handleKeyPress}
-                        />
-                        <button onClick={sendMessage} className="btn btn-primary">
-                            <PaperAirplaneIcon className="h-5 w-5" />
-                        </button>
-                    </div>
                 </div>
             </div>
             {!isOnline && (
@@ -236,6 +179,5 @@ const ChatRoomComponent = ({ postId, userEmail }) => {
         </div>
     );
 }
-
 
 export default React.memo(ChatRoomComponent);

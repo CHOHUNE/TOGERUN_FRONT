@@ -3,8 +3,9 @@ import ReactDOM from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { UserGroupIcon, ClockIcon, ChatBubbleLeftEllipsisIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import { getJoinedChatRoom } from "../../api/memberAPI";
-import {leaveChatRoom} from "../../api/chatAPI";
-import {UserIcon} from "@heroicons/react/24/outline";
+import { leaveChatRoom } from "../../api/chatAPI";
+import { UserIcon } from "@heroicons/react/24/outline";
+import CustomModal from './CustomModal';
 
 const style = `
   .drawer-container {
@@ -48,7 +49,7 @@ function SideOpenDrawer({ isOpen, onClose }) {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [isActive, setIsActive] = useState(false);
-    const [showLeaveModal, setShowLeaveModal] = useState(false);
+    const [modalConfig, setModalConfig] = useState({ show: false, title: '', content: '', onConfirm: null });
     const [selectedRoomId, setSelectedRoomId] = useState(null);
     const navigate = useNavigate();
 
@@ -94,7 +95,7 @@ function SideOpenDrawer({ isOpen, onClose }) {
             try {
                 await leaveChatRoom(selectedRoomId);
                 setChatRooms(chatRooms.filter(room => room.postId !== selectedRoomId));
-                setShowLeaveModal(false);
+                setModalConfig({ show: false });
             } catch (err) {
                 console.error("채팅방 나가기 실패", err);
                 setError("채팅방 나가기에 실패했습니다.");
@@ -104,7 +105,16 @@ function SideOpenDrawer({ isOpen, onClose }) {
 
     const openLeaveModal = (postId) => {
         setSelectedRoomId(postId);
-        setShowLeaveModal(true);
+        setModalConfig({
+            show: true,
+            title: '채팅방 나가기',
+            content: '채팅방을 나가면 대화 내용이 모두 삭제됩니다. 정말 나가시겠습니까?',
+            onConfirm: handleLeaveChatRoom
+        });
+    };
+
+    const closeModal = () => {
+        setModalConfig({ show: false });
     };
 
     if (!isOpen) return null;
@@ -125,7 +135,6 @@ function SideOpenDrawer({ isOpen, onClose }) {
                         </button>
                     </div>
                 </div>
-
 
                 {isLoading && <div className="flex justify-center items-center h-24">
                     <div className="loading loading-spinner loading-md"></div>
@@ -180,17 +189,13 @@ function SideOpenDrawer({ isOpen, onClose }) {
                 ))}
             </div>
 
-            {showLeaveModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-xl">
-                        <h3 className="text-lg font-bold mb-4">채팅방을 나가시겠습니까?</h3>
-                        <p className="mb-4">채팅방을 나가면 대화 내용이 모두 삭제됩니다.</p>
-                        <div className="flex justify-end space-x-2">
-                            <button className="btn btn-error" onClick={handleLeaveChatRoom}>나가기</button>
-                            <button className="btn btn-ghost" onClick={() => setShowLeaveModal(false)}>취소</button>
-                        </div>
-                    </div>
-                </div>
+            {modalConfig.show && (
+                <CustomModal
+                    title={modalConfig.title}
+                    content={modalConfig.content}
+                    onClose={closeModal}
+                    onConfirm={modalConfig.onConfirm}
+                />
             )}
         </div>
     );

@@ -5,20 +5,21 @@ import ResultModal from "../common/ResultModal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { postInitState } from "../../atoms/postInitState";
 import FetchingModal from "../common/FetchingModal";
-import { HeartIcon, StarIcon, ShareIcon, ChatBubbleLeftEllipsisIcon, PencilSquareIcon, ArrowUturnLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { HeartIcon, StarIcon, ChatBubbleLeftEllipsisIcon, PencilSquareIcon, ArrowUturnLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import KakaoMapComponent from "../kakaoMap/KakaoMapComponent";
 import { CalendarIcon, ClockIcon, MapPinIcon, UserGroupIcon, EyeIcon } from "@heroicons/react/20/solid";
 import { deleteOne, favoriteToggle, getOne } from "../../api/postAPI";
 import { getChatRoomStatus } from "../../api/chatAPI";
 import { likeToggle } from "../../api/api";
+import CustomModal from "../common/CustomModal";
 
 function ReadComponent({postId}) {
     const queryClient = useQueryClient();
     const [chatRoomStatus, setChatRoomStatus] = useState(null);
     const {moveToList, moveToModify} = useCustomMove();
     const navigate = useNavigate();
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [modalConfig, setModalConfig] = useState({ show: false, title: '', content: '', onConfirm: null });
 
     const {data, isFetching, refetch} = useQuery({
         queryKey: ['post', postId],
@@ -59,7 +60,7 @@ function ReadComponent({postId}) {
         mutationFn: (postId) => deleteOne(postId),
         onSuccess: () => {
             queryClient.invalidateQueries(['post/List']);
-            setShowDeleteModal(false);
+            setModalConfig({ show: false });
             moveToList();
         }
     });
@@ -75,21 +76,20 @@ function ReadComponent({postId}) {
     });
 
     const closeModal = () => {
-        queryClient.invalidateQueries(['post/List']);
-        if(delMutation.isSuccess){
-            moveToList()
-        }
+        setModalConfig({ show: false });
     }
 
-    const handleClickDelete = () => delMutation.mutate(postId)
-    const toggleDeleteModal = () => setShowDeleteModal(!showDeleteModal)
+    const handleClickDelete = () => {
+        setModalConfig({
+            show: true,
+            title: '게시물 삭제',
+            content: '게시물을 삭제하시겠습니까?',
+            onConfirm: () => delMutation.mutate(postId)
+        });
+    }
+
     const handleLikeToggle = () => likeMutation.mutate(postId)
     const handleFavoriteToggle = () => favoriteMutation.mutate(postId)
-
-    // const handleShare = () => {
-    //     // 공유 기능 구현
-    //     alert('공유 기능은 아직 구현되지 않았습니다.');
-    // }
 
     if (!post) {
         return <div className="flex justify-center items-center h-screen">Loading...</div>;
@@ -132,9 +132,6 @@ function ReadComponent({postId}) {
                                 )}
                                 <span className="text-white font-medium">즐겨찾기</span>
                             </button>
-                            {/*<button onClick={handleShare} className="bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors duration-200 rounded-full p-2">*/}
-                            {/*    <ShareIcon className="h-5 w-5 text-white" />*/}
-                            {/*</button>*/}
                         </div>
                     </div>
                 </div>
@@ -218,7 +215,7 @@ function ReadComponent({postId}) {
                             <ArrowUturnLeftIcon className="h-5 w-5 mr-2"/>
                             목록
                         </button>
-                        <button className="btn btn-outline btn-error" onClick={toggleDeleteModal}>
+                        <button className="btn btn-outline btn-error" onClick={handleClickDelete}>
                             <TrashIcon className="h-5 w-5 mr-2"/>
                             삭제
                         </button>
@@ -226,17 +223,15 @@ function ReadComponent({postId}) {
                 </div>
             </div>
 
-            {showDeleteModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                    <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-                        <h3 className="font-bold text-lg mb-4">게시물을 삭제하시겠습니까?</h3>
-                        <div className="flex justify-end space-x-2">
-                            <button className="btn btn-error" onClick={handleClickDelete}>삭제</button>
-                            <button className="btn btn-ghost" onClick={toggleDeleteModal}>취소</button>
-                        </div>
-                    </div>
-                </div>
+            {modalConfig.show && (
+                <CustomModal
+                    title={modalConfig.title}
+                    content={modalConfig.content}
+                    onClose={closeModal}
+                    onConfirm={modalConfig.onConfirm}
+                />
             )}
+
             {delMutation.isSuccess && (
                 <ResultModal title={'게시글 삭제'} content={`게시물 삭제가 완료되었습니다.`} callbackFn={closeModal} />
             )}

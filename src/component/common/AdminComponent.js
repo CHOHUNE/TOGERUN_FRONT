@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAllMember, deleteMember, restoreMember } from "../../api/memberAPI";
 import { UserCircleIcon, TrashIcon, ArrowPathIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
-import {UsersIcon} from "@heroicons/react/16/solid";
+import { UsersIcon } from "@heroicons/react/16/solid";
+import CustomModal from './CustomModal';
 
 const AdminComponent = () => {
     const queryClient = useQueryClient();
     const [currentPage, setCurrentPage] = useState(1);
+    const [modalConfig, setModalConfig] = useState({ show: false, title: '', content: '', onConfirm: null });
     const usersPerPage = 10;
 
     const { data: users, isLoading, isError } = useQuery({
@@ -29,16 +31,30 @@ const AdminComponent = () => {
     });
 
     const handleSoftDelete = (userId) => {
-        if (window.confirm('정말로 이 사용자를 삭제하시겠습니까?')) {
-            softDeleteMutation.mutate(userId);
-        }
+        setModalConfig({
+            show: true,
+            title: '사용자 삭제',
+            content: '정말로 이 사용자를 삭제하시겠습니까?',
+            onConfirm: () => {
+                softDeleteMutation.mutate(userId);
+                setModalConfig({ show: false });
+            }
+        });
     };
 
     const handleRestore = (userId) => {
-        if (window.confirm('이 사용자를 복구하시겠습니까?')) {
-            restoreMutation.mutate(userId);
-        }
+        setModalConfig({
+            show: true,
+            title: '사용자 복구',
+            content: '이 사용자를 복구하시겠습니까?',
+            onConfirm: () => {
+                restoreMutation.mutate(userId);
+                setModalConfig({ show: false });
+            }
+        });
     };
+
+    const closeModal = () => setModalConfig({ show: false });
 
     if (isLoading) return (
         <div className="flex justify-center items-center h-screen">
@@ -78,118 +94,126 @@ const AdminComponent = () => {
                 </div>
 
                 <div className="overflow-x-auto">
-                <table className="table table-zebra w-full">
-                    <thead>
-                    <tr>
-                        <th>사용자</th>
-                        <th>연락처</th>
-                        <th>상세 정보</th>
-                        <th>상태</th>
-                        <th>작업</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {currentUsers.map((user) => (
-                        <tr key={user.id}>
-                            <td>
-                                <div className="flex items-center space-x-3">
-                                    <div className="avatar">
-                                        <div className="mask mask-squircle w-12 h-12">
-                                            {user.img ? (
-                                                <img src={user.img} alt={user.name} />
-                                            ) : (
-                                                <UserCircleIcon className="w-12 h-12 text-gray-300" />
-                                            )}
+                    <table className="table table-zebra w-full">
+                        <thead>
+                        <tr>
+                            <th>사용자</th>
+                            <th>연락처</th>
+                            <th>상세 정보</th>
+                            <th>상태</th>
+                            <th>작업</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {currentUsers.map((user) => (
+                            <tr key={user.id}>
+                                <td>
+                                    <div className="flex items-center space-x-3">
+                                        <div className="avatar">
+                                            <div className="mask mask-squircle w-12 h-12">
+                                                {user.img ? (
+                                                    <img src={user.img} alt={user.name} />
+                                                ) : (
+                                                    <UserCircleIcon className="w-12 h-12 text-gray-300" />
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="font-bold">{user.name}</div>
+                                            <div className="text-sm opacity-50">{user.nickname}</div>
                                         </div>
                                     </div>
-                                    <div>
-                                        <div className="font-bold">{user.name}</div>
-                                        <div className="text-sm opacity-50">{user.nickname}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                {user.email}
-                                <br/>
-                                <span className="badge badge-ghost badge-sm">{user.mobile}</span>
-                            </td>
-                            <td>
-                                {user.gender}, {user.age}세
-                                <br/>
-                                <span className={`badge ${user.social ? 'badge-info' : 'badge-success'} badge-sm`}>
-                                        {user.social ? '소셜' : '일반'}
-                                    </span>
-                            </td>
-                            <td>
-                                    <span className={`badge ${user.deleted ? 'badge-error' : 'badge-success'}`}>
-                                        {user.deleted ? '삭제됨' : '활성'}
-                                    </span>
-                                {user.deleted && (
-                                    <div className="text-xs opacity-50">
-                                        삭제일: {new Date(user.deletedAt).toLocaleString('ko-KR', {
-                                        year: 'numeric',
-                                        month: '2-digit',
-                                        day: '2-digit',
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                        hour12: false
-                                    })}
-                                    </div>
-                                )}
-                            </td>
-                            <td>
-                                {user.deleted ? (
-                                    <button
-                                        onClick={() => handleRestore(user.id)}
-                                        className="btn btn-ghost btn-xs"
-                                    >
-                                        <ArrowPathIcon className="h-4 w-4 mr-1" />
-                                        복구
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={() => handleSoftDelete(user.id)}
-                                        className="btn btn-ghost btn-xs text-error"
-                                    >
-                                        <TrashIcon className="h-4 w-4 mr-1" />
-                                        삭제
-                                    </button>
-                                )}
-                            </td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-            </div>
-            <div className="flex justify-center mt-4">
-                <div className="join">
-                    <button
-                        className="join-item btn"
-                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                        disabled={currentPage === 1}
-                    >
-                        <ChevronLeftIcon className="h-5 w-5" />
-                    </button>
-                    {Array.from({ length: totalPages }, (_, i) => (
+                                </td>
+                                <td>
+                                    {user.email}
+                                    <br/>
+                                    <span className="badge badge-ghost badge-sm">{user.mobile}</span>
+                                </td>
+                                <td>
+                                    {user.gender}, {user.age}세
+                                    <br/>
+                                    <span className={`badge ${user.social ? 'badge-info' : 'badge-success'} badge-sm`}>
+                                            {user.social ? '소셜' : '일반'}
+                                        </span>
+                                </td>
+                                <td>
+                                        <span className={`badge ${user.deleted ? 'badge-error' : 'badge-success'}`}>
+                                            {user.deleted ? '삭제됨' : '활성'}
+                                        </span>
+                                    {user.deleted && (
+                                        <div className="text-xs opacity-50">
+                                            삭제일: {new Date(user.deletedAt).toLocaleString('ko-KR', {
+                                            year: 'numeric',
+                                            month: '2-digit',
+                                            day: '2-digit',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: false
+                                        })}
+                                        </div>
+                                    )}
+                                </td>
+                                <td>
+                                    {user.deleted ? (
+                                        <button
+                                            onClick={() => handleRestore(user.id)}
+                                            className="btn btn-ghost btn-xs"
+                                        >
+                                            <ArrowPathIcon className="h-4 w-4 mr-1" />
+                                            복구
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={() => handleSoftDelete(user.id)}
+                                            className="btn btn-ghost btn-xs text-error"
+                                        >
+                                            <TrashIcon className="h-4 w-4 mr-1" />
+                                            삭제
+                                        </button>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
+                <div className="flex justify-center mt-4">
+                    <div className="join">
                         <button
-                            key={i}
-                            onClick={() => setCurrentPage(i + 1)}
-                            className={`join-item btn ${currentPage === i + 1 ? 'btn-active' : ''}`}
+                            className="join-item btn"
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
                         >
-                            {i + 1}
+                            <ChevronLeftIcon className="h-5 w-5" />
                         </button>
-                    ))}
-                    <button
-                        className="join-item btn"
-                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                        disabled={currentPage === totalPages}
-                    >
-                        <ChevronRightIcon className="h-5 w-5" />
-                    </button>
+                        {Array.from({ length: totalPages }, (_, i) => (
+                            <button
+                                key={i}
+                                onClick={() => setCurrentPage(i + 1)}
+                                className={`join-item btn ${currentPage === i + 1 ? 'btn-active' : ''}`}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
+                        <button
+                            className="join-item btn"
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                        >
+                            <ChevronRightIcon className="h-5 w-5" />
+                        </button>
+                    </div>
                 </div>
             </div>
+            {modalConfig.show && (
+                <CustomModal
+                    title={modalConfig.title}
+                    content={modalConfig.content}
+                    onClose={closeModal}
+                    onConfirm={modalConfig.onConfirm}
+                />
+            )}
         </div>
-    </div>
     );
 };
 
