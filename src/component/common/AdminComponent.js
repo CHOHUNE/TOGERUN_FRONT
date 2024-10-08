@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAllMember, deleteMember, restoreMember } from "../../api/memberAPI";
 import { UserCircleIcon, TrashIcon, ArrowPathIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
+import {UsersIcon} from "@heroicons/react/16/solid";
 
 const AdminComponent = () => {
     const queryClient = useQueryClient();
@@ -62,8 +63,21 @@ const AdminComponent = () => {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold mb-6">관리자 대시보드 - 사용자 관리</h1>
-            <div className="overflow-x-auto">
+            <div className="container mx-auto px-4 py-8">
+                <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-lg p-6 mb-8">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                            <UsersIcon className="h-10 w-10 text-white mr-4" />
+                            <h1 className="text-3xl font-bold text-white">관리자 대시보드</h1>
+                        </div>
+                        <div className="bg-white bg-opacity-20 rounded-full px-4 py-2">
+                            <span className="text-white font-semibold">사용자 관리</span>
+                        </div>
+                    </div>
+                    <p className="text-white mt-2 opacity-80">전체 사용자: {users ? users.length : 0}명</p>
+                </div>
+
+                <div className="overflow-x-auto">
                 <table className="table table-zebra w-full">
                     <thead>
                     <tr>
@@ -175,6 +189,7 @@ const AdminComponent = () => {
                 </div>
             </div>
         </div>
+    </div>
     );
 };
 

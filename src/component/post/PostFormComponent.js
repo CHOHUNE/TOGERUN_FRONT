@@ -7,6 +7,7 @@ import KakaoMapSearchComponent from "../kakaoMap/KakaoMapSearchComponent";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import {useDropzone} from "react-dropzone";
+import {PencilIcon} from "@heroicons/react/24/solid";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10;
 const ACCEPTED_FILE_TYPES = {
@@ -135,7 +136,13 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
                 />
             )}
             <form onSubmit={handleSubmit} className="space-y-6">
-                <h1 className="text-3xl font-bold mb-6">게시글 작성</h1>
+                <div className="bg-gradient-to-r from-blue-500 to-green-400 rounded-lg shadow-lg p-6 mb-8">
+                    <div className="flex items-center justify-center">
+                        <PencilIcon className="h-12 w-12 text-white mr-4"/>
+                        <h1 className="text-3xl font-bold text-white">게시글 작성</h1>
+                    </div>
+                    <p className="text-white text-center mt-2 opacity-80">함께 공유하고 싶은 운동을 게재 해주세요!</p>
+                </div>
 
                 <div className="form-control">
                     <label htmlFor="title" className="label">

@@ -12,6 +12,7 @@ import { EyeIcon, MapPinIcon, HeartIcon, UserIcon, CalendarIcon, PencilIcon } fr
 import { getList } from "../../api/postAPI";
 import { Navigation, Pagination } from "swiper/modules";
 import AnimatedRowComponent from "../common/AnimatedRowComponent";
+import {ClipboardIcon} from "@heroicons/react/16/solid";
 
 
 const initState = {
@@ -143,12 +144,20 @@ function ListComponent() {
         <div className="container mx-auto px-4 py-8">
             {isFetching && <FetchingModal/>}
 
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold">게시글 목록</h1>
-                <button onClick={() => navigate("/post/write")} className="btn btn-primary">
-                    <PencilIcon className="h-5 w-5 mr-2"/>
-                    글 작성
-                </button>
+            <div className="bg-gradient-to-r from-blue-500 to-teal-400 rounded-lg shadow-lg p-6 mb-8">
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                        <ClipboardIcon className="h-10 w-10 text-white mr-4"/>
+                        <h1 className="text-3xl font-bold text-white">게시글 목록</h1>
+                    </div>
+                    <div className="flex items-center">
+                        <span className="text-white mr-4">총 {serverData.totalCount}개의 게시글</span>
+                        <button onClick={() => navigate("/post/write")} className="btn btn-primary">
+                            <PencilIcon className="h-5 w-5 mr-2"/>
+                            글 작성
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div className="mb-6">

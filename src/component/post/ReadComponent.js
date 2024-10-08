@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { likeToggle } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import useCustomMove from "../../hooks/useCustomMove";
 import ResultModal from "../common/ResultModal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { postInitState } from "../../atoms/postInitState";
 import FetchingModal from "../common/FetchingModal";
-import { HeartIcon, StarIcon, ChatBubbleLeftEllipsisIcon, PencilSquareIcon, ArrowUturnLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { HeartIcon, StarIcon, ShareIcon, ChatBubbleLeftEllipsisIcon, PencilSquareIcon, ArrowUturnLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import KakaoMapComponent from "../kakaoMap/KakaoMapComponent";
 import { CalendarIcon, ClockIcon, MapPinIcon, UserGroupIcon, EyeIcon } from "@heroicons/react/20/solid";
 import { deleteOne, favoriteToggle, getOne } from "../../api/postAPI";
 import { getChatRoomStatus } from "../../api/chatAPI";
+import { likeToggle } from "../../api/api";
 
 function ReadComponent({postId}) {
     const queryClient = useQueryClient();
@@ -86,6 +86,11 @@ function ReadComponent({postId}) {
     const handleLikeToggle = () => likeMutation.mutate(postId)
     const handleFavoriteToggle = () => favoriteMutation.mutate(postId)
 
+    // const handleShare = () => {
+    //     // 공유 기능 구현
+    //     alert('공유 기능은 아직 구현되지 않았습니다.');
+    // }
+
     if (!post) {
         return <div className="flex justify-center items-center h-screen">Loading...</div>;
     }
@@ -94,20 +99,46 @@ function ReadComponent({postId}) {
         <div className="bg-gray-100 min-h-screen py-8">
             {isFetching && <FetchingModal />}
             <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-                <div className="p-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-3xl font-bold text-gray-800">{post.title}</h1>
-                        <div className="flex items-center space-x-2">
-                            <button onClick={handleLikeToggle} className="btn btn-circle btn-ghost">
-                                {post.like ? <HeartIconSolid className="h-6 w-6 text-red-500" /> : <HeartIcon className="h-6 w-6" />}
-                                <span className="ml-1">{post.likeCount}</span>
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 rounded-t-lg shadow-lg">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+                        <div className="flex-1">
+                            <h1 className="text-3xl font-bold text-white mb-2">{post.title}</h1>
+                            <div className="flex items-center text-white text-sm">
+                                <span className="mr-4">작성자: {post.nickname}</span>
+                                <span>작성일: {new Date(post.localDate).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                            <button
+                                onClick={handleLikeToggle}
+                                className="flex items-center space-x-1 bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors duration-200 rounded-full py-2 px-4"
+                            >
+                                {post.like ? (
+                                    <HeartIconSolid className="h-5 w-5 text-red-500" />
+                                ) : (
+                                    <HeartIcon className="h-5 w-5 text-white" />
+                                )}
+                                <span className="text-white font-medium">{post.likeCount}</span>
                             </button>
-                            <button onClick={handleFavoriteToggle} className="btn btn-circle btn-ghost">
-                                {post.favorite ? <StarIconSolid className="h-6 w-6 text-yellow-500" /> : <StarIcon className="h-6 w-6" />}
+                            <button
+                                onClick={handleFavoriteToggle}
+                                className="flex items-center space-x-1 bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors duration-200 rounded-full py-2 px-4"
+                            >
+                                {post.favorite ? (
+                                    <StarIconSolid className="h-5 w-5 text-yellow-500" />
+                                ) : (
+                                    <StarIcon className="h-5 w-5 text-white" />
+                                )}
+                                <span className="text-white font-medium">즐겨찾기</span>
                             </button>
+                            {/*<button onClick={handleShare} className="bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors duration-200 rounded-full p-2">*/}
+                            {/*    <ShareIcon className="h-5 w-5 text-white" />*/}
+                            {/*</button>*/}
                         </div>
                     </div>
+                </div>
 
+                <div className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div className="flex items-center bg-gray-100 p-3 rounded-lg">
                             <UserGroupIcon className="h-5 w-5 mr-2 text-blue-500"/>

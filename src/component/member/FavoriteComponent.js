@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
-import { CalendarIcon, ClockIcon, UserGroupIcon, MapPinIcon, UserIcon } from '@heroicons/react/24/outline';
+import {CalendarIcon, ClockIcon, UserGroupIcon, MapPinIcon, UserIcon, HeartIcon} from '@heroicons/react/24/outline';
 import { getAllFavorites } from "../../api/memberAPI";
 import { useNavigate } from 'react-router-dom';
 import { favoriteToggle } from "../../api/postAPI";
@@ -114,7 +114,18 @@ const FavoriteComponent = () => {
 
     return (
         <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-4">My Favorites</h1>
+            <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg shadow-lg p-6 mb-8">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                        <HeartIcon className="h-10 w-10 text-white mr-4"/>
+                        <h1 className="text-3xl font-bold text-white">My Favorites</h1>
+                    </div>
+                    <div className="bg-white bg-opacity-20 rounded-full px-4 py-2">
+                        <span className="text-white font-semibold">즐겨찾기 목록</span>
+                    </div>
+                </div>
+                <p className="text-white mt-2 opacity-80">총 {favorites.length}개의 즐겨찾기</p>
+            </div>
             <div>
                 {groupedFavorites.map((row, index) => (
                     <AnimatedRowComponent key={index} rowIndex={index}>
@@ -129,7 +140,8 @@ const FavoriteComponent = () => {
                         <h3 className="font-bold text-lg mb-4">즐겨찾기에서 삭제하시겠습니까?</h3>
                         <div className="flex justify-end space-x-2">
                             <button className="btn btn-error btn-sm" onClick={handleRemove}>삭제</button>
-                            <button className="btn btn-ghost btn-sm" onClick={() => setShowDeleteModal(false)}>취소</button>
+                            <button className="btn btn-ghost btn-sm" onClick={() => setShowDeleteModal(false)}>취소
+                            </button>
                         </div>
                     </div>
                 </div>

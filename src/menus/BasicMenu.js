@@ -12,7 +12,7 @@ import ResultModal from "../component/common/ResultModal";
 
 const BasicMenu = () => {
     const navigate = useNavigate();
-    const {doLogout, moveToPath, loginState} = useCustomLogin();
+    const {doLogout, moveToPath, loginState,isLogin} = useCustomLogin();
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [signIn, setSignIn] = useRecoilState(signInState);
     const [searchKeyword, setSearchKeyword] = useState("");
@@ -59,12 +59,12 @@ const BasicMenu = () => {
                             <li>
                                 <button onClick={() => navigate('/post/list')}>게시글</button>
                             </li>
-                            {loginState.roleNames && loginState.roleNames.includes("ADMIN") && (
+                            {loginState.roleNames && loginState.roleNames.includes("ROLE_ADMIN") && (
                                 <li>
                                     <button onClick={() => navigate("/member/admin")}>관리자</button>
                                 </li>
                             )}
-                            {loginState.email && (
+                            {isLogin && (
                                 <li>
                                     <button onClick={() => navigate("/member/modify")}>내 프로필</button>
                                 </li>
@@ -91,19 +91,19 @@ const BasicMenu = () => {
                 </div>
                 <div className="navbar-center hidden lg:flex">
                     <ul className="menu menu-horizontal px-1">
-                        {loginState.roleNames && loginState.roleNames.includes("ADMIN") && (
+                        {loginState.roleNames && loginState.roleNames.includes("ROLE_ADMIN") && (
                             <li>
                                 <button onClick={() => navigate("/member/admin")}>관리자</button>
                             </li>
                         )}
-                        <li>
+                        {isLogin&&(<li>
                             <button onClick={() => navigate('/post/list')}>게시글</button>
-                        </li>
+                        </li>)}
                     </ul>
                 </div>
                 <div className="navbar-end">
                     <form onSubmit={handleSearch} className="flex items-center">
-                        <div className="form-control">
+                        {isLogin&&(<div className="form-control">
                             <input
                                 type="text"
                                 placeholder="제목, 내용, 장소 검색"
@@ -111,15 +111,21 @@ const BasicMenu = () => {
                                 onChange={(e) => setSearchKeyword(e.target.value)}
                                 className="input input-bordered w-24 md:w-auto"
                             />
-                        </div>
-                        <button type="submit" className="btn btn-ghost btn-circle">
+                        </div>)}
+                        {isLogin&&(
+                            <button type="submit" className="btn btn-ghost btn-circle">
                             <MagnifyingGlassIcon className="h-5 w-5"/>
                         </button>
+                        )}
                     </form>
-                    <NotificationIcon/>
-                    <button onClick={toggleSideDrawer} className="btn btn-ghost btn-circle">
-                        <ChatBubbleLeftRightIcon className="h-5 w-5"/>
-                    </button>
+                    {isLogin&& <NotificationIcon/>}
+                        {isLogin&&
+                            <button onClick={toggleSideDrawer} className="btn btn-ghost btn-circle">
+                            <ChatBubbleLeftRightIcon className="h-5 w-5"/>
+                        </button>
+                        }
+
+
                     {loginState.email && (
                         <div className="dropdown dropdown-end">
                             <label tabIndex={0} className="btn btn-ghost btn-circle avatar">

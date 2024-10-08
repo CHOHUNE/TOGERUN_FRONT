@@ -3,6 +3,7 @@ import ResultModal from "../common/ResultModal";
 import useCustomLogin from "../../hooks/useCustomLogin";
 import {checkMemberNickname, getMember, modifyMember} from "../../api/memberAPI";
 import {UserCircleIcon} from "@heroicons/react/20/solid";
+import {UserIcon} from "@heroicons/react/24/outline";
 
 const initState = {
     id: '',
@@ -169,17 +170,23 @@ function MemberModifyComponent() {
                 />
             )}
             <form onSubmit={handleClickModify} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                <h1 className="text-3xl font-bold mb-6 text-center">회원정보 수정</h1>
+                <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg shadow-lg p-6 mb-8">
+                    <div className="flex items-center justify-center">
+                        <UserIcon className="h-12 w-12 text-white mr-4" />
+                        <h1 className="text-3xl font-bold text-white">회원정보 수정</h1>
+                    </div>
+                    <p className="text-white text-center mt-2 opacity-80">프로필을 업데이트하고 계정을 관리하세요</p>
+                </div>
 
                 <div className="flex justify-center mb-6">
                     {user.img ? (
                         <img
                             src={user.img}
                             alt="Profile"
-                            className="w-32 h-32 rounded-full object-cover border-4 border-blue-500"
+                            className="w-32 h-32 rounded-full object-cover border-4 border-purple-500"
                         />
                     ) : (
-                        <UserCircleIcon className="w-32 h-32 text-blue-500"/>
+                        <UserCircleIcon className="w-32 h-32 text-purple-500"/>
                     )}
                 </div>
 

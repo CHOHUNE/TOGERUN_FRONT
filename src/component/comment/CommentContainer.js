@@ -36,9 +36,9 @@ export function CommentContainer({ postId }) {
     }
 
     return (
-        <div className="w-full my-12 bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="w-full my-4 bg-white shadow-lg rounded-lg overflow-hidden">
             <div className="p-6">
-                <h2 className="text-2xl font-bold mb-6 text-gray-800">댓글</h2>
+                {/*<h2 className="text-2xl font-bold mb-6 text-gray-800">댓글</h2>*/}
                 <CommentForm
                     isSubmitting={isSubmitting}
                     onSubmit={handleAddComment}
