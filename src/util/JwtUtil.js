@@ -1,8 +1,6 @@
 import axios from "axios";
 import {getCookie, setCookie} from "./cookieUtil";
 import {axiosInstance} from "../api/api";
-import {useSetRecoilState} from "recoil";
-import {modalState} from "../atoms/modalState";
 
 const jwtAxios = axios.create({
     baseURL: 'http://localhost:8080/api'
@@ -20,7 +18,12 @@ const beforeReq = (config) => {
     if (!memberInfo) {
         console.log("Member NOT FOUND")
         return Promise.reject({
-            response: { data: { error: "REQUIRE_LOGIN" } }
+            response: {
+                data: { error: "REQUIRE_LOGIN" },
+                status:401,
+                redirectUrl: '/api/member/login'
+            }
+
         })
     }
 
@@ -80,10 +83,6 @@ const responseFail = (err,setModalState) => {
     }
 
     return Promise.reject(err)
-}
-
-const useJwtAxios = () => {
-
 }
 
 jwtAxios.interceptors.request.use(beforeReq, requestFail)
