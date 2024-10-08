@@ -1,35 +1,16 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from "react-router-dom";
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination, Navigation } from 'swiper/modules';
+import React, {useState} from 'react';
+import {Link, useNavigate} from "react-router-dom";
+import {Swiper, SwiperSlide} from 'swiper/react';
+import {Autoplay, Navigation, Pagination} from 'swiper/modules';
 import useCustomLogin from "../hooks/useCustomLogin";
 
 // Swiper styles
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
-import LoginComponent from "../component/member/LoginComponent";
 import {ChatBubbleLeftRightIcon, HeartIcon, MapPinIcon, UserGroupIcon, UserPlusIcon} from "@heroicons/react/24/outline";
 import BasicLayout from "../layouts/BasicLayout";
-
-// LoginModal component
-const LoginModal = ({ isOpen, onClose }) => {
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full">
-                <button
-                    className="absolute right-2 top-2 btn btn-sm btn-circle btn-ghost"
-                    onClick={onClose}
-                >
-                    ✕
-                </button>
-                <LoginComponent />
-            </div>
-        </div>
-    );
-};
+import {LoginModal} from "../component/member/LoginModal";
 
 function MainPage() {
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -55,7 +36,7 @@ function MainPage() {
         <BasicLayout>
         <div className="min-h-screen bg-gray-100">
             <div className="container max-w-full px-0 py-8">
-                {/*<h1 className="text-4xl font-bold text-center mb-8">같이달려요</h1>*/}
+                {/*<h1 className="text-4xl font-bold text-center mb-8">TOGERUN</h1>*/}
 
                 <Swiper
                     spaceBetween={0}
@@ -84,7 +65,10 @@ function MainPage() {
                 </div>
 
                 <div className="flex justify-center space-x-4">
-                    <button onClick={handleFindMeeting} className="btn btn-primary">운동 모임 찾기</button>
+                    <button onClick={handleFindMeeting} className="btn btn-primary">
+                        운동 모임 찾기
+                        <UserPlusIcon className="w-5 h-5 ml-2"/>
+                    </button>
                     {/*<Link to="/about" className="btn btn-outline">서비스 소개</Link>*/}
                 </div>
             </div>
@@ -95,14 +79,14 @@ function MainPage() {
             />
 
             <div className="container mx-auto px-4 py-8">
-                <h1 className="text-3xl font-bold text-center mb-8">같이달려요 - 운동 파트너 찾기</h1>
+                <h1 className="text-3xl font-bold text-center mb-8">TOGERUN - 운동 파트너 찾기</h1>
 
                 <div className="card bg-base-100 shadow-xl mb-8">
                     <div className="card-body">
                         <h2 className="card-title">앱 소개</h2>
                         <p>
-                            '같이달려요'는 다양한 운동을 함께 즐길 수 있는 파트너를 찾는 실시간 채팅 기반 웹 애플리케이션입니다.
-                            혼자 운동하기 심심하셨나요? 이제 '같이달려요'와 함께 즐겁게 운동하세요!
+                            'TOGERUN'는 다양한 운동을 함께 즐길 수 있는 파트너를 찾는 실시간 채팅 기반 웹 애플리케이션입니다.
+                            혼자 운동하기 심심하셨나요? 이제 'TOGERUN'와 함께 즐겁게 운동하세요!
                         </p>
 
                     </div>
@@ -137,7 +121,7 @@ function MainPage() {
                     <div className="card-body">
                         <h2 className="card-title flex items-center">
                             <HeartIcon className="w-6 h-6 text-red-500 mr-2"/>
-                            '같이달려요'의 장점
+                            'TOGERUN'의 장점
                         </h2>
                         <ul className="list-disc list-inside space-y-2">
                             <li>운동 동기 부여 및 지속성 향상</li>
@@ -150,11 +134,7 @@ function MainPage() {
                 </div>
 
                 <div className="text-center">
-                    <p className="text-xl mb-4">지금 바로 '같이달려요'와 함께 건강하고 즐거운 운동을 시작하세요!</p>
-                    <Link to="/signup" className="btn btn-primary btn-lg">
-                        회원가입
-                        <UserPlusIcon className="w-5 h-5 ml-2"/>
-                    </Link>
+                    <p className="text-xl mb-4">지금 바로 'TOGERUN' 과 함께 건강하고 즐거운 운동을 시작하세요!</p>
                 </div>
             </div>
         </div>

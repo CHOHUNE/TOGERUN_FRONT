@@ -161,7 +161,7 @@ function MemberModifyComponent() {
     };
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto">
             {result && (
                 <ResultModal
                     title={'회원정보 수정'}
@@ -169,6 +169,7 @@ function MemberModifyComponent() {
                     callbackFn={closeModal}
                 />
             )}
+
             <form onSubmit={handleClickModify} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
                 <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg shadow-lg p-6 mb-8">
                     <div className="flex items-center justify-center">

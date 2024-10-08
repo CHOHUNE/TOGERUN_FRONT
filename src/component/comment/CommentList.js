@@ -29,14 +29,14 @@ export function CommentList({
 
 
     return (
-        <div className="card mt-12 shadow-md">
-            <div className="card-header p-4 bg-gradient-to-r from-blue-500 to-purple-500">
+        <div className="card mt-12 shadow-md overflow-hidden rounded-lg">
+            <div className="card-header p-4 bg-gradient-to-r from-blue-500 to-purple-500 border-b-4 border-white">
                 <div className="flex items-center space-x-3">
                     <ChatBubbleLeftRightIcon className="h-6 w-6 text-white"/>
                     <h2 className="card-title text-xl font-bold text-white">댓글 리스트</h2>
                 </div>
             </div>
-            <div className="card-body space-y-4">
+            <div className="card-body space-y-4 p-6">
                 {processedComments.map((comment) => (
                     <CommentItem
                         key={comment.id}

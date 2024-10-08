@@ -96,8 +96,9 @@ function ReadComponent({postId}) {
     }
 
     return (
-        <div className="bg-gray-100 min-h-screen py-8">
+        <div className="min-h-screen py-8">
             {isFetching && <FetchingModal />}
+
             <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
                 <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 rounded-t-lg shadow-lg">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserGroupIcon, ClockIcon, ChatBubbleLeftEllipsisIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import { getJoinedChatRoom } from "../../api/memberAPI";
 import {leaveChatRoom} from "../../api/chatAPI";
+import {UserIcon} from "@heroicons/react/24/outline";
 
 const style = `
   .drawer-container {
@@ -113,18 +114,26 @@ function SideOpenDrawer({ isOpen, onClose }) {
             <style>{style}</style>
             <div className={`drawer-overlay ${isActive ? 'active' : ''}`} onClick={handleClose}></div>
             <div className={`drawer-content ${isActive ? 'active' : ''}`}>
-                <div className="flex justify-between items-center p-4 border-b">
-                    <h2 className="text-lg font-bold">참여 중인 채팅방</h2>
-                    <button onClick={handleClose} className="btn btn-ghost btn-circle">
-                        <XMarkIcon className="h-6 w-6" />
-                    </button>
+                <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-6 rounded-b-xl shadow-md">
+                    <div className="flex items-center justify-between text-white">
+                        <div className="flex items-center space-x-3">
+                            <UserIcon className="h-8 w-8"/>
+                            <h2 className="text-xl font-bold">참여 중인 채팅방</h2>
+                        </div>
+                        <button onClick={handleClose} className="text-white hover:text-gray-200 transition-colors">
+                            <XMarkIcon className="h-6 w-6"/>
+                        </button>
+                    </div>
                 </div>
+
+
                 {isLoading && <div className="flex justify-center items-center h-24">
                     <div className="loading loading-spinner loading-md"></div>
                 </div>}
                 {error && <div className="alert alert-error text-sm">{error}</div>}
                 {chatRooms.map((room) => (
-                    <div key={room.chatRoomId} className="card bg-base-100 shadow-sm m-3 hover:shadow-md transition-shadow duration-300">
+                    <div key={room.chatRoomId}
+                         className="card bg-base-100 shadow-sm m-3 hover:shadow-md transition-shadow duration-300">
                         <div className="card-body p-3">
                             <h3 className="card-title text-sm font-semibold mb-2">{room.postTitle}</h3>
                             <div className="space-y-1 text-xs">
@@ -143,7 +152,8 @@ function SideOpenDrawer({ isOpen, onClose }) {
                             </div>
                             <div className="card-actions justify-between items-center mt-2">
                                 <div className="flex space-x-2">
-                                    <span className={`badge badge-sm ${room.participantCount < room.capacity ? 'badge-success' : 'badge-error'}`}>
+                                    <span
+                                        className={`badge badge-sm ${room.participantCount < room.capacity ? 'badge-success' : 'badge-error'}`}>
                                         {room.participantCount < room.capacity ? '참여가능' : '마감'}
                                     </span>
                                     <span className="badge badge-sm badge-outline">

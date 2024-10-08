@@ -6,9 +6,9 @@ function ModifyPage(props) {
 
     return (
         <BasicLayout>
-        <div className="container mx-auto p-4">
+
             <MemberModifyComponent />
-        </div>
+
         </BasicLayout>
     );
 }

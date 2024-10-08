@@ -8,6 +8,7 @@ import NotificationIcon from "../component/notification/NotificationComponent";
 import {Bars3Icon, MagnifyingGlassIcon, UserCircleIcon, ChatBubbleLeftRightIcon} from '@heroicons/react/24/outline';
 import SideOpenDrawer from "../component/common/sideOpenDrawer";
 import ResultModal from "../component/common/ResultModal";
+import {ClipboardDocumentListIcon, ShieldCheckIcon} from "@heroicons/react/16/solid";
 
 
 const BasicMenu = () => {
@@ -72,7 +73,7 @@ const BasicMenu = () => {
                         </ul>
                     </div>
 
-                    <button onClick={() => navigate('/home')} className="btn btn-ghost normal-case px-2 h-auto min-h-0">
+                    <button onClick={() => navigate('/')} className="btn btn-ghost normal-case px-2 h-auto min-h-0">
                         <div className="h-12 sm:h-16 w-auto py-1"> {/* 작은 화면에서는 h-12, 큰 화면에서는 h-16 */}
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" className="h-full w-auto">
                                 <defs>
@@ -90,20 +91,34 @@ const BasicMenu = () => {
 
                 </div>
                 <div className="navbar-center hidden lg:flex">
-                    <ul className="menu menu-horizontal px-1">
+                    <ul className="menu menu-horizontal px-1 space-x-2">
                         {loginState.roleNames && loginState.roleNames.includes("ROLE_ADMIN") && (
                             <li>
-                                <button onClick={() => navigate("/member/admin")}>관리자</button>
+                                <button
+                                    onClick={() => navigate("/member/admin")}
+                                    className="btn btn-sm btn-outline hover:btn-primary transition-colors duration-300 flex items-center space-x-2"
+                                >
+                                    <ShieldCheckIcon className="h-5 w-5"/>
+                                    <span>관리자</span>
+                                </button>
                             </li>
                         )}
-                        {isLogin&&(<li>
-                            <button onClick={() => navigate('/post/list')}>게시글</button>
-                        </li>)}
+                        {isLogin && (
+                            <li>
+                                <button
+                                    onClick={() => navigate('/post/list')}
+                                    className="btn btn-sm btn-outline hover:btn-secondary transition-colors duration-300 flex items-center space-x-2"
+                                >
+                                    <ClipboardDocumentListIcon className="h-5 w-5"/>
+                                    <span>게시글</span>
+                                </button>
+                            </li>
+                        )}
                     </ul>
                 </div>
                 <div className="navbar-end">
                     <form onSubmit={handleSearch} className="flex items-center">
-                        {isLogin&&(<div className="form-control">
+                        {isLogin && (<div className="form-control">
                             <input
                                 type="text"
                                 placeholder="제목, 내용, 장소 검색"
@@ -112,24 +127,24 @@ const BasicMenu = () => {
                                 className="input input-bordered w-24 md:w-auto"
                             />
                         </div>)}
-                        {isLogin&&(
+                        {isLogin && (
                             <button type="submit" className="btn btn-ghost btn-circle">
-                            <MagnifyingGlassIcon className="h-5 w-5"/>
-                        </button>
+                                <MagnifyingGlassIcon className="h-5 w-5"/>
+                            </button>
                         )}
                     </form>
-                    {isLogin&& <NotificationIcon/>}
-                        {isLogin&&
-                            <button onClick={toggleSideDrawer} className="btn btn-ghost btn-circle">
+                    {isLogin && <NotificationIcon/>}
+                    {isLogin &&
+                        <button onClick={toggleSideDrawer} className="btn btn-ghost btn-circle">
                             <ChatBubbleLeftRightIcon className="h-5 w-5"/>
                         </button>
-                        }
+                    }
 
 
                     {loginState.email && (
                         <div className="dropdown dropdown-end">
                             <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-                                <div className="w-10 rounded-full">
+                            <div className="w-10 rounded-full">
                                     {loginState.img ? (
                                         <img src={loginState.img} alt="프로필"/>
                                     ) : (

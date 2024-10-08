@@ -63,7 +63,7 @@ const AdminComponent = () => {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="container mx-auto px-4 py-8">
+            <div>
                 <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-lg p-6 mb-8">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
