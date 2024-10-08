@@ -5,14 +5,14 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { useSpring, animated } from 'react-spring';
-import { useInView } from 'react-intersection-observer';
 import PageComponent from "../common/PageComponent";
 import useCustomMove from "../../hooks/useCustomMove";
 import FetchingModal from "../common/FetchingModal";
 import { EyeIcon, MapPinIcon, HeartIcon, UserIcon, CalendarIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { getList } from "../../api/postAPI";
 import { Navigation, Pagination } from "swiper/modules";
+import AnimatedRowComponent from "../common/AnimatedRowComponent";
+
 
 const initState = {
     dtoList: [],
@@ -57,68 +57,6 @@ function ListComponent() {
 
     const serverData = data || initState;
 
-    const AnimatedRow = ({ posts, rowIndex }) => {
-        const [ref, inView] = useInView({
-            triggerOnce: true,
-            threshold: 0.1,
-        });
-
-        const animationProps = useSpring({
-            opacity: inView ? 1 : 0,
-            transform: inView ? 'translateY(0px)' : 'translateY(50px)',
-            delay: rowIndex * 200,
-        });
-
-        return (
-            <animated.div ref={ref} style={animationProps} className="flex flex-wrap -mx-2 mb-4">
-                {posts.map((post) => (
-                    <div key={post.id} className="w-full sm:w-1/2 lg:w-1/3 px-2 mb-4">
-                        <div className="card bg-base-100 shadow-xl h-full">
-                            <div className="card-body">
-                                <h2 className="card-title">
-                                    <Link to={`/post/${post.id}`} className="link link-primary">
-                                        {post.title}
-                                    </Link>
-                                </h2>
-                                <div className="flex items-center text-sm text-gray-500 mb-2">
-                                    <UserIcon className="h-4 w-4 mr-1"/>
-                                    <span>{post.nickname}</span>
-                                    <CalendarIcon className="h-4 w-4 ml-4 mr-1"/>
-                                    <span>{post.localDate}</span>
-                                </div>
-                                <div className="flex flex-wrap gap-2 mb-4">
-                                    <span className={`badge ${post.participateFlag ? 'badge-success' : 'badge-error'}`}>
-                                        {post.participateFlag ? '참여가능' : '마감'}
-                                    </span>
-                                    <span className="badge badge-info">
-                                        <EyeIcon className="h-4 w-4 mr-1"/>
-                                        {post.viewCount}
-                                    </span>
-                                    <span className="badge badge-warning">
-                                        <HeartIcon className="h-4 w-4 mr-1"/>
-                                        {post.likeCount}
-                                    </span>
-                                    <span className="badge badge-accent">
-                                        {getActivityName(post.activityType)}
-                                    </span>
-                                </div>
-                                <div className="flex items-center text-sm text-gray-500 mb-4">
-                                    <MapPinIcon className="h-4 w-4 mr-1"/>
-                                    <span>{formatRoadName(post.roadName)}</span>
-                                </div>
-                                <div className="card-actions justify-end mt-auto">
-                                    <Link to={`/post/${post.id}`} className="btn btn-primary btn-sm">
-                                        자세히 보기
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </animated.div>
-        );
-    };
-
     const handleClickPage = (pageParam) => {
         moveToList(pageParam)
     }
@@ -155,6 +93,51 @@ function ListComponent() {
     };
 
     const groupedPosts = groupPosts(serverData.dtoList, 3);
+
+    const renderPostCard = (post) => (
+        <div key={post.id} className="w-full sm:w-1/2 lg:w-1/3 px-2 mb-4">
+            <div className="card bg-base-100 shadow-xl h-full">
+                <div className="card-body">
+                    <h2 className="card-title">
+                        <Link to={`/post/${post.id}`} className="link link-primary">
+                            {post.title}
+                        </Link>
+                    </h2>
+                    <div className="flex items-center text-sm text-gray-500 mb-2">
+                        <UserIcon className="h-4 w-4 mr-1"/>
+                        <span>{post.nickname}</span>
+                        <CalendarIcon className="h-4 w-4 ml-4 mr-1"/>
+                        <span>{post.localDate}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                        <span className={`badge ${post.participateFlag ? 'badge-success' : 'badge-error'}`}>
+                            {post.participateFlag ? '참여가능' : '마감'}
+                        </span>
+                        <span className="badge badge-info">
+                            <EyeIcon className="h-4 w-4 mr-1"/>
+                            {post.viewCount}
+                        </span>
+                        <span className="badge badge-warning">
+                            <HeartIcon className="h-4 w-4 mr-1"/>
+                            {post.likeCount}
+                        </span>
+                        <span className="badge badge-accent">
+                            {getActivityName(post.activityType)}
+                        </span>
+                    </div>
+                    <div className="flex items-center text-sm text-gray-500 mb-4">
+                        <MapPinIcon className="h-4 w-4 mr-1"/>
+                        <span>{formatRoadName(post.roadName)}</span>
+                    </div>
+                    <div className="card-actions justify-end mt-auto">
+                        <Link to={`/post/${post.id}`} className="btn btn-primary btn-sm">
+                            자세히 보기
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -275,7 +258,9 @@ function ListComponent() {
 
             <div>
                 {groupedPosts.map((row, index) => (
-                    <AnimatedRow key={index} posts={row} rowIndex={index} />
+                    <AnimatedRowComponent key={index} rowIndex={index}>
+                        {row.map(renderPostCard)}
+                    </AnimatedRowComponent>
                 ))}
             </div>
 
