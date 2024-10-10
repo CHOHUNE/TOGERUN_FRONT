@@ -1,91 +1,110 @@
 import axios from "axios";
-import {getCookie, setCookie} from "./cookieUtil";
-import {axiosInstance} from "../api/api";
+import { getCookie, setCookie } from "./cookieUtil";
+import { axiosInstance } from "../api/api";
 
 const jwtAxios = axios.create({
-    baseURL: 'http://localhost:8080/api'
-})
+    baseURL: 'http://localhost:8080/api',
+    withCredentials: true
+});
 
 const refreshJWT = async (accessToken) => {
-    const header = {headers: {"Authorization": `Bearer ${accessToken}`}}
-    const res = await axiosInstance.get(`/member/refresh`, header)
-    return res.data
-}
+    const header = { headers: { "Authorization": `Bearer ${accessToken}` } };
+    const res = await axiosInstance.get(`/member/refresh`, header);
+    return res.data;
+};
 
 const beforeReq = (config) => {
-    const memberInfo = getCookie('member')
+    const memberInfo = getCookie('member');
 
     if (!memberInfo) {
-        console.log("Member NOT FOUND")
+        console.log("Member NOT FOUND");
         return Promise.reject({
             response: {
-                data: { error: "REQUIRE_LOGIN" },
-                status:401,
-                redirectUrl: '/api/member/login'
+                data: {
+                    status: "UNAUTHORIZED",
+                    message: "로그인이 필요합니다.",
+                    redirect: '/member/login',
+                    errorStatus: "AUTHENTICATION_REQUIRED"
+                }
             }
-
-        })
+        });
     }
 
-    const {accessToken} = memberInfo
-    config.headers.Authorization = `Bearer ${accessToken}`
+    const { accessToken } = memberInfo;
+    config.headers.Authorization = `Bearer ${accessToken}`;
 
-    return config
-}
+    return config;
+};
 
 const requestFail = (err) => {
-    console.log(".....request error occur.....")
-    return Promise.reject(err)
-}
+    console.log(".....request error occur.....");
+    return Promise.reject(err);
+};
 
 const beforeRes = async (res) => {
-    console.log("before return response...........")
+    console.log("before return response...........");
 
-    const data = res.data
+    const data = res.data;
 
-    if (data && data.error === 'ERROR_ACCESS_TOKEN') {
-        const memberCookieValue = getCookie("member")
-        const result = await refreshJWT(memberCookieValue.accessToken)
-        console.log("refreshJWT RESULT", result)
+    if (data && data.errorStatus === 'ERROR_ACCESS_TOKEN') {
+        const memberCookieValue = getCookie("member");
+        const result = await refreshJWT(memberCookieValue.accessToken);
+        console.log("refreshJWT RESULT", result);
 
-        memberCookieValue.accessToken = result.accessToken
-        setCookie("member", JSON.stringify(memberCookieValue), 1)
+        memberCookieValue.accessToken = result.accessToken;
+        setCookie("member", JSON.stringify(memberCookieValue), 1);
 
-        const originalRequest = res.config
-        originalRequest.headers.Authorization = `Bearer ${result.accessToken}`
+        const originalRequest = res.config;
+        originalRequest.headers.Authorization = `Bearer ${result.accessToken}`;
 
-        return axiosInstance(originalRequest)
+        return axiosInstance(originalRequest);
     }
 
-    return res
-}
+    return res;
+};
 
-const responseFail = (err,setModalState) => {
-    console.log(".....response fail error .....")
+const responseFail = (err) => {
+    console.log(".....response fail error .....");
 
-    if (err.response && err.response.status === 403) {
-        const data = err.response.data;
-        if (data.status === 'NEED_PROFILE_UPDATE') {
-            console.log('Profile update required.');
-            setModalState({
-                isOpen: true,
-                title: "프로필 업데이트 필요",
-                content: "회원가입 정보를 전부 기입 완료해 주십시오.",
-                callbackFn: () => {
-                    window.location.href = data.redirectUrl;
-                }
-            });
-        } else if (data.status === 'ACCESS_DENIED') {
-            console.error('Access denied:', data.message);
-            // 여기에 접근 거부에 대한 추가 처리를 구현할 수 있습니다.
-            // 예: 알림 표시, 특정 페이지로 리다이렉트 등
+    if (err.response && err.response.data) {
+        const { status, message, redirect, errorStatus } = err.response.data;
+
+        console.error(`Error: ${errorStatus}, Message: ${message}`);
+
+        switch (errorStatus) {
+            case "AUTHENTICATION_REQUIRED":
+                window.location.href=redirect || '/member/login';
+                break;
+            case "AUTHENTICATION_FAILED":
+                window.location.href = redirect || '/member/login';
+                break;
+            case "ACCESS_DENIED":
+                window.location.href = redirect || '/';
+                break;
+            case "NEED_PROFILE_UPDATE":
+                window.location.href = redirect || '/member/modify';
+                break;
+            case "INSUFFICIENT_AUTHENTICATION":
+                window.location.href = redirect || '/member/login';
+                break;
+            default:
+                console.error('Unhandled error:', message);
+                window.location.href = redirect || '/';
         }
+    } else {
+        console.error('Unexpected error:', err);
+        window.location.href = '/error';
     }
 
-    return Promise.reject(err)
-}
+    return Promise.reject(err);
+};
 
-jwtAxios.interceptors.request.use(beforeReq, requestFail)
-jwtAxios.interceptors.response.use(beforeRes, responseFail)
+jwtAxios.interceptors.request.use(beforeReq, requestFail);
+jwtAxios.interceptors.response.use(beforeRes, responseFail);
 
-export default jwtAxios
+export default jwtAxios;
+
+// 외부 웹사이트로 이동하거나 전체 페이지 새로고침이 필요한 경우 window.location.href를 사용합니다.
+// React 애플리케이션 내부에서 페이지 간 이동을 할 때는 navigate 함수를 사용하는 것이 좋지만,
+// 오류 처리의 경우 React 컴포넌트 컨텍스트 밖에서 동작해야 하기 때문에
+// 전체 페이지 새로 고침 후 navigate를 이용하는 것이 더 적절합니다.
