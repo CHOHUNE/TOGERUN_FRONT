@@ -1,6 +1,6 @@
 import React from 'react';
 import BasicLayout from "../../layouts/BasicLayout";
-import RestoreComponent from "../../component/post/RestoreComponent";
+import RestoreComponent from "../../component/member/RestoreComponent";
 import {useParams} from "react-router-dom";
 
 function RestorePage(props) {

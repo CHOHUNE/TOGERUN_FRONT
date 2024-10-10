@@ -4,7 +4,8 @@ import jwtAxios from "../util/JwtUtil";
 export const basicURL = 'http://localhost:8080/api'
 
 export const axiosInstance = axios.create({
-    baseURL: basicURL
+    baseURL: basicURL,
+    withCredentials: true
     //추후 배포시 baseURL 만 변경 해준다
 })
 
