@@ -1,11 +1,11 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { CommentForm } from "./CommentForm";
+import { CommentWritingForm } from "./CommentWritingForm";
 import { CommentList } from "./CommentList";
 import { useCommentHook } from "../../hooks/useCommentHook";
 import { fetchCommentList } from "../../api/commentAPI";
 
-export function CommentContainer({ postId }) {
+export function CommentTotalContainer({ postId }) {
     const {
         handleAddComment,
         handleDeleteComment,
@@ -39,7 +39,7 @@ export function CommentContainer({ postId }) {
         <div className="w-full my-4 bg-white shadow-lg rounded-lg overflow-hidden">
             <div className="p-6">
                 {/*<h2 className="text-2xl font-bold mb-6 text-gray-800">댓글</h2>*/}
-                <CommentForm
+                <CommentWritingForm
                     isSubmitting={isSubmitting}
                     onSubmit={handleAddComment}
                 />
@@ -57,4 +57,4 @@ export function CommentContainer({ postId }) {
     );
 }
 
-export default CommentContainer;
+export default CommentTotalContainer;

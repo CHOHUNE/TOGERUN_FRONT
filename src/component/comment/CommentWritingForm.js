@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import useCustomLogin from "../../hooks/useCustomLogin";
 
-export function CommentForm({isSubmitting,onSubmit}) {
+export function CommentWritingForm({isSubmitting,onSubmit}) {
     const [content, setContent] = useState("");
 
     const {isLogin} = useCustomLogin();

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useCommentHook } from "../../hooks/useCommentHook";
-import { PencilIcon, PlusIcon, TrashIcon, XMarkIcon, UserCircleIcon } from "@heroicons/react/24/solid";
+import { PencilIcon, PlusIcon, TrashIcon, XMarkIcon, UserCircleIcon, ArrowUturnLeftIcon } from "@heroicons/react/24/solid";
 import useCustomLogin from "../../hooks/useCustomLogin";
+import ResultModal from "../common/ResultModal";
 
 export function CommentItem({ comment, postId, submittingState }) {
     const [isEditing, setIsEditing] = useState(false);
@@ -9,20 +10,80 @@ export function CommentItem({ comment, postId, submittingState }) {
     const [commentEdited, setCommentEdited] = useState(comment.content);
     const [replyComment, setReplyComment] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(submittingState);
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showResultModal, setShowResultModal] = useState(false);
+    const [resultModalProps, setResultModalProps] = useState({});
     const { isLogin, loginState } = useCustomLogin();
 
     const {
-        handleAddComment,
+        handleAddComment: hookHandleAddComment,
         handleDeleteComment,
         handleEditComment,
     } = useCommentHook(postId, setIsSubmitting, setIsEditing, setIsWriting);
 
-    const toggleDeleteModal = () => setShowDeleteModal(!showDeleteModal);
+    const toggleConfirmModal = () => setShowConfirmModal(!showConfirmModal);
 
-    const confirmDelete = () => {
-        handleDeleteComment(comment.id);
-        toggleDeleteModal();
+    const confirmAction = async () => {
+        toggleConfirmModal();
+        try {
+            await handleDeleteComment(comment.id);
+            setResultModalProps({
+                title: "작업 완료",
+                content: comment.delFlag ? "댓글이 복구되었습니다." : "댓글이 삭제되었습니다.",
+                callbackFn: () => setShowResultModal(false)
+            });
+            setShowResultModal(true);
+        } catch (error) {
+            setResultModalProps({
+                title: "오류 발생",
+                content: "작업 중 오류가 발생했습니다. 다시 시도해주세요.",
+                callbackFn: () => setShowResultModal(false)
+            });
+            setShowResultModal(true);
+        }
+    };
+
+    const handleEdit = async (commentId, content, event) => {
+        if (event && event.key !== 'Enter') return;
+        try {
+            await handleEditComment(commentId, content);
+            setIsEditing(false);
+            setResultModalProps({
+                title: "수정 완료",
+                content: "댓글이 성공적으로 수정되었습니다.",
+                callbackFn: () => setShowResultModal(false)
+            });
+            setShowResultModal(true);
+        } catch (error) {
+            setResultModalProps({
+                title: "수정 오류",
+                content: "댓글 수정 중 오류가 발생했습니다. 다시 시도해주세요.",
+                callbackFn: () => setShowResultModal(false)
+            });
+            setShowResultModal(true);
+        }
+    };
+
+    const handleAddComment = async (content, parentId, event) => {
+        if (event && event.key !== 'Enter') return;
+        try {
+            await hookHandleAddComment(content, parentId);
+            setIsWriting(false);
+            setReplyComment("");
+            setResultModalProps({
+                title: "댓글 추가 완료",
+                content: "댓글이 성공적으로 추가되었습니다.",
+                callbackFn: () => setShowResultModal(false)
+            });
+            setShowResultModal(true);
+        } catch (error) {
+            setResultModalProps({
+                title: "댓글 추가 오류",
+                content: "댓글 추가 중 오류가 발생했습니다. 다시 시도해주세요.",
+                callbackFn: () => setShowResultModal(false)
+            });
+            setShowResultModal(true);
+        }
     };
 
     return (
@@ -66,33 +127,39 @@ export function CommentItem({ comment, postId, submittingState }) {
 
                             {loginState.email === comment.createdBy && (
                                 <>
-                                    {!isEditing ? (
-                                        <button
-                                            className="btn btn-info btn-xs"
-                                            onClick={() => setIsEditing(true)}
-                                        >
-                                            <PencilIcon className="h-4 w-4" />
-                                        </button>
-                                    ) : (
-                                        <button
-                                            className="btn btn-ghost btn-xs"
-                                            onClick={() => setIsEditing(false)}
-                                        >
-                                            <XMarkIcon className="h-4 w-4" />
-                                        </button>
+                                    {!comment.delFlag && (
+                                        <>
+                                            {!isEditing ? (
+                                                <button
+                                                    className="btn btn-info btn-xs"
+                                                    onClick={() => setIsEditing(true)}
+                                                >
+                                                    <PencilIcon className="h-4 w-4" />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className="btn btn-ghost btn-xs"
+                                                    onClick={() => setIsEditing(false)}
+                                                >
+                                                    <XMarkIcon className="h-4 w-4" />
+                                                </button>
+                                            )}
+                                        </>
                                     )}
                                     <button
-                                        onClick={toggleDeleteModal}
-                                        className="btn btn-error btn-xs"
+                                        onClick={toggleConfirmModal}
+                                        className={`btn btn-xs ${comment.delFlag ? 'btn-warning' : 'btn-error'}`}
                                     >
-                                        <TrashIcon className="h-4 w-4" />
+                                        {comment.delFlag ? <ArrowUturnLeftIcon className="h-4 w-4" /> : <TrashIcon className="h-4 w-4" />}
                                     </button>
                                 </>
                             )}
                         </div>
                     </div>
                     <div className="mt-1">
-                        {!isEditing ? (
+                        {comment.delFlag ? (
+                            <p className="text-gray-500 italic">삭제된 댓글입니다</p>
+                        ) : !isEditing ? (
                             <p className="whitespace-pre-wrap text-base">
                                 {comment.content}
                             </p>
@@ -102,12 +169,17 @@ export function CommentItem({ comment, postId, submittingState }) {
                                     className="textarea textarea-bordered w-full"
                                     value={commentEdited}
                                     onChange={(e) => setCommentEdited(e.target.value)}
-                                    onKeyDown={(e) => handleEditComment(comment.id, commentEdited, e)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleEdit(comment.id, commentEdited);
+                                        }
+                                    }}
                                 />
                                 <button
                                     className="btn btn-primary mt-2"
                                     disabled={isSubmitting}
-                                    onClick={() => handleEditComment(comment.id, commentEdited)}
+                                    onClick={() => handleEdit(comment.id, commentEdited)}
                                 >
                                     수정 - 저장
                                 </button>
@@ -120,7 +192,12 @@ export function CommentItem({ comment, postId, submittingState }) {
                                     value={replyComment}
                                     onChange={(e) => setReplyComment(e.target.value)}
                                     placeholder="댓글을 입력 해주세요."
-                                    onKeyDown={(e) => handleAddComment(replyComment, comment.id, e)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleAddComment(replyComment, comment.id);
+                                        }
+                                    }}
                                 />
                                 <button
                                     className="btn btn-primary mt-2"
@@ -149,17 +226,26 @@ export function CommentItem({ comment, postId, submittingState }) {
                 </div>
             )}
 
-            {showDeleteModal && (
+            {showConfirmModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                     <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-                        <h3 className="font-bold text-lg mb-4">댓글을 삭제하시겠습니까?</h3>
+                        <h3 className="font-bold text-lg mb-4">
+                            {comment.delFlag ? "댓글을 복구하시겠습니까?" : "댓글을 삭제하시겠습니까?"}
+                        </h3>
                         <div className="flex justify-end space-x-2">
-                            <button className="btn btn-error" onClick={confirmDelete}>삭제</button>
-                            <button className="btn btn-ghost" onClick={toggleDeleteModal}>취소</button>
+                            <button
+                                className={`btn ${comment.delFlag ? 'btn-warning' : 'btn-error'}`}
+                                onClick={confirmAction}
+                            >
+                                {comment.delFlag ? "복구" : "삭제"}
+                            </button>
+                            <button className="btn btn-ghost" onClick={toggleConfirmModal}>취소</button>
                         </div>
                     </div>
                 </div>
             )}
+
+            {showResultModal && <ResultModal {...resultModalProps} />}
         </div>
     );
 }

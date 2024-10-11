@@ -18,7 +18,6 @@ export const useCommentHook = (postId) => {
         mutationFn: (commentId) => deleteCommentAPI(commentId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["comments", postId] });
-            alert("삭제 성공");
         },
         onError: (error) => {
             console.error("댓글 삭제 실패:", error);

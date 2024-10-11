@@ -1,7 +1,7 @@
 import React from 'react';
 import {useParams} from 'react-router-dom';
 import ReadComponent from "../../component/post/ReadComponent";
-import CommentContainer from "../../component/comment/CommentContainer";
+import CommentTotalContainer from "../../component/comment/CommentTotalContainer";
 
 
 const ReadPage = () => {
@@ -13,7 +13,7 @@ const ReadPage = () => {
 
         <div className="container mx-auto">
             <ReadComponent postId={postId}/>
-            <CommentContainer postId={postId}/>
+            <CommentTotalContainer postId={postId}/>
         </div>
 
     );
