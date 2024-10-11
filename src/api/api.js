@@ -5,7 +5,7 @@ export const basicURL = 'http://localhost:8080/api'
 
 export const axiosInstance = axios.create({
     baseURL: basicURL,
-    withCredentials: true
+    // withCredentials: true
     //추후 배포시 baseURL 만 변경 해준다
 })
 

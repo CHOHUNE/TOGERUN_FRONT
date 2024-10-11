@@ -4,7 +4,7 @@ import { axiosInstance } from "../api/api";
 
 const jwtAxios = axios.create({
     baseURL: 'http://localhost:8080/api',
-    withCredentials: true
+
 });
 
 const refreshJWT = async (accessToken) => {

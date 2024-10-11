@@ -19,7 +19,9 @@ export const getMember = async () => {
 }
 
 export const modifyMember = async (member) => {
-    const res = await jwtAxios.put('/user/modify', member)
+    const res = await jwtAxios.put('/user/modify', member,{
+        withCredentials: true
+    })
     return res.data
 }
 
