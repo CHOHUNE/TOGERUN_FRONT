@@ -37,13 +37,12 @@ export function CommentTotalContainer({ postId }) {
 
     return (
         <div className="w-full my-4 bg-white shadow-lg rounded-lg overflow-hidden">
-            <div className="p-6">
-                {/*<h2 className="text-2xl font-bold mb-6 text-gray-800">댓글</h2>*/}
+            <div className="p-4 sm:p-6">
                 <CommentWritingForm
                     isSubmitting={isSubmitting}
                     onSubmit={handleAddComment}
                 />
-                <div className="mt-8">
+                <div className="mt-6 sm:mt-8">
                     <CommentList
                         commentList={commentList || []}
                         isSubmitting={isSubmitting}
@@ -56,5 +55,4 @@ export function CommentTotalContainer({ postId }) {
         </div>
     );
 }
-
 export default CommentTotalContainer;

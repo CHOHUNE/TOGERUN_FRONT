@@ -17,17 +17,17 @@ export function CommentWritingForm({isSubmitting,onSubmit}) {
     }
 
     return (
-        <div className="flex items-center">
-      <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="textarea textarea-bordered w-full h-24 resize-none"
-          placeholder="댓글을 입력 해주세요."
-          disabled={!isLogin}
-      />
-            <div className="ml-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center">
+            <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="textarea textarea-bordered w-full h-20 sm:h-24 resize-none text-sm sm:text-base"
+                placeholder="댓글을 입력 해주세요."
+                disabled={!isLogin}
+            />
+            <div className="mt-2 sm:mt-0 sm:ml-2 w-full sm:w-auto">
                 <button
-                    className="btn btn-primary h-24 w-24"
+                    className="btn btn-primary w-full sm:w-24 h-12 sm:h-24 text-sm sm:text-base"
                     disabled={isSubmitting || !isLogin}
                     onClick={handleSubmit}
                     title={!isLogin ? "로그인 후 작성 가능 합니다. " : ""}

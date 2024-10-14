@@ -1,23 +1,24 @@
-import React, {useState} from 'react';
-import {useNavigate} from "react-router-dom";
+import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import useCustomLogin from "../hooks/useCustomLogin";
-import {useMutation} from "@tanstack/react-query";
-import {useRecoilState} from "recoil";
-import {initState, signInState} from "../atoms/singinState";
+import { useMutation } from "@tanstack/react-query";
+import { useRecoilState } from "recoil";
+import { initState, signInState } from "../atoms/singinState";
 import NotificationIcon from "../component/notification/NotificationComponent";
-import {Bars3Icon, MagnifyingGlassIcon, UserCircleIcon, ChatBubbleLeftRightIcon} from '@heroicons/react/24/outline';
+import { Bars3Icon, MagnifyingGlassIcon, UserCircleIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import SideOpenDrawer from "../component/common/sideOpenDrawer";
 import ResultModal from "../component/common/ResultModal";
-import {ClipboardDocumentListIcon, ShieldCheckIcon} from "@heroicons/react/16/solid";
-
+import { ClipboardDocumentListIcon, ShieldCheckIcon } from "@heroicons/react/16/solid";
 
 const BasicMenu = () => {
     const navigate = useNavigate();
-    const {doLogout, moveToPath, loginState,isLogin} = useCustomLogin();
+    const { doLogout, moveToPath, loginState, isLogin } = useCustomLogin();
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [signIn, setSignIn] = useRecoilState(signInState);
     const [searchKeyword, setSearchKeyword] = useState("");
     const [isSideDrawerOpen, setIsSideDrawerOpen] = useState(false);
+    const [isSearchVisible, setIsSearchVisible] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -46,35 +47,19 @@ const BasicMenu = () => {
 
     const toggleLogoutModal = () => setShowLogoutModal(!showLogoutModal);
     const toggleSideDrawer = () => setIsSideDrawerOpen(!isSideDrawerOpen);
+    const toggleSearchVisibility = () => setIsSearchVisible(!isSearchVisible);
+    const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+
 
     return (
         <div className="bg-base-100 shadow-md relative z-50">
-            <div className="navbar container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="navbar container mx-auto px-2 sm:px-4 lg:px-8">
                 <div className="navbar-start">
-                    <div className="dropdown">
-                        <label tabIndex={0} className="btn btn-ghost lg:hidden">
-                            <Bars3Icon className="h-5 w-5"/>
-                        </label>
-                        <ul tabIndex={0}
-                            className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                            <li>
-                                <button onClick={() => navigate('/post/list')}>게시글</button>
-                            </li>
-                            {loginState.roleNames && loginState.roleNames.includes("ROLE_ADMIN") && (
-                                <li>
-                                    <button onClick={() => navigate("/member/admin")}>관리자</button>
-                                </li>
-                            )}
-                            {isLogin && (
-                                <li>
-                                    <button onClick={() => navigate("/member/modify")}>내 프로필</button>
-                                </li>
-                            )}
-                        </ul>
-                    </div>
-
+                    <button onClick={toggleMobileMenu} className="btn btn-ghost lg:hidden">
+                        <Bars3Icon className="h-5 w-5"/>
+                    </button>
                     <button onClick={() => navigate('/')} className="btn btn-ghost normal-case px-2 h-auto min-h-0">
-                        <div className="h-12 sm:h-16 w-auto py-1"> {/* 작은 화면에서는 h-12, 큰 화면에서는 h-16 */}
+                        <div className="h-8 sm:h-10 md:h-12 w-auto py-1">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" className="h-full w-auto">
                                 <defs>
                                     <style>
@@ -88,17 +73,17 @@ const BasicMenu = () => {
                             </svg>
                         </div>
                     </button>
-
                 </div>
+
                 <div className="navbar-center hidden lg:flex">
                     <ul className="menu menu-horizontal px-1 space-x-2">
                         {loginState.roleNames && loginState.roleNames.includes("ROLE_ADMIN") && (
                             <li>
                                 <button
                                     onClick={() => navigate("/member/admin")}
-                                    className="btn btn-sm btn-outline hover:btn-primary transition-colors duration-300 flex items-center space-x-2"
+                                    className="btn btn-sm btn-outline hover:btn-primary transition-colors duration-300 flex items-center space-x-2 group"
                                 >
-                                    <ShieldCheckIcon className="h-5 w-5"/>
+                                    <ShieldCheckIcon className="h-5 w-5 group-hover:opacity-100"/>
                                     <span>관리자</span>
                                 </button>
                             </li>
@@ -107,70 +92,82 @@ const BasicMenu = () => {
                             <li>
                                 <button
                                     onClick={() => navigate('/post/list')}
-                                    className="btn btn-sm btn-outline hover:btn-secondary transition-colors duration-300 flex items-center space-x-2"
+                                    className="btn btn-sm btn-outline hover:btn-secondary transition-colors duration-300 flex items-center space-x-2 group"
                                 >
-                                    <ClipboardDocumentListIcon className="h-5 w-5"/>
+                                    <ClipboardDocumentListIcon className="h-5 w-5 group-hover:opacity-100"/>
                                     <span>게시글</span>
                                 </button>
                             </li>
                         )}
                     </ul>
                 </div>
+
                 <div className="navbar-end">
-                    <form onSubmit={handleSearch} className="flex items-center">
-                        {isLogin && (<div className="form-control">
-                            <input
-                                type="text"
-                                placeholder="제목, 내용, 장소 검색"
-                                value={searchKeyword}
-                                onChange={(e) => setSearchKeyword(e.target.value)}
-                                className="input input-bordered w-24 md:w-auto"
-                            />
-                        </div>)}
-                        {isLogin && (
-                            <button type="submit" className="btn btn-ghost btn-circle">
+                    {isLogin && (
+                        <>
+                            <button onClick={toggleSearchVisibility} className="btn btn-ghost btn-circle lg:hidden">
                                 <MagnifyingGlassIcon className="h-5 w-5"/>
                             </button>
-                        )}
-                    </form>
-                    {isLogin && <NotificationIcon/>}
-                    {isLogin &&
-                        <button onClick={toggleSideDrawer} className="btn btn-ghost btn-circle">
-                            <ChatBubbleLeftRightIcon className="h-5 w-5"/>
-                        </button>
-                    }
-
-
-                    {loginState.email && (
+                            <NotificationIcon/>
+                            <button onClick={toggleSideDrawer} className="btn btn-ghost btn-circle">
+                                <ChatBubbleLeftRightIcon className="h-5 w-5"/>
+                            </button>
+                        </>
+                    )}
+                    {loginState.email ? (
                         <div className="dropdown dropdown-end">
                             <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
-                            <div className="w-10 rounded-full">
+                                <div className="w-8 rounded-full">
                                     {loginState.img ? (
                                         <img src={loginState.img} alt="프로필"/>
                                     ) : (
-                                        <UserCircleIcon className="h-10 w-10"/>
+                                        <UserCircleIcon className="h-8 w-8"/>
                                     )}
                                 </div>
                             </label>
                             <ul tabIndex={0}
                                 className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-                                <li>
-                                    <button onClick={() => navigate('/member/modify')}>프로필</button>
-                                </li>
-                                <li>
-                                    <button onClick={() => navigate('/member/favorites')}>즐겨 찾기</button>
-                                </li>
-                                <li>
-                                    <button onClick={toggleLogoutModal}>로그아웃</button>
-                                </li>
+                                <li><button onClick={() => navigate('/member/modify')}>프로필</button></li>
+                                <li><button onClick={() => navigate('/member/favorites')}>즐겨 찾기</button></li>
+                                <li><button onClick={toggleLogoutModal}>로그아웃</button></li>
                             </ul>
                         </div>
-                    )}
-                    {!loginState.email && (
-                        <button className="btn btn-primary" onClick={() => navigate("/member/login")}>로그인</button>
+                    ) : (
+                        <button className="btn btn-primary btn-sm" onClick={() => navigate("/member/login")}>로그인</button>
                     )}
                 </div>
             </div>
+
+            {/* 모바일 메뉴 */}
+            {isMobileMenuOpen && (
+                <div className="lg:hidden bg-base-100 shadow-md">
+                    <ul className="menu menu-sm p-2">
+                        {isLogin && <li><button onClick={() => navigate('/post/list')}>게시글</button></li>}
+                        {loginState.roleNames && loginState.roleNames.includes("ROLE_ADMIN") && (
+                            <li><button onClick={() => navigate("/member/admin")}>관리자</button></li>
+                        )}
+                        {isLogin && <li><button onClick={() => navigate("/member/modify")}>내 프로필</button></li>}
+                    </ul>
+                </div>
+            )}
+
+            {/* 모바일 검색 */}
+            {isSearchVisible && (
+                <div className="lg:hidden bg-base-100 p-2">
+                    <form onSubmit={handleSearch} className="flex items-center">
+                        <input
+                            type="text"
+                            placeholder="제목, 내용, 장소 검색"
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            className="input input-bordered w-full mr-2"
+                        />
+                        <button type="submit" className="btn btn-ghost btn-circle">
+                            <MagnifyingGlassIcon className="h-5 w-5"/>
+                        </button>
+                    </form>
+                </div>
+            )}
 
             <SideOpenDrawer isOpen={isSideDrawerOpen} onClose={toggleSideDrawer}/>
 

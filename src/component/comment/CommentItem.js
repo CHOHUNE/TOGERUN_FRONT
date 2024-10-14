@@ -87,39 +87,39 @@ export function CommentItem({ comment, postId, submittingState }) {
     };
 
     return (
-        <div className="ml-4 mt-4">
-            <div className="flex items-start space-x-3">
+        <div className={`ml-0 sm:ml-4 mt-4 p-3 sm:p-4 bg-gray-50 rounded-lg ${comment.parentId ? 'border-l-4 border-blue-300' : ''}`}>
+            <div className="flex items-start space-x-2 sm:space-x-3">
                 <div className="flex-shrink-0">
                     {comment.img ? (
                         <img
                             src={comment.img}
                             alt={`${comment.createdBy}'s profile`}
-                            className="w-10 h-10 rounded-full object-cover"
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover"
                         />
                     ) : (
-                        <UserCircleIcon className="w-10 h-10 text-gray-400" />
+                        <UserCircleIcon className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
                     )}
                 </div>
 
                 <div className="flex-grow">
-                    <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-bold">{comment.name}</h3>
-                        <div className="flex items-center space-x-2">
+                    <div className="flex justify-between items-center flex-wrap">
+                        <h3 className="text-sm sm:text-base font-bold">{comment.name}</h3>
+                        <div className="flex items-center space-x-1 sm:space-x-2 mt-1 sm:mt-0">
                             {isLogin && (
                                 <>
                                     {!isWriting ? (
                                         <button
-                                            className="btn btn-success btn-xs"
+                                            className="btn btn-success btn-xs sm:btn-sm"
                                             onClick={() => setIsWriting(true)}
                                         >
-                                            <PlusIcon className="h-4 w-4" />
+                                            <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                                         </button>
                                     ) : (
                                         <button
-                                            className="btn btn-ghost btn-xs"
+                                            className="btn btn-ghost btn-xs sm:btn-sm"
                                             onClick={() => setIsWriting(false)}
                                         >
-                                            <XMarkIcon className="h-4 w-4" />
+                                            <XMarkIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                                         </button>
                                     )}
                                 </>
@@ -131,42 +131,42 @@ export function CommentItem({ comment, postId, submittingState }) {
                                         <>
                                             {!isEditing ? (
                                                 <button
-                                                    className="btn btn-info btn-xs"
+                                                    className="btn btn-info btn-xs sm:btn-sm"
                                                     onClick={() => setIsEditing(true)}
                                                 >
-                                                    <PencilIcon className="h-4 w-4" />
+                                                    <PencilIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                                                 </button>
                                             ) : (
                                                 <button
-                                                    className="btn btn-ghost btn-xs"
+                                                    className="btn btn-ghost btn-xs sm:btn-sm"
                                                     onClick={() => setIsEditing(false)}
                                                 >
-                                                    <XMarkIcon className="h-4 w-4" />
+                                                    <XMarkIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                                                 </button>
                                             )}
                                         </>
                                     )}
                                     <button
                                         onClick={toggleConfirmModal}
-                                        className={`btn btn-xs ${comment.delFlag ? 'btn-warning' : 'btn-error'}`}
+                                        className={`btn btn-xs sm:btn-sm ${comment.delFlag ? 'btn-warning' : 'btn-error'}`}
                                     >
-                                        {comment.delFlag ? <ArrowUturnLeftIcon className="h-4 w-4" /> : <TrashIcon className="h-4 w-4" />}
+                                        {comment.delFlag ? <ArrowUturnLeftIcon className="h-3 w-3 sm:h-4 sm:w-4" /> : <TrashIcon className="h-3 w-3 sm:h-4 sm:w-4" />}
                                     </button>
                                 </>
                             )}
                         </div>
                     </div>
-                    <div className="mt-1">
+                    <div className="mt-2">
                         {comment.delFlag ? (
-                            <p className="text-gray-500 italic">삭제된 댓글입니다</p>
+                            <p className="text-gray-500 italic text-sm">삭제된 댓글입니다</p>
                         ) : !isEditing ? (
-                            <p className="whitespace-pre-wrap text-base">
+                            <p className="whitespace-pre-wrap text-sm sm:text-base">
                                 {comment.content}
                             </p>
                         ) : (
                             <div>
                                 <textarea
-                                    className="textarea textarea-bordered w-full"
+                                    className="textarea textarea-bordered w-full text-sm sm:text-base"
                                     value={commentEdited}
                                     onChange={(e) => setCommentEdited(e.target.value)}
                                     onKeyDown={(e) => {
@@ -177,21 +177,21 @@ export function CommentItem({ comment, postId, submittingState }) {
                                     }}
                                 />
                                 <button
-                                    className="btn btn-primary mt-2"
+                                    className="btn btn-primary btn-sm mt-2"
                                     disabled={isSubmitting}
                                     onClick={() => handleEdit(comment.id, commentEdited)}
                                 >
-                                    수정 - 저장
+                                    수정 완료
                                 </button>
                             </div>
                         )}
                         {isWriting && (
                             <div className="mt-2">
                                 <textarea
-                                    className="textarea textarea-bordered w-full"
+                                    className="textarea textarea-bordered w-full text-sm sm:text-base"
                                     value={replyComment}
                                     onChange={(e) => setReplyComment(e.target.value)}
-                                    placeholder="댓글을 입력 해주세요."
+                                    placeholder="대댓글을 입력해주세요."
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && !e.shiftKey) {
                                             e.preventDefault();
@@ -200,11 +200,11 @@ export function CommentItem({ comment, postId, submittingState }) {
                                     }}
                                 />
                                 <button
-                                    className="btn btn-primary mt-2"
+                                    className="btn btn-primary btn-sm mt-2"
                                     disabled={isSubmitting}
                                     onClick={() => handleAddComment(replyComment, comment.id)}
                                 >
-                                    댓글-댓글 저장
+                                    대댓글 작성
                                 </button>
                             </div>
                         )}
@@ -213,7 +213,7 @@ export function CommentItem({ comment, postId, submittingState }) {
             </div>
 
             {comment.children && comment.children.length > 0 && (
-                <div className="mt-4 space-y-4 ml-10">
+                <div className="mt-4 space-y-4 ml-4 sm:ml-8">
                     {comment.children.map((childComment) => (
                         <CommentItem
                             key={childComment.id}
@@ -228,18 +228,18 @@ export function CommentItem({ comment, postId, submittingState }) {
 
             {showConfirmModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                    <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+                    <div className="bg-white rounded-lg p-4 sm:p-6 max-w-sm w-full mx-4">
                         <h3 className="font-bold text-lg mb-4">
                             {comment.delFlag ? "댓글을 복구하시겠습니까?" : "댓글을 삭제하시겠습니까?"}
                         </h3>
                         <div className="flex justify-end space-x-2">
                             <button
-                                className={`btn ${comment.delFlag ? 'btn-warning' : 'btn-error'}`}
+                                className={`btn btn-sm sm:btn-md ${comment.delFlag ? 'btn-warning' : 'btn-error'}`}
                                 onClick={confirmAction}
                             >
                                 {comment.delFlag ? "복구" : "삭제"}
                             </button>
-                            <button className="btn btn-ghost" onClick={toggleConfirmModal}>취소</button>
+                            <button className="btn btn-ghost btn-sm sm:btn-md" onClick={toggleConfirmModal}>취소</button>
                         </div>
                     </div>
                 </div>

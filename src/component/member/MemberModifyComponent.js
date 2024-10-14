@@ -161,7 +161,7 @@ function MemberModifyComponent() {
     };
 
     return (
-        <div className="container mx-auto">
+        <div className="container mx-auto px-4 py-8">
             {result && (
                 <ResultModal
                     title={'회원정보 수정'}
@@ -170,13 +170,13 @@ function MemberModifyComponent() {
                 />
             )}
 
-            <form onSubmit={handleClickModify} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-                <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg shadow-lg p-6 mb-8">
-                    <div className="flex items-center justify-center">
-                        <UserIcon className="h-12 w-12 text-white mr-4" />
-                        <h1 className="text-3xl font-bold text-white">회원정보 수정</h1>
+            <form onSubmit={handleClickModify} className="bg-white shadow-md rounded px-4 sm:px-8 pt-6 pb-8 mb-4">
+                <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
+                    <div className="flex flex-col items-center justify-center">
+                        <UserIcon className="h-10 w-10 sm:h-12 sm:w-12 text-white mb-2 sm:mb-4" />
+                        <h1 className="text-2xl sm:text-3xl font-bold text-white text-center">회원정보 수정</h1>
                     </div>
-                    <p className="text-white text-center mt-2 opacity-80">프로필을 업데이트하고 계정을 관리하세요</p>
+                    <p className="text-white text-center mt-2 opacity-80 text-sm sm:text-base">프로필을 업데이트하고 계정을 관리하세요</p>
                 </div>
 
                 <div className="flex justify-center mb-6">
@@ -184,14 +184,14 @@ function MemberModifyComponent() {
                         <img
                             src={user.img}
                             alt="Profile"
-                            className="w-32 h-32 rounded-full object-cover border-4 border-purple-500"
+                            className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-purple-500"
                         />
                     ) : (
-                        <UserCircleIcon className="w-32 h-32 text-purple-500"/>
+                        <UserCircleIcon className="w-24 h-24 sm:w-32 sm:h-32 text-purple-500"/>
                     )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                     <div className="mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
                             이메일
@@ -238,33 +238,31 @@ function MemberModifyComponent() {
                         <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nickname">
                             닉네임
                         </label>
-                        <div className="flex items-center">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center">
                             <input
                                 id="nickname"
                                 type="text"
                                 name="nickname"
                                 value={user.nickname}
                                 onChange={handleChange}
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2"
+                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2 sm:mb-0 sm:mr-2"
                             />
                             <button
                                 type="button"
                                 onClick={checkNicknameAvailability}
-                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full sm:w-auto"
                                 disabled={isCheckingNickname || !user.nickname || user.nickname === originalUser.nickname}
                             >
                                 {isCheckingNickname ? '확인 중...' : '중복 확인'}
                             </button>
                         </div>
-                        {errors.nickname && <p className="text-red-500 text-xs italic">{errors.nickname}</p>}
+                        {errors.nickname && <p className="text-red-500 text-xs italic mt-1">{errors.nickname}</p>}
                         {isNicknameAvailable !== null && !errors.nickname && (
-                            <p className={`text-xs italic ${isNicknameAvailable ? 'text-green-500' : 'text-red-500'}`}>
+                            <p className={`text-xs italic mt-1 ${isNicknameAvailable ? 'text-green-500' : 'text-red-500'}`}>
                                 {isNicknameAvailable ? '사용 가능한 닉네임입니다.' : '이미 사용 중인 닉네임입니다.'}
                             </p>
                         )}
                     </div>
-
-
 
                     <div className="mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="gender">
@@ -281,7 +279,7 @@ function MemberModifyComponent() {
                             <option value="M">남성</option>
                             <option value="F">여성</option>
                         </select>
-                        {errors.gender && <p className="text-red-500 text-xs italic">{errors.gender}</p>}
+                        {errors.gender && <p className="text-red-500 text-xs italic mt-1">{errors.gender}</p>}
                     </div>
 
                     <div className="mb-4">
@@ -300,7 +298,7 @@ function MemberModifyComponent() {
                             <option value="30-39">30~39</option>
                             <option value="40-49">40~49</option>
                         </select>
-                        {errors.age && <p className="text-red-500 text-xs italic">{errors.age}</p>}
+                        {errors.age && <p className="text-red-500 text-xs italic mt-1">{errors.age}</p>}
                     </div>
 
                     <div className="mb-4">
@@ -336,15 +334,15 @@ function MemberModifyComponent() {
                                 maxLength="4"
                             />
                         </div>
-                        {errors.phone1 && <p className="text-red-500 text-xs italic">{errors.phone1}</p>}
+                        {errors.phone1 && <p className="text-red-500 text-xs italic mt-1">{errors.phone1}</p>}
                         {(errors.phone2 || errors.phone3) &&
-                            <p className="text-red-500 text-xs italic">전화번호를 모두 입력해주세요.</p>}
+                            <p className="text-red-500 text-xs italic mt-1">전화번호를 모두 입력해주세요.</p>}
                     </div>
                 </div>
 
                 <div className="flex items-center justify-center mt-6">
                     <button type="submit"
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full sm:w-auto">
                         수정하기
                     </button>
                 </div>

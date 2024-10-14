@@ -122,23 +122,27 @@ const NotificationComponent = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+
+
     return (
-        <div className="relative mr-4" ref={notificationRef}>
+        <div className="relative" ref={notificationRef}>
             <button
                 onClick={toggleNotifications}
-                className="p-1 rounded-full text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
+                className="btn btn-ghost btn-circle hover:bg-base-200"
             >
-                <BellIcon className="h-6 w-6" />
-                {unreadCount > 0 && (
-                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-                        {unreadCount}
-                    </span>
-                )}
+                <div className="indicator">
+                    <BellIcon className="h-5 w-5" />
+                    {unreadCount > 0 && (
+                        <span className="badge badge-xs badge-primary indicator-item">
+                            {unreadCount}
+                        </span>
+                    )}
+                </div>
             </button>
 
             {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-10 max-h-[40vh] flex flex-col">
-                    <div className="py-2 flex-grow overflow-y-auto">
+                <div className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-[90vw] sm:w-80 max-h-[80vh] sm:max-h-[70vh] overflow-y-auto fixed sm:absolute left-1/2 sm:left-auto right-auto sm:right-0 -translate-x-1/2 sm:translate-x-0 top-[60px] sm:top-auto sm:mt-2 z-[100]">
+                    <div className="flex flex-col">
                         {isLoading ? (
                             <p className="text-center py-4">로딩 중...</p>
                         ) : notifications.length === 0 ? (
@@ -148,28 +152,28 @@ const NotificationComponent = () => {
                                 {notifications.map((notification) => (
                                     <div
                                         key={notification.id}
-                                        className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${
-                                            notification.isRead ? 'bg-gray-50' : 'bg-white'
+                                        className={`p-4 hover:bg-base-200 cursor-pointer ${
+                                            notification.isRead ? 'bg-base-200' : 'bg-base-100'
                                         }`}
                                         onClick={() => markAsRead(notification)}
                                     >
-                                        <p className="text-sm text-gray-600">{notification.content}</p>
-                                        <p className="text-xs text-gray-400">{new Date(notification.createdAt).toLocaleString()}</p>
+                                        <p className="text-sm mb-2">{notification.content}</p>
+                                        <p className="text-xs text-base-content/60">{new Date(notification.createdAt).toLocaleString()}</p>
                                     </div>
                                 ))}
-                                <div className="flex justify-between px-4 py-2 border-t">
+                                <div className="flex justify-between p-3 border-t border-base-300 mt-2">
                                     {hasNextPage && (
                                         <button
                                             onClick={() => fetchNextPage()}
                                             disabled={isFetchingNextPage}
-                                            className="text-sm text-blue-500 hover:text-blue-700"
+                                            className="btn btn-ghost btn-sm sm:btn-xs"
                                         >
                                             {isFetchingNextPage ? '로딩 중...' : '더 보기'}
                                         </button>
                                     )}
                                     <button
                                         onClick={() => setShowClearModal(true)}
-                                        className="text-sm text-red-500 hover:text-red-700"
+                                        className="btn btn-ghost btn-sm sm:btn-xs text-error"
                                     >
                                         모두 읽기
                                     </button>
@@ -181,12 +185,14 @@ const NotificationComponent = () => {
             )}
 
             {showClearModal && (
-                <CustomModal
-                    title="알림 모두 읽기"
-                    content="모든 알림을 읽음 처리하시겠습니까?"
-                    onClose={() => setShowClearModal(false)}
-                    onConfirm={handleClearAllNotifications}
-                />
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[200]">
+                    <CustomModal
+                        title="알림 모두 읽기"
+                        content="모든 알림을 읽음 처리하시겠습니까?"
+                        onClose={() => setShowClearModal(false)}
+                        onConfirm={handleClearAllNotifications}
+                    />
+                </div>
             )}
         </div>
     );

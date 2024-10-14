@@ -119,19 +119,19 @@ function SideOpenDrawer({ isOpen, onClose }) {
 
     if (!isOpen) return null;
 
-    const drawerContent = (
+    return ReactDOM.createPortal(
         <div className="drawer-container">
             <style>{style}</style>
             <div className={`drawer-overlay ${isActive ? 'active' : ''}`} onClick={handleClose}></div>
             <div className={`drawer-content ${isActive ? 'active' : ''}`}>
-                <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-6 rounded-b-xl shadow-md">
+                <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-4 sm:p-6 rounded-b-xl shadow-md">
                     <div className="flex items-center justify-between text-white">
-                        <div className="flex items-center space-x-3">
-                            <UserIcon className="h-8 w-8"/>
-                            <h2 className="text-xl font-bold">참여 중인 채팅방</h2>
+                        <div className="flex items-center space-x-2 sm:space-x-3">
+                            <UserIcon className="h-6 w-6 sm:h-8 sm:w-8"/>
+                            <h2 className="text-lg sm:text-xl font-bold">참여 중인 채팅방</h2>
                         </div>
                         <button onClick={handleClose} className="text-white hover:text-gray-200 transition-colors">
-                            <XMarkIcon className="h-6 w-6"/>
+                            <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6"/>
                         </button>
                     </div>
                 </div>
@@ -139,12 +139,12 @@ function SideOpenDrawer({ isOpen, onClose }) {
                 {isLoading && <div className="flex justify-center items-center h-24">
                     <div className="loading loading-spinner loading-md"></div>
                 </div>}
-                {error && <div className="alert alert-error text-sm">{error}</div>}
+                {error && <div className="alert alert-error text-sm m-2">{error}</div>}
                 {chatRooms.map((room) => (
                     <div key={room.chatRoomId}
-                         className="card bg-base-100 shadow-sm m-3 hover:shadow-md transition-shadow duration-300">
-                        <div className="card-body p-3">
-                            <h3 className="card-title text-sm font-semibold mb-2">{room.postTitle}</h3>
+                         className="card bg-base-100 shadow-sm m-2 sm:m-3 hover:shadow-md transition-shadow duration-300">
+                        <div className="card-body p-2 sm:p-3">
+                            <h3 className="card-title text-sm font-semibold mb-1 sm:mb-2">{room.postTitle}</h3>
                             <div className="space-y-1 text-xs">
                                 <p className="flex items-center">
                                     <ClockIcon className="h-3 w-3 mr-1 text-blue-500"/>
@@ -160,21 +160,20 @@ function SideOpenDrawer({ isOpen, onClose }) {
                                 </p>
                             </div>
                             <div className="card-actions justify-between items-center mt-2">
-                                <div className="flex space-x-2">
-                                    <span
-                                        className={`badge badge-sm ${room.participantCount < room.capacity ? 'badge-success' : 'badge-error'}`}>
+                                <div className="flex space-x-1 sm:space-x-2">
+                                    <span className={`badge badge-xs sm:badge-sm ${room.participantCount < room.capacity ? 'badge-success' : 'badge-error'}`}>
                                         {room.participantCount < room.capacity ? '참여가능' : '마감'}
                                     </span>
-                                    <span className="badge badge-sm badge-outline">
+                                    <span className="badge badge-xs sm:badge-sm badge-outline">
                                         {room.activityType}
                                     </span>
                                 </div>
-                                <div className="flex space-x-2">
+                                <div className="flex space-x-1 sm:space-x-2">
                                     <button
                                         onClick={() => handleChatRoomEntry(room.postId)}
                                         className="btn btn-primary btn-xs"
                                     >
-                                        채팅방 입장
+                                        입장
                                     </button>
                                     <button
                                         onClick={() => openLeaveModal(room.postId)}
@@ -197,10 +196,9 @@ function SideOpenDrawer({ isOpen, onClose }) {
                     onConfirm={modalConfig.onConfirm}
                 />
             )}
-        </div>
+        </div>,
+        document.body
     );
-
-    return ReactDOM.createPortal(drawerContent, document.body);
 }
 
 export default SideOpenDrawer;
