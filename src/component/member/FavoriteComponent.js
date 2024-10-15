@@ -5,6 +5,7 @@ import { getAllFavorites } from "../../api/memberAPI";
 import { useNavigate } from 'react-router-dom';
 import { favoriteToggle } from "../../api/postAPI";
 import CustomModal from "../common/CustomModal";
+import AnimatedRowComponent from "../common/AnimatedRowComponent";
 
 const FavoriteComponent = () => {
     const [favorites, setFavorites] = useState([]);
@@ -56,6 +57,18 @@ const FavoriteComponent = () => {
     const closeModal = () => {
         setModalConfig({ show: false });
     };
+
+    const groupFavorites = (favorites, size) => {
+        return favorites.reduce((acc, _, index) => {
+            if (index % size === 0) {
+                acc.push(favorites.slice(index, index + size));
+            }
+            return acc;
+        }, []);
+    };
+
+    const groupedFavorites = groupFavorites(favorites, 3);
+
 
     const renderFavoriteCard = (favorite) => (
         <div key={favorite.id} className="w-full mb-4">
@@ -130,10 +143,16 @@ const FavoriteComponent = () => {
                         <span className="text-white font-semibold text-sm sm:text-base">즐겨찾기 목록</span>
                     </div>
                 </div>
-                <p className="text-white mt-2 opacity-80 text-sm sm:text-base text-center sm:text-left">총 {favorites.length}개의 즐겨찾기</p>
+                <p className="text-white mt-2 opacity-80 text-sm sm:text-base text-center sm:text-left">총 {favorites.length}개의
+                    즐겨찾기</p>
             </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {favorites.map(renderFavoriteCard)}
+                {groupedFavorites.map((row, rowIndex) => (
+                    <AnimatedRowComponent key={rowIndex} rowIndex={rowIndex}>
+                        {row.map(renderFavoriteCard)}
+                    </AnimatedRowComponent>
+                ))}
             </div>
 
             {modalConfig.show && (

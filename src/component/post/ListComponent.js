@@ -10,7 +10,7 @@ import useCustomMove from "../../hooks/useCustomMove";
 import FetchingModal from "../common/FetchingModal";
 import { EyeIcon, MapPinIcon, HeartIcon, UserIcon, CalendarIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { getList } from "../../api/postAPI";
-import { Navigation, Pagination } from "swiper/modules";
+import { Navigation } from "swiper/modules";
 import AnimatedRowComponent from "../common/AnimatedRowComponent";
 import {ClipboardIcon} from "@heroicons/react/16/solid";
 
@@ -96,43 +96,45 @@ function ListComponent() {
     const groupedPosts = groupPosts(serverData.dtoList, 3);
 
     const renderPostCard = (post) => (
-        <div key={post.id} className="card bg-base-100 shadow-xl h-full">
-            <div className="card-body p-4">
-                <h2 className="card-title text-base sm:text-lg mb-2">
-                    <Link to={`/post/${post.id}`} className="link link-primary">
-                        {post.title}
-                    </Link>
-                </h2>
-                <div className="flex flex-wrap items-center text-xs sm:text-sm text-gray-500 mb-2">
-                    <UserIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1"/>
-                    <span className="mr-2">{post.nickname}</span>
-                    <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1"/>
-                    <span>{post.localDate}</span>
-                </div>
-                <div className="flex flex-wrap gap-1 sm:gap-2 mb-2">
-                    <span className={`badge badge-sm ${post.participateFlag ? 'badge-success' : 'badge-error'}`}>
-                        {post.participateFlag ? '참여가능' : '마감'}
-                    </span>
-                    <span className="badge badge-sm badge-info">
-                        <EyeIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1"/>
-                        {post.viewCount}
-                    </span>
-                    <span className="badge badge-sm badge-warning">
-                        <HeartIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1"/>
-                        {post.likeCount}
-                    </span>
-                    <span className="badge badge-sm badge-accent">
-                        {getActivityName(post.activityType)}
-                    </span>
-                </div>
-                <div className="flex items-center text-xs sm:text-sm text-gray-500 mb-2">
-                    <MapPinIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1"/>
-                    <span>{formatRoadName(post.roadName)}</span>
-                </div>
-                <div className="card-actions justify-end mt-auto">
-                    <Link to={`/post/${post.id}`} className="btn btn-primary btn-xs sm:btn-sm">
-                        자세히 보기
-                    </Link>
+        <div key={post.id} className="w-full sm:w-1/2 lg:w-1/3 px-2 mb-4">
+            <div className="card bg-base-100 shadow-xl h-full">
+                <div className="card-body p-4">
+                    <h2 className="card-title text-base sm:text-lg mb-2">
+                        <Link to={`/post/${post.id}`} className="link link-primary">
+                            {post.title}
+                        </Link>
+                    </h2>
+                    <div className="flex flex-wrap items-center text-xs sm:text-sm text-gray-500 mb-2">
+                        <UserIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1"/>
+                        <span className="mr-2">{post.nickname}</span>
+                        <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1"/>
+                        <span>{post.localDate}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1 sm:gap-2 mb-2">
+                        <span className={`badge badge-sm ${post.participateFlag ? 'badge-success' : 'badge-error'}`}>
+                            {post.participateFlag ? '참여가능' : '마감'}
+                        </span>
+                        <span className="badge badge-sm badge-info">
+                            <EyeIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1"/>
+                            {post.viewCount}
+                        </span>
+                        <span className="badge badge-sm badge-warning">
+                            <HeartIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1"/>
+                            {post.likeCount}
+                        </span>
+                        <span className="badge badge-sm badge-accent">
+                            {getActivityName(post.activityType)}
+                        </span>
+                    </div>
+                    <div className="flex items-center text-xs sm:text-sm text-gray-500 mb-2">
+                        <MapPinIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1"/>
+                        <span>{formatRoadName(post.roadName)}</span>
+                    </div>
+                    <div className="card-actions justify-end mt-auto">
+                        <Link to={`/post/${post.id}`} className="btn btn-primary btn-xs sm:btn-sm">
+                            자세히 보기
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>
@@ -253,7 +255,6 @@ function ListComponent() {
                 </div>
             </div>
 
-
             {(keyword || selectedRegion || selectedActivity) && (
                 <p className="text-sm sm:text-lg font-semibold mb-4">
                     검색 조건: {[
@@ -264,8 +265,12 @@ function ListComponent() {
                 </p>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {serverData.dtoList.map(renderPostCard)}
+            <div>
+                {groupedPosts.map((row, index) => (
+                    <AnimatedRowComponent key={index} rowIndex={index}>
+                        {row.map(renderPostCard)}
+                    </AnimatedRowComponent>
+                ))}
             </div>
 
             <div className="mt-8">
@@ -274,5 +279,4 @@ function ListComponent() {
         </div>
     );
 }
-
 export default ListComponent;
