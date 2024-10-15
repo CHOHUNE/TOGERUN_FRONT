@@ -5,6 +5,7 @@ import { getAllFavorites } from "../../api/memberAPI";
 import { useNavigate } from 'react-router-dom';
 import { favoriteToggle } from "../../api/postAPI";
 import CustomModal from "../common/CustomModal";
+import AnimatedRowComponent from "../common/AnimatedRowComponent";
 
 const FavoriteComponent = () => {
     const [favorites, setFavorites] = useState([]);
@@ -57,62 +58,64 @@ const FavoriteComponent = () => {
         setModalConfig({ show: false });
     };
 
-    const renderFavoriteCard = (favorite) => (
-        <div key={favorite.id} className="w-full mb-4">
-            <div className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-                <div className="card-body p-4">
-                    <div className="flex justify-between items-start mb-2">
-                        <h2 className="card-title text-sm sm:text-base">
-                            {favorite.postTitle}
-                        </h2>
-                        <div className={`badge ${favorite.participateFlag ? 'badge-success' : 'badge-error'} badge-sm`}>
-                            {favorite.participateFlag ? '참여가능' : '마감'}
+    const renderFavoriteCard = (favorite, index) => (
+        <AnimatedRowComponent key={favorite.id} rowIndex={index}>
+            <div className="w-full mb-4">
+                <div className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+                    <div className="card-body p-4">
+                        <div className="flex justify-between items-start mb-2">
+                            <h2 className="card-title text-sm sm:text-base">
+                                {favorite.postTitle}
+                            </h2>
+                            <div className={`badge ${favorite.participateFlag ? 'badge-success' : 'badge-error'} badge-sm`}>
+                                {favorite.participateFlag ? '참여가능' : '마감'}
+                            </div>
                         </div>
-                    </div>
-                    <div className="badge badge-outline badge-sm mb-2">{favorite.activityType}</div>
-                    <div className="text-xs sm:text-sm space-y-1">
-                        <div className="flex items-center flex-wrap">
-                            <div className="flex items-center mr-2">
-                                <CalendarIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-blue-500" />
-                                <span>{format(parseISO(favorite.localDate), 'yy.MM.dd')}</span>
+                        <div className="badge badge-outline badge-sm mb-2">{favorite.activityType}</div>
+                        <div className="text-xs sm:text-sm space-y-1">
+                            <div className="flex items-center flex-wrap">
+                                <div className="flex items-center mr-2">
+                                    <CalendarIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-blue-500" />
+                                    <span>{format(parseISO(favorite.localDate), 'yy.MM.dd')}</span>
+                                </div>
+                                <div className="flex items-center">
+                                    <ClockIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-green-500" />
+                                    <span>{format(parseISO(favorite.meetingTime), 'HH:mm')}</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center flex-wrap">
+                                <div className="flex items-center mr-2">
+                                    <UserGroupIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-purple-500" />
+                                    <span>{favorite.capacity}명</span>
+                                </div>
+                                <div className="flex items-center">
+                                    <MapPinIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-red-500" />
+                                    <span className="truncate">{favorite.placeName}</span>
+                                </div>
                             </div>
                             <div className="flex items-center">
-                                <ClockIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-green-500" />
-                                <span>{format(parseISO(favorite.meetingTime), 'HH:mm')}</span>
+                                <UserIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-indigo-500" />
+                                <span className="truncate">{favorite.createdBy}</span>
                             </div>
                         </div>
-                        <div className="flex items-center flex-wrap">
-                            <div className="flex items-center mr-2">
-                                <UserGroupIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-purple-500" />
-                                <span>{favorite.capacity}명</span>
-                            </div>
-                            <div className="flex items-center">
-                                <MapPinIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-red-500" />
-                                <span className="truncate">{favorite.placeName}</span>
-                            </div>
+                        <div className="card-actions justify-end mt-2">
+                            <button
+                                className="btn btn-primary btn-xs sm:btn-sm"
+                                onClick={() => handleViewDetails(favorite.postId)}
+                            >
+                                상세
+                            </button>
+                            <button
+                                className="btn btn-outline btn-error btn-xs sm:btn-sm"
+                                onClick={() => toggleDeleteModal(favorite.postId)}
+                            >
+                                삭제
+                            </button>
                         </div>
-                        <div className="flex items-center">
-                            <UserIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-indigo-500" />
-                            <span className="truncate">{favorite.createdBy}</span>
-                        </div>
-                    </div>
-                    <div className="card-actions justify-end mt-2">
-                        <button
-                            className="btn btn-primary btn-xs sm:btn-sm"
-                            onClick={() => handleViewDetails(favorite.postId)}
-                        >
-                            상세
-                        </button>
-                        <button
-                            className="btn btn-outline btn-error btn-xs sm:btn-sm"
-                            onClick={() => toggleDeleteModal(favorite.postId)}
-                        >
-                            삭제
-                        </button>
                     </div>
                 </div>
             </div>
-        </div>
+        </AnimatedRowComponent>
     );
 
     if (loading) return <div className="loading loading-lg"></div>;
@@ -130,10 +133,13 @@ const FavoriteComponent = () => {
                         <span className="text-white font-semibold text-sm sm:text-base">즐겨찾기 목록</span>
                     </div>
                 </div>
-                <p className="text-white mt-2 opacity-80 text-sm sm:text-base text-center sm:text-left">총 {favorites.length}개의 즐겨찾기</p>
+                <p className="text-white mt-2 opacity-80 text-sm sm:text-base text-center sm:text-left">
+                    총 {favorites.length}개의 즐겨찾기
+                </p>
             </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {favorites.map(renderFavoriteCard)}
+                {favorites.map((favorite, index) => renderFavoriteCard(favorite, index))}
             </div>
 
             {modalConfig.show && (

@@ -141,7 +141,7 @@ const NotificationComponent = () => {
             </button>
 
             {showNotifications && (
-                <div className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-[90vw] sm:w-80 max-h-[80vh] sm:max-h-[70vh] overflow-y-auto fixed sm:absolute left-1/2 sm:left-auto right-auto sm:right-0 -translate-x-1/2 sm:translate-x-0 top-[60px] sm:top-auto sm:mt-2 z-[100]">
+                <div className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-screen sm:w-80 max-h-[80vh] overflow-y-auto fixed sm:absolute left-0 sm:left-auto right-0 top-16 sm:top-auto sm:mt-2 z-[100] notification-dropdown">
                     <div className="flex flex-col">
                         {isLoading ? (
                             <p className="text-center py-4">로딩 중...</p>
@@ -152,28 +152,28 @@ const NotificationComponent = () => {
                                 {notifications.map((notification) => (
                                     <div
                                         key={notification.id}
-                                        className={`p-4 hover:bg-base-200 cursor-pointer ${
+                                        className={`p-3 hover:bg-base-200 cursor-pointer ${
                                             notification.isRead ? 'bg-base-200' : 'bg-base-100'
                                         }`}
                                         onClick={() => markAsRead(notification)}
                                     >
-                                        <p className="text-sm mb-2">{notification.content}</p>
+                                        <p className="text-sm mb-1">{notification.content}</p>
                                         <p className="text-xs text-base-content/60">{new Date(notification.createdAt).toLocaleString()}</p>
                                     </div>
                                 ))}
-                                <div className="flex justify-between p-3 border-t border-base-300 mt-2">
+                                <div className="flex justify-between p-2 border-t border-base-300 mt-2">
                                     {hasNextPage && (
                                         <button
                                             onClick={() => fetchNextPage()}
                                             disabled={isFetchingNextPage}
-                                            className="btn btn-ghost btn-sm sm:btn-xs"
+                                            className="btn btn-ghost btn-xs"
                                         >
                                             {isFetchingNextPage ? '로딩 중...' : '더 보기'}
                                         </button>
                                     )}
                                     <button
                                         onClick={() => setShowClearModal(true)}
-                                        className="btn btn-ghost btn-sm sm:btn-xs text-error"
+                                        className="btn btn-ghost btn-xs text-error"
                                     >
                                         모두 읽기
                                     </button>

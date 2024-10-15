@@ -50,7 +50,6 @@ const BasicMenu = () => {
     const toggleSearchVisibility = () => setIsSearchVisible(!isSearchVisible);
     const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
-
     return (
         <div className="bg-base-100 shadow-md relative z-50">
             <div className="navbar container mx-auto px-2 sm:px-4 lg:px-8">
@@ -105,6 +104,22 @@ const BasicMenu = () => {
                 <div className="navbar-end">
                     {isLogin && (
                         <>
+                            {/* PC 환경 검색창 */}
+                            <div className="hidden lg:block mr-2">
+                                <form onSubmit={handleSearch} className="flex items-center">
+                                    <input
+                                        type="text"
+                                        placeholder="제목, 내용, 장소 검색"
+                                        value={searchKeyword}
+                                        onChange={(e) => setSearchKeyword(e.target.value)}
+                                        className="input input-bordered w-full max-w-xs"
+                                    />
+                                    <button type="submit" className="btn btn-ghost btn-circle ml-2">
+                                        <MagnifyingGlassIcon className="h-5 w-5"/>
+                                    </button>
+                                </form>
+                            </div>
+                            {/* 모바일 검색 버튼 */}
                             <button onClick={toggleSearchVisibility} className="btn btn-ghost btn-circle lg:hidden">
                                 <MagnifyingGlassIcon className="h-5 w-5"/>
                             </button>
@@ -139,21 +154,19 @@ const BasicMenu = () => {
             </div>
 
             {/* 모바일 메뉴 */}
-            {isMobileMenuOpen && (
-                <div className="lg:hidden bg-base-100 shadow-md">
-                    <ul className="menu menu-sm p-2">
-                        {isLogin && <li><button onClick={() => navigate('/post/list')}>게시글</button></li>}
-                        {loginState.roleNames && loginState.roleNames.includes("ROLE_ADMIN") && (
-                            <li><button onClick={() => navigate("/member/admin")}>관리자</button></li>
-                        )}
-                        {isLogin && <li><button onClick={() => navigate("/member/modify")}>내 프로필</button></li>}
-                    </ul>
-                </div>
-            )}
+            <div className={`lg:hidden bg-base-100 shadow-md overflow-hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-60' : 'max-h-0'}`}>
+                <ul className="menu menu-sm p-2">
+                    {isLogin && <li><button onClick={() => navigate('/post/list')}>게시글</button></li>}
+                    {loginState.roleNames && loginState.roleNames.includes("ROLE_ADMIN") && (
+                        <li><button onClick={() => navigate("/member/admin")}>관리자</button></li>
+                    )}
+                    {isLogin && <li><button onClick={() => navigate("/member/modify")}>내 프로필</button></li>}
+                </ul>
+            </div>
 
             {/* 모바일 검색 */}
-            {isSearchVisible && (
-                <div className="lg:hidden bg-base-100 p-2">
+            <div className={`lg:hidden bg-base-100 overflow-hidden transition-all duration-300 ease-in-out ${isSearchVisible ? 'max-h-20' : 'max-h-0'}`}>
+                <div className="p-2">
                     <form onSubmit={handleSearch} className="flex items-center">
                         <input
                             type="text"
@@ -167,7 +180,8 @@ const BasicMenu = () => {
                         </button>
                     </form>
                 </div>
-            )}
+            </div>
+
 
             <SideOpenDrawer isOpen={isSideDrawerOpen} onClose={toggleSideDrawer}/>
 
@@ -190,6 +204,16 @@ const BasicMenu = () => {
                     callbackFn={closeModal}
                 />
             )}
+
+            <style jsx>{`
+                @keyframes slideDown {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .notification-dropdown {
+                    animation: slideDown 0.3s ease-out;
+                }
+            `}</style>
         </div>
     );
 };
