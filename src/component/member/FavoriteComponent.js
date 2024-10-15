@@ -133,11 +133,8 @@ const FavoriteComponent = () => {
                         <span className="text-white font-semibold text-sm sm:text-base">즐겨찾기 목록</span>
                     </div>
                 </div>
-                <p className="text-white mt-2 opacity-80 text-sm sm:text-base text-center sm:text-left">
-                    총 {favorites.length}개의 즐겨찾기
-                </p>
+                <p className="text-white mt-2 opacity-80 text-sm sm:text-base text-center sm:text-left">총 {favorites.length}개의 즐겨찾기</p>
             </div>
-
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {favorites.map((favorite, index) => renderFavoriteCard(favorite, index))}
             </div>
