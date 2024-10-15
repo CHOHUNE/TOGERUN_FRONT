@@ -13,11 +13,13 @@ import { deleteOne, favoriteToggle, getOne } from "../../api/postAPI";
 import { getChatRoomStatus } from "../../api/chatAPI";
 import { likeToggle } from "../../api/api";
 import CustomModal from "../common/CustomModal";
+import useCustomLogin from "../../hooks/useCustomLogin";
 
 function ReadComponent({postId}) {
     const queryClient = useQueryClient();
     const [chatRoomStatus, setChatRoomStatus] = useState(null);
     const {moveToList, moveToModify} = useCustomMove();
+    const {loginState} = useCustomLogin();
     const navigate = useNavigate();
     const [modalConfig, setModalConfig] = useState({ show: false, title: '', content: '', onConfirm: null });
 
@@ -94,6 +96,19 @@ function ReadComponent({postId}) {
     if (!post) {
         return <div className="flex justify-center items-center h-screen">Loading...</div>;
     }
+
+
+    const canModifyOrDelete = () => {
+        if (!loginState || !post) return false;
+
+        const isAuthor = loginState.id === post.userId;
+        const isAdmin = Array.isArray(loginState?.roleNames) && loginState.roleNames.includes('ROLE_ADMIN');
+
+        return isAuthor || isAdmin;
+    };
+
+
+    console.log(loginState)
 
     return (
         <div className="min-h-screen py-8">
@@ -207,19 +222,24 @@ function ReadComponent({postId}) {
                             <ChatBubbleLeftEllipsisIcon className="h-5 w-5 mr-2"/>
                             {chatRoomStatus && chatRoomStatus.canJoin ? '채팅방 입장' : '입장 불가'}
                         </button>
-                        <button className="btn btn-outline btn-info" onClick={() => moveToModify(postId)}>
-                            <PencilSquareIcon className="h-5 w-5 mr-2"/>
-                            수정
-                        </button>
+                        {canModifyOrDelete() && (
+                            <>
+                                <button className="btn btn-outline btn-info" onClick={() => moveToModify(postId)}>
+                                    <PencilSquareIcon className="h-5 w-5 mr-2"/>
+                                    수정
+                                </button>
+                                <button className="btn btn-outline btn-error" onClick={handleClickDelete}>
+                                    <TrashIcon className="h-5 w-5 mr-2"/>
+                                    삭제
+                                </button>
+                            </>
+                        )}
                         <button className="btn btn-outline btn-warning" onClick={moveToList}>
                             <ArrowUturnLeftIcon className="h-5 w-5 mr-2"/>
                             목록
                         </button>
-                        <button className="btn btn-outline btn-error" onClick={handleClickDelete}>
-                            <TrashIcon className="h-5 w-5 mr-2"/>
-                            삭제
-                        </button>
-                    </div>
+
+                </div>
                 </div>
             </div>
 

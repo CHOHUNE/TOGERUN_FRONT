@@ -4,6 +4,8 @@ import useCustomLogin from "../../hooks/useCustomLogin";
 import {checkMemberNickname, getMember, modifyMember} from "../../api/memberAPI";
 import {UserCircleIcon} from "@heroicons/react/20/solid";
 import {UserIcon} from "@heroicons/react/24/outline";
+import useCustomMove from "../../hooks/useCustomMove";
+import {useNavigate} from "react-router-dom";
 
 const initState = {
     id: '',
@@ -23,12 +25,14 @@ const initState = {
 function MemberModifyComponent() {
     const [user, setUser] = useState(initState);
     const [originalUser, setOriginalUser] = useState(initState);
-    const {loginState, moveToLogin} = useCustomLogin();
+    const {loginState} = useCustomLogin();
     const [result, setResult] = useState('');
     const [errors, setErrors] = useState({});
+    const navigate = useNavigate();
 
     const [isNicknameAvailable, setIsNicknameAvailable] = useState(null);
     const [isCheckingNickname, setIsCheckingNickname] = useState(false);
+
 
     useEffect(() => {
         const fetchMemberData = async () => {
@@ -157,7 +161,7 @@ function MemberModifyComponent() {
 
     const closeModal = () => {
         setResult(null);
-        moveToLogin();
+      navigate('/');
     };
 
     return (
