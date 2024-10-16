@@ -3,30 +3,32 @@ import {CommentItem} from "./CommentItem";
 import {ChatBubbleLeftRightIcon} from "@heroicons/react/24/outline";
 
 export function CommentList({
-
                                 commentList,
                                 onDelete,
                                 setIsSubmitting,
-                                postId
-
+                                postId,
+                                postAuthorNickname,
+                                loginState
                             }) {
-
     const processComments = (comments) => {
         return comments.map(comment => {
-            // 각 댓글은 ["com.example.simplechatapp.dto.CommentResponseDto", {...}] 형태
-            const commentData = comment[1];  // 실제 댓글 데이터는 두 번째 요소
+            const commentData = comment[1];
+            const processedChildren = commentData.children ? processComments(commentData.children) : [];
+
+            // 댓글이 삭제되었고 자식 댓글이 없으면 null을 반환
+            if (commentData.delFlag && processedChildren.length === 0) {
+                return null;
+            }
+
             return {
                 ...commentData,
-                children: commentData.children ? processComments(commentData.children) : []
+                children: processedChildren
             };
-        });
+        }).filter(comment => comment !== null); // null인 댓글 제거
     };
 
     // 처리된 댓글 리스트
     const processedComments = processComments(commentList);
-
-
-
 
     return (
         <div className="card mt-8 sm:mt-12 shadow-md overflow-hidden rounded-lg">
@@ -45,6 +47,8 @@ export function CommentList({
                         onSubitComment={null}
                         onDelete={onDelete}
                         postId={postId}
+                        postAuthorNickname={postAuthorNickname}
+                        loginState={loginState}
                     />
                 ))}
             </div>

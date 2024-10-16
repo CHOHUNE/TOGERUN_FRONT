@@ -5,7 +5,7 @@ import { CommentList } from "./CommentList";
 import { useCommentHook } from "../../hooks/useCommentHook";
 import { fetchCommentList } from "../../api/commentAPI";
 
-export function CommentTotalContainer({ postId }) {
+export function CommentTotalContainer({ postId ,postAuthorNickname, loginState }) {
     const {
         handleAddComment,
         handleDeleteComment,
@@ -49,6 +49,8 @@ export function CommentTotalContainer({ postId }) {
                         onDelete={handleDeleteComment}
                         onSubmit={handleAddComment}
                         postId={postId}
+                        postAuthorNickname={postAuthorNickname}
+                        loginState={loginState}
                     />
                 </div>
             </div>

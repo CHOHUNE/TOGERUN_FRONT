@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { useCommentHook } from "../../hooks/useCommentHook";
 import { PencilIcon, PlusIcon, TrashIcon, XMarkIcon, UserCircleIcon, ArrowUturnLeftIcon } from "@heroicons/react/24/solid";
-import useCustomLogin from "../../hooks/useCustomLogin";
 import ResultModal from "../common/ResultModal";
 
-export function CommentItem({ comment, postId, submittingState }) {
+export function CommentItem({ comment, postId, submittingState, postAuthorNickname, loginState }) {
     const [isEditing, setIsEditing] = useState(false);
     const [isWriting, setIsWriting] = useState(false);
     const [commentEdited, setCommentEdited] = useState(comment.content);
@@ -13,7 +12,6 @@ export function CommentItem({ comment, postId, submittingState }) {
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [showResultModal, setShowResultModal] = useState(false);
     const [resultModalProps, setResultModalProps] = useState({});
-    const { isLogin, loginState } = useCustomLogin();
 
     const {
         handleAddComment: hookHandleAddComment,
@@ -22,6 +20,15 @@ export function CommentItem({ comment, postId, submittingState }) {
     } = useCommentHook(postId, setIsSubmitting, setIsEditing, setIsWriting);
 
     const toggleConfirmModal = () => setShowConfirmModal(!showConfirmModal);
+
+    const canDeleteComment = () => {
+        if (!loginState) return false;
+        return (
+            loginState.nickname === comment.nickName ||
+            loginState.nickname === postAuthorNickname ||
+            (Array.isArray(loginState?.roleNames) && loginState.roleNames.includes('ROLE_ADMIN'))
+        );
+    };
 
     const confirmAction = async () => {
         toggleConfirmModal();
@@ -103,9 +110,9 @@ export function CommentItem({ comment, postId, submittingState }) {
 
                 <div className="flex-grow">
                     <div className="flex justify-between items-center flex-wrap">
-                        <h3 className="text-sm sm:text-base font-bold">{comment.name}</h3>
+                        <h3 className="text-sm sm:text-base font-bold">{comment.nickName}</h3>
                         <div className="flex items-center space-x-1 sm:space-x-2 mt-1 sm:mt-0">
-                            {isLogin && (
+                            {loginState && (
                                 <>
                                     {!isWriting ? (
                                         <button
@@ -125,7 +132,7 @@ export function CommentItem({ comment, postId, submittingState }) {
                                 </>
                             )}
 
-                            {loginState.email === comment.createdBy && (
+                            {loginState?.nickname === comment.nickName && (
                                 <>
                                     {!comment.delFlag && (
                                         <>
@@ -146,13 +153,16 @@ export function CommentItem({ comment, postId, submittingState }) {
                                             )}
                                         </>
                                     )}
-                                    <button
-                                        onClick={toggleConfirmModal}
-                                        className={`btn btn-xs sm:btn-sm ${comment.delFlag ? 'btn-warning' : 'btn-error'}`}
-                                    >
-                                        {comment.delFlag ? <ArrowUturnLeftIcon className="h-3 w-3 sm:h-4 sm:w-4" /> : <TrashIcon className="h-3 w-3 sm:h-4 sm:w-4" />}
-                                    </button>
                                 </>
+                            )}
+
+                            {canDeleteComment() && (
+                                <button
+                                    onClick={toggleConfirmModal}
+                                    className={`btn btn-xs sm:btn-sm ${comment.delFlag ? 'btn-warning' : 'btn-error'}`}
+                                >
+                                    {comment.delFlag ? <ArrowUturnLeftIcon className="h-3 w-3 sm:h-4 sm:w-4" /> : <TrashIcon className="h-3 w-3 sm:h-4 sm:w-4" />}
+                                </button>
                             )}
                         </div>
                     </div>
@@ -220,7 +230,8 @@ export function CommentItem({ comment, postId, submittingState }) {
                             comment={childComment}
                             postId={postId}
                             submittingState={isSubmitting}
-                            setIsSubmitting={setIsSubmitting}
+                            postAuthorNickname={postAuthorNickname}
+                            loginState={loginState}
                         />
                     ))}
                 </div>
