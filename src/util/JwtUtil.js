@@ -3,7 +3,10 @@ import { getCookie, setCookie } from "./cookieUtil";
 import { axiosInstance } from "../api/api";
 
 const jwtAxios = axios.create({
-    baseURL: 'http://43.203.60.237/api',
+    baseURL:
+
+        'https://api.togerun.shop/api'
+    // : 'http://localhost:8080/api' 개발 환경
 
 });
 

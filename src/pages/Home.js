@@ -17,11 +17,14 @@ function MainPage() {
     const { loginState } = useCustomLogin();
     const navigate = useNavigate();
 
+    const prefix = "https://myprojectsbuckets.s3.ap-northeast-2.amazonaws.com/"
+
     const images = [
-        'https://study48678981512.s3.ap-northeast-2.amazonaws.com/chatApp/home/homepic1.jpg',
-        'https://study48678981512.s3.ap-northeast-2.amazonaws.com/chatApp/home/homepic2.jpg',
-        'https://study48678981512.s3.ap-northeast-2.amazonaws.com/chatApp/home/homepic3.jpg',
-        'https://study48678981512.s3.ap-northeast-2.amazonaws.com/chatApp/home/homepic4.jpg'
+
+        prefix+'chatApp/home/homepic1.jpg',
+        prefix+'chatApp/home/homepic2.jpg',
+        prefix+'chatApp/home/homepic3.jpg',
+        prefix+'chatApp/home/homepic4.jpg'
     ];
 
     const handleFindMeeting = () => {

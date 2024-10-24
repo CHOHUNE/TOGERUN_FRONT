@@ -1,7 +1,8 @@
 import axios from "axios";
 import jwtAxios from "../util/JwtUtil";
 
-export const basicURL = 'http://43.203.60.237/api'
+export const basicURL = 'https://api.togerun.shop/api'
+// export const basicURL = 'http://localhost:8080/api'
 
 export const axiosInstance = axios.create({
     baseURL: basicURL,

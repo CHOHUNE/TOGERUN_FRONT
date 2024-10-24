@@ -3,7 +3,8 @@ import { Client } from "@stomp/stompjs";
 import { PaperAirplaneIcon } from "@heroicons/react/16/solid";
 import { getChatRoom, joinChatRoom } from "../../api/chatAPI";
 
-const WEBSOCKET_URL = 'ws://43.203.60.237/chat';
+const WEBSOCKET_URL = 'wss://api.togerun.shop/chat'
+// const WEBSOCKET_URL = 'ws://43.203.60.237/chat';
 
 const ChatRoomComponent = ({ postId, userEmail }) => {
     const [messages, setMessages] = useState([]);
