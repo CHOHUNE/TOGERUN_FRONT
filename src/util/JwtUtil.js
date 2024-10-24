@@ -3,7 +3,7 @@ import { getCookie, setCookie } from "./cookieUtil";
 import { axiosInstance } from "../api/api";
 
 const jwtAxios = axios.create({
-    baseURL: 'http://localhost:8080/api',
+    baseURL: 'http://43.203.60.237/api',
 
 });
 
@@ -79,7 +79,7 @@ const responseFail = (err) => {
                 window.location.href = redirect || '/member/login';
                 break;
             case "ACCESS_DENIED":
-                window.location.href = redirect || '/';
+                window.location.href = redirect || '/error';
                 break;
             case "NEED_PROFILE_UPDATE":
                 window.location.href = redirect || '/member/modify';
@@ -87,14 +87,15 @@ const responseFail = (err) => {
             case "INSUFFICIENT_AUTHENTICATION":
                 window.location.href = redirect || '/member/login';
                 break;
-            default:
-                console.error('Unhandled error:', message);
-                window.location.href = redirect || '/';
+            // default:
+            //     console.error('Unhandled error:', message);
+            //     window.location.href = redirect || '/';
         }
-    } else {
-        console.error('Unexpected error:', err);
-        window.location.href = '/error';
     }
+    // else {
+    //     console.error('Unexpected error:', err);
+    //     window.location.href = '/';
+    // }
 
     return Promise.reject(err);
 };
