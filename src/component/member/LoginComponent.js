@@ -10,7 +10,7 @@ const LoginComponent = () => {
 
             <div className="space-y-4">
                 <a
-                    href="https://togerun.vercel.app/oauth2/authorization/kakao"
+                    href="http://api.togerun.shop/authorization/kakao"
                     className="btn btn-block bg-[#FEE500] hover:bg-[#FDD900] text-black border-none font-medium py-3 rounded-md transition duration-300 ease-in-out flex items-center justify-center relative"
                 >
                     <SiKakaotalk className="absolute left-4 text-2xl" />
@@ -18,7 +18,7 @@ const LoginComponent = () => {
                 </a>
 
                 <a
-                    href="https://togerun.vercel.app/oauth2/authorization/naver"
+                    href="http://api.togerun.shop/oauth2/authorization/naver"
                     className="btn btn-block bg-[#03C75A] hover:bg-[#02B64F] text-white border-none font-medium py-3 rounded-md transition duration-300 ease-in-out flex items-center justify-center relative"
                 >
                     <SiNaver className="absolute left-4 text-2xl" />
@@ -26,7 +26,7 @@ const LoginComponent = () => {
                 </a>
 
                 <a
-                    href="https://togerun.vercel.app/oauth2/authorization/google"
+                    href="http://api.togerun.shop/oauth2/authorization/google"
                     className="btn btn-block bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 font-medium py-3 rounded-md transition duration-300 ease-in-out flex items-center justify-center relative"
                 >
                     <FaGoogle className="absolute left-4 text-2xl text-[#4285F4]" />
