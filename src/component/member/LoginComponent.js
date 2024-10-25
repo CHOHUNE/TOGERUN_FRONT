@@ -10,7 +10,7 @@ const LoginComponent = () => {
 
             <div className="space-y-4">
                 <a
-                    href="http://api.togerun.shop/authorization/kakao"
+                    href="http://api.togerun.shop/oauth2/authorization/kakao"
                     className="btn btn-block bg-[#FEE500] hover:bg-[#FDD900] text-black border-none font-medium py-3 rounded-md transition duration-300 ease-in-out flex items-center justify-center relative"
                 >
                     <SiKakaotalk className="absolute left-4 text-2xl" />
