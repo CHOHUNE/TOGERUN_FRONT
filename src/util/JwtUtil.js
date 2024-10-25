@@ -2,29 +2,12 @@ import axios from "axios";
 import { getCookie, setCookie } from "./cookieUtil";
 import { axiosInstance } from "../api/api";
 
-// 상수 분리
-const API_BASE_URL = 'https://api.togerun.shop/api';
-const FRONTEND_BASE_URL = 'https://www.togerun.shop';
-
-// 에러 타입 상수화
-const ERROR_TYPES = {
-    AUTHENTICATION_REQUIRED: 'AUTHENTICATION_REQUIRED',
-    AUTHENTICATION_FAILED: 'AUTHENTICATION_FAILED',
-    ACCESS_DENIED: 'ACCESS_DENIED',
-    NEED_PROFILE_UPDATE: 'NEED_PROFILE_UPDATE',
-    INSUFFICIENT_AUTHENTICATION: 'INSUFFICIENT_AUTHENTICATION',
-    ERROR_ACCESS_TOKEN: 'ERROR_ACCESS_TOKEN'
-};
-
-// 리다이렉트 경로 상수화
-const REDIRECT_PATHS = {
-    LOGIN: '/member/login',
-    ERROR: '/error',
-    MODIFY: '/member/modify'
-};
-
 const jwtAxios = axios.create({
-    baseURL: API_BASE_URL
+    baseURL:
+
+        'https://api.togerun.shop/api'
+    // : 'http://localhost:8080/api' 개발 환경
+
 });
 
 const refreshJWT = async (accessToken) => {
@@ -33,26 +16,26 @@ const refreshJWT = async (accessToken) => {
     return res.data;
 };
 
-const handleAuthError = () => {
-    console.log("Member NOT FOUND");
-    return Promise.reject({
-        response: {
-            data: {
-                status: "UNAUTHORIZED",
-                message: "로그인이 필요합니다.",
-                redirect: REDIRECT_PATHS.LOGIN,
-                errorStatus: ERROR_TYPES.AUTHENTICATION_REQUIRED
-            }
-        }
-    });
-};
-
 const beforeReq = (config) => {
     const memberInfo = getCookie('member');
-    if (!memberInfo) return handleAuthError();
+
+    if (!memberInfo) {
+        console.log("Member NOT FOUND");
+        return Promise.reject({
+            response: {
+                data: {
+                    status: "UNAUTHORIZED",
+                    message: "로그인이 필요합니다.",
+                    redirect: '/member/login',
+                    errorStatus: "AUTHENTICATION_REQUIRED"
+                }
+            }
+        });
+    }
 
     const { accessToken } = memberInfo;
     config.headers.Authorization = `Bearer ${accessToken}`;
+
     return config;
 };
 
@@ -61,58 +44,62 @@ const requestFail = (err) => {
     return Promise.reject(err);
 };
 
-const handleTokenRefresh = async (res) => {
-    const memberCookieValue = getCookie("member");
-    const result = await refreshJWT(memberCookieValue.accessToken);
-    console.log("refreshJWT RESULT", result);
-
-    memberCookieValue.accessToken = result.accessToken;
-    setCookie("member", JSON.stringify(memberCookieValue), 1);
-
-    const originalRequest = res.config;
-    originalRequest.headers.Authorization = `Bearer ${result.accessToken}`;
-
-    return axiosInstance(originalRequest);
-};
-
 const beforeRes = async (res) => {
     console.log("before return response...........");
+
     const data = res.data;
 
-    if (data?.errorStatus === ERROR_TYPES.ERROR_ACCESS_TOKEN) {
-        return handleTokenRefresh(res);
+    if (data && data.errorStatus === 'ERROR_ACCESS_TOKEN') {
+        const memberCookieValue = getCookie("member");
+        const result = await refreshJWT(memberCookieValue.accessToken);
+        console.log("refreshJWT RESULT", result);
+
+        memberCookieValue.accessToken = result.accessToken;
+        setCookie("member", JSON.stringify(memberCookieValue), 1);
+
+        const originalRequest = res.config;
+        originalRequest.headers.Authorization = `Bearer ${result.accessToken}`;
+
+        return axiosInstance(originalRequest);
     }
+
     return res;
 };
 
-const handleRedirect = (redirect, defaultPath) => {
-    window.location.href = `${FRONTEND_BASE_URL}${redirect || defaultPath}`;
-};
-
-const handleErrorResponse = ({message, redirect, errorStatus}) => {
-    console.error(`Error: ${errorStatus}, Message: ${message}`);
-
-    switch (errorStatus) {
-        case ERROR_TYPES.AUTHENTICATION_REQUIRED:
-        case ERROR_TYPES.AUTHENTICATION_FAILED:
-        case ERROR_TYPES.INSUFFICIENT_AUTHENTICATION:
-            handleRedirect(redirect, REDIRECT_PATHS.LOGIN);
-            break;
-        case ERROR_TYPES.ACCESS_DENIED:
-            handleRedirect(redirect, REDIRECT_PATHS.ERROR);
-            break;
-        case ERROR_TYPES.NEED_PROFILE_UPDATE:
-            handleRedirect(redirect, REDIRECT_PATHS.MODIFY);
-            break;
-    }
-};
-
 const responseFail = (err) => {
-    console.log(".....response fail error.....");
+    console.log(".....response fail error .....");
 
-    if (err.response?.data) {
-        handleErrorResponse(err.response.data);
+    if (err.response && err.response.data) {
+        const { status, message, redirect, errorStatus } = err.response.data;
+
+        console.error(`Error: ${errorStatus}, Message: ${message}`);
+
+        switch (errorStatus) {
+            case "AUTHENTICATION_REQUIRED":
+                window.location.href=redirect || '/member/login';
+                break;
+            case "AUTHENTICATION_FAILED":
+                window.location.href = redirect || '/member/login';
+                break;
+            case "ACCESS_DENIED":
+                window.location.href = redirect || '/error';
+                break;
+            case "NEED_PROFILE_UPDATE":
+                window.location.href = redirect || '/member/modify';
+                break;
+            case "INSUFFICIENT_AUTHENTICATION":
+                window.location.href = redirect || '/member/login';
+                break;
+            // default:
+            //     console.error('Unhandled error:', message);
+            //     window.location.href = redirect || '/';
+        }
     }
+    // else {
+    //     console.error('Unexpected error:', err);
+    //     window.location.href = '/';
+    // }
+
     return Promise.reject(err);
 };
 
@@ -120,3 +107,8 @@ jwtAxios.interceptors.request.use(beforeReq, requestFail);
 jwtAxios.interceptors.response.use(beforeRes, responseFail);
 
 export default jwtAxios;
+
+// 외부 웹사이트로 이동하거나 전체 페이지 새로고침이 필요한 경우 window.location.href를 사용합니다.
+// React 애플리케이션 내부에서 페이지 간 이동을 할 때는 navigate 함수를 사용하는 것이 좋지만,
+// 오류 처리의 경우 React 컴포넌트 컨텍스트 밖에서 동작해야 하기 때문에
+// 전체 페이지 새로 고침 후 navigate를 이용하는 것이 더 적절합니다.
