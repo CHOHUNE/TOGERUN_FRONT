@@ -63,11 +63,11 @@ function ListComponent() {
     }
 
     const formatRoadName = (roadName) => {
-        const parts = roadName.split(' ');
+        const parts = roadName?.split(' ') || [];
         if (parts.length >= 2) {
             return `${parts[0]} ${parts[1]}`;
         }
-        return roadName;
+        return roadName || '주소 없음';
     };
 
     const handleRegionSelect = (region) => {
