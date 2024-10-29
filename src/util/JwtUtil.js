@@ -64,7 +64,7 @@ const requestFail = (err) => {
 const handleTokenRefresh = async (res) => {
     const memberCookieValue = getCookie("member");
     const result = await refreshJWT(memberCookieValue.accessToken);
-    console.log("refreshJWT RESULT", result);
+    // console.log("refreshJWT RESULT", result);
 
     memberCookieValue.accessToken = result.accessToken;
     setCookie("member", memberCookieValue,6);
@@ -76,7 +76,7 @@ const handleTokenRefresh = async (res) => {
 };
 
 const beforeRes = async (res) => {
-    console.log("before return response...........");
+    // console.log("before return response...........");
     const data = res.data;
 
     if (data?.errorStatus === ERROR_TYPES.ERROR_ACCESS_TOKEN) {
