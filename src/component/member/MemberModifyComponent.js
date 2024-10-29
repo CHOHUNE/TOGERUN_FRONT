@@ -4,7 +4,6 @@ import useCustomLogin from "../../hooks/useCustomLogin";
 import {checkMemberNickname, getMember, modifyMember} from "../../api/memberAPI";
 import {UserCircleIcon} from "@heroicons/react/20/solid";
 import {UserIcon} from "@heroicons/react/24/outline";
-import useCustomMove from "../../hooks/useCustomMove";
 import {useNavigate} from "react-router-dom";
 
 const initState = {
