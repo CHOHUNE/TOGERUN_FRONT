@@ -67,7 +67,7 @@ const handleTokenRefresh = async (res) => {
     console.log("refreshJWT RESULT", result);
 
     memberCookieValue.accessToken = result.accessToken;
-    setCookie("member", JSON.stringify(memberCookieValue), 1);
+    setCookie("member", memberCookieValue,6);
 
     const originalRequest = res.config;
     originalRequest.headers.Authorization = `Bearer ${result.accessToken}`;
