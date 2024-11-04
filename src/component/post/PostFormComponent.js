@@ -25,9 +25,29 @@ const ACTIVITY_TYPES = [
 ];
 
 const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => {
+    const defaultContent = `[준비물]
+- 
+- 
+- 
+
+[준비물 및 참여 복장]
+- 
+- 
+- 
+
+[주의사항]
+- 
+- 
+- 
+
+[기타 안내사항]
+- 
+- `;
+
     const [post, setPost] = useState({
         ...initialPost,
-        images: initialPost.imageList ? initialPost.imageList.map(url => ({type: 'url', content: url})) : []
+        images: initialPost.imageList ? initialPost.imageList.map(url => ({type: 'url', content: url})) : [],
+        content: initialPost.content || defaultContent, // 초기값이 없을 경우 기본 양식 사용
     });
     const {moveToList} = useCustomMove();
     const queryClient = useQueryClient();
@@ -168,7 +188,7 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
                         onChange={handleChangePost}
                         required
                         className="textarea textarea-bordered h-24"
-                        placeholder="내용을 입력하세요"
+                        placeholder="모임에 대한 상세 정보를 입력해주세요. (준비물, 코스, 주의사항 등)"
                     />
                 </div>
 
