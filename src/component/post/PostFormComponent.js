@@ -138,7 +138,8 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
             latitude: parseFloat(place.y),
             longitude: parseFloat(place.x),
             placeName: place.place_name,
-            roadName: place.road_address_name
+            roadName: place.road_address_name || place.address_name
+
         }));
     }
 
