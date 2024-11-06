@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useCommentHook } from "../../hooks/useCommentHook";
-import { PencilIcon, PlusIcon, TrashIcon, XMarkIcon, UserCircleIcon, ArrowUturnLeftIcon } from "@heroicons/react/24/solid";
+import { PencilIcon, PlusIcon, TrashIcon, XMarkIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import ResultModal from "../common/ResultModal";
 
 export function CommentItem({ comment, postId, submittingState, postAuthorNickname, loginState }) {
@@ -36,7 +36,7 @@ export function CommentItem({ comment, postId, submittingState, postAuthorNickna
             await handleDeleteComment(comment.id);
             setResultModalProps({
                 title: "작업 완료",
-                content: comment.delFlag ? "댓글이 복구되었습니다." : "댓글이 삭제되었습니다.",
+                content: "댓글이 삭제되었습니다.",
                 callbackFn: () => setShowResultModal(false)
             });
             setShowResultModal(true);
@@ -112,7 +112,7 @@ export function CommentItem({ comment, postId, submittingState, postAuthorNickna
                     <div className="flex justify-between items-center flex-wrap">
                         <h3 className="text-sm sm:text-base font-bold">{comment.nickName}</h3>
                         <div className="flex items-center space-x-1 sm:space-x-2 mt-1 sm:mt-0">
-                            {loginState && (
+                            {loginState && !comment.delFlag && (
                                 <>
                                     {!isWriting ? (
                                         <button
@@ -132,36 +132,32 @@ export function CommentItem({ comment, postId, submittingState, postAuthorNickna
                                 </>
                             )}
 
-                            {loginState?.nickname === comment.nickName && (
+                            {loginState?.nickname === comment.nickName && !comment.delFlag && (
                                 <>
-                                    {!comment.delFlag && (
-                                        <>
-                                            {!isEditing ? (
-                                                <button
-                                                    className="btn btn-info btn-xs sm:btn-sm"
-                                                    onClick={() => setIsEditing(true)}
-                                                >
-                                                    <PencilIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    className="btn btn-ghost btn-xs sm:btn-sm"
-                                                    onClick={() => setIsEditing(false)}
-                                                >
-                                                    <XMarkIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                                                </button>
-                                            )}
-                                        </>
+                                    {!isEditing ? (
+                                        <button
+                                            className="btn btn-info btn-xs sm:btn-sm"
+                                            onClick={() => setIsEditing(true)}
+                                        >
+                                            <PencilIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="btn btn-ghost btn-xs sm:btn-sm"
+                                            onClick={() => setIsEditing(false)}
+                                        >
+                                            <XMarkIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                                        </button>
                                     )}
                                 </>
                             )}
 
-                            {canDeleteComment() && (
+                            {canDeleteComment() && !comment.delFlag && (
                                 <button
                                     onClick={toggleConfirmModal}
-                                    className={`btn btn-xs sm:btn-sm ${comment.delFlag ? 'btn-warning' : 'btn-error'}`}
+                                    className="btn btn-error btn-xs sm:btn-sm"
                                 >
-                                    {comment.delFlag ? <ArrowUturnLeftIcon className="h-3 w-3 sm:h-4 sm:w-4" /> : <TrashIcon className="h-3 w-3 sm:h-4 sm:w-4" />}
+                                    <TrashIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                                 </button>
                             )}
                         </div>
@@ -240,15 +236,13 @@ export function CommentItem({ comment, postId, submittingState, postAuthorNickna
             {showConfirmModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                     <div className="bg-white rounded-lg p-4 sm:p-6 max-w-sm w-full mx-4">
-                        <h3 className="font-bold text-lg mb-4">
-                            {comment.delFlag ? "댓글을 복구하시겠습니까?" : "댓글을 삭제하시겠습니까?"}
-                        </h3>
+                        <h3 className="font-bold text-lg mb-4">댓글을 삭제하시겠습니까?</h3>
                         <div className="flex justify-end space-x-2">
                             <button
-                                className={`btn btn-sm sm:btn-md ${comment.delFlag ? 'btn-warning' : 'btn-error'}`}
+                                className="btn btn-error btn-sm sm:btn-md"
                                 onClick={confirmAction}
                             >
-                                {comment.delFlag ? "복구" : "삭제"}
+                                삭제
                             </button>
                             <button className="btn btn-ghost btn-sm sm:btn-md" onClick={toggleConfirmModal}>취소</button>
                         </div>
