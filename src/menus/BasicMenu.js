@@ -60,7 +60,7 @@ const BasicMenu = () => {
                         <img
                             src="https://myprojectsbuckets.s3.ap-northeast-2.amazonaws.com/chatApp/home/togerun_big.png"
                             alt="TOGERUN"
-                            className="h-10 w-auto object-contain scale-125" /* scale로 이미지만 확대 */
+                            className="h-10 w-auto object-contain scale-150" /* scale로 이미지만 확대 */
                         />
                     </div>
                 </div>
