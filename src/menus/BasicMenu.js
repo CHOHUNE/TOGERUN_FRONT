@@ -57,11 +57,13 @@ const BasicMenu = () => {
                     <button onClick={toggleMobileMenu} className="btn btn-ghost lg:hidden">
                         <Bars3Icon className="h-5 w-5"/>
                     </button>
-                    <img
-                        src="https://myprojectsbuckets.s3.ap-northeast-2.amazonaws.com/chatApp/home/togerun_big.png"
-                        alt="TOGERUN"
-                        className="h-full w-auto"
-                    />
+                    <div className="flex items-center h-16"> {/* Fixed height container */}
+                        <img
+                            src="https://myprojectsbuckets.s3.ap-northeast-2.amazonaws.com/chatApp/home/togerun_big.png"
+                            alt="TOGERUN"
+                            className="h-8 w-auto object-contain" /* Adjusted height and added object-contain */
+                        />
+                    </div>
                 </div>
 
                 <div className="navbar-center hidden lg:flex">
