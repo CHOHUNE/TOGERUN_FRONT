@@ -57,21 +57,11 @@ const BasicMenu = () => {
                     <button onClick={toggleMobileMenu} className="btn btn-ghost lg:hidden">
                         <Bars3Icon className="h-5 w-5"/>
                     </button>
-                    <button onClick={() => navigate('/')} className="btn btn-ghost normal-case px-2 h-auto min-h-0">
-                        <div className="h-8 sm:h-10 md:h-12 w-auto py-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" className="h-full w-auto">
-                                <defs>
-                                    <style>
-                                        @import
-                                        url('https://fonts.googleapis.com/css2?family=Futura:wght@400&display=swap');
-                                    </style>
-                                </defs>
-                                <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fontSize="100"
-                                      fontWeight="400" fill="currentColor" fontFamily="Futura, sans-serif">TOGERUN
-                                </text>
-                            </svg>
-                        </div>
-                    </button>
+                    <img
+                        src="https://myprojectsbuckets.s3.ap-northeast-2.amazonaws.com/chatApp/home/togerun_big.png"
+                        alt="TOGERUN"
+                        className="h-full w-auto"
+                    />
                 </div>
 
                 <div className="navbar-center hidden lg:flex">
