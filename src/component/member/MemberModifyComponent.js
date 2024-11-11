@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import ResultModal from "../common/ResultModal";
+import CustomModal from "../common/CustomModal";
 import useCustomLogin from "../../hooks/useCustomLogin";
 import {checkMemberNickname, getMember, modifyMember} from "../../api/memberAPI";
 import {UserCircleIcon} from "@heroicons/react/20/solid";
@@ -28,10 +29,10 @@ function MemberModifyComponent() {
     const [result, setResult] = useState('');
     const [errors, setErrors] = useState({});
     const navigate = useNavigate();
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     const [isNicknameAvailable, setIsNicknameAvailable] = useState(null);
     const [isCheckingNickname, setIsCheckingNickname] = useState(false);
-
 
     useEffect(() => {
         const fetchMemberData = async () => {
@@ -58,7 +59,7 @@ function MemberModifyComponent() {
         setUser({...user, [name]: value});
         if (name === 'nickname') {
             validateNickname(value);
-            setIsNicknameAvailable(null); // 닉네임이 변경될 때마다 중복 확인 상태 초기화
+            setIsNicknameAvailable(null);
         } else if (name === 'phone1') {
             validatePhone1(value);
         }
@@ -87,10 +88,7 @@ function MemberModifyComponent() {
         setIsCheckingNickname(true);
         try {
             const response = await checkMemberNickname(user.nickname);
-            setIsNicknameAvailable(response.available);  // 직접 available 값을 사용
-
-            console.log("Checking nickname:", user.nickname);
-            console.log("API response:", response);
+            setIsNicknameAvailable(response.available);
         } catch (error) {
             console.error("닉네임 중복 확인 오류:", error);
             setIsNicknameAvailable(false);
@@ -99,10 +97,9 @@ function MemberModifyComponent() {
         }
     };
 
-
     const validateForm = () => {
         const newErrors = {};
-        const requiredFields = ['nickname', 'gender', 'age', 'phone1', 'phone2', 'phone3'];
+        const requiredFields = ['nickname', 'phone1', 'phone2', 'phone3'];
         requiredFields.forEach(field => {
             if (!user[field]) {
                 newErrors[field] = '필수 입력 항목입니다.';
@@ -113,14 +110,8 @@ function MemberModifyComponent() {
             newErrors.phone1 = '전화번호는 010으로 시작해야 합니다.';
         }
 
-        if (user.nickname === ''|| user.nickname === "DefaultUser") {
+        if (user.nickname === '' || user.nickname === "DefaultUser") {
             newErrors.nickname = '닉네임을 입력 해주세요.';
-        }
-        if (user.gender === "Unspecified" || user.gender === "") {
-            newErrors.gender = '성별을 선택 해주세요.';
-        }
-        if (user.age === "0"|| user.age === "") {
-            newErrors.age = '연령대를 선택 해주세요.';
         }
 
         if (user.nickname !== originalUser.nickname && isNicknameAvailable !== true) {
@@ -138,29 +129,43 @@ function MemberModifyComponent() {
                 setErrors(prev => ({...prev, nickname: '사용 가능한 닉네임이어야 합니다.'}));
                 return;
             }
-            try {
-                const updatedUser = {
-                    email: user.email,
-                    nickname: user.nickname,
-                    gender: user.gender,
-                    age: user.age,
-                    mobile: `${user.phone1}-${user.phone2}-${user.phone3}`,
-                };
 
-                await modifyMember(updatedUser);
-                setResult("Modified");
-            } catch (error) {
-                console.error("Error modifying user:", error);
-                setResult("Error");
+            // 소셜 로그인이거나 gender/age가 없는 경우 확인 모달 표시
+            if (user.social || !user.gender || !user.age) {
+                setShowConfirmModal(true);
+                return;
             }
+
+            await updateUserInfo();
         }
     };
 
+    const updateUserInfo = async () => {
+        try {
+            const updatedUser = {
+                email: user.email,
+                nickname: user.nickname,
+                gender: user.gender || "Unspecified",
+                age: user.age || "0",
+                mobile: `${user.phone1}-${user.phone2}-${user.phone3}`,
+            };
 
+            await modifyMember(updatedUser);
+            setResult("Modified");
+        } catch (error) {
+            console.error("Error modifying user:", error);
+            setResult("Error");
+        }
+    };
+
+    const handleConfirmModal = async () => {
+        setShowConfirmModal(false);
+        await updateUserInfo();
+    };
 
     const closeModal = () => {
         setResult(null);
-      navigate('/');
+        navigate('/');
     };
 
     return (
@@ -172,6 +177,24 @@ function MemberModifyComponent() {
                     callbackFn={closeModal}
                 />
             )}
+
+            {showConfirmModal && (
+                <CustomModal
+                    title="회원정보 수정 확인"
+                    content={
+                        user.social && (!user.gender || !user.age)
+                            ? "소셜 로그인 계정이며, 성별/연령 정보가 없습니다. "
+                            : user.social
+                                ? "소셜 로그인 계정입니다."
+                                : (!user.gender || !user.age)
+                                    ? "성별/연령 정보가 없습니다. "
+                                    : "입력된 정보로 수정하시겠습니까?"
+                    }
+                    onClose={() => setShowConfirmModal(false)}
+                    onConfirm={handleConfirmModal}
+                />
+            )}
+
 
             <form onSubmit={handleClickModify} className="bg-white shadow-md rounded px-4 sm:px-8 pt-6 pb-8 mb-4">
                 <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
