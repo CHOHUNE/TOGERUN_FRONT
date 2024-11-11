@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import ReactDOM from 'react-dom';
-import { useNavigate } from 'react-router-dom';
-import { UserGroupIcon, ClockIcon, ChatBubbleLeftEllipsisIcon, XMarkIcon } from '@heroicons/react/24/solid';
-import { getJoinedChatRoom } from "../../api/memberAPI";
-import { leaveChatRoom } from "../../api/chatAPI";
-import { UserIcon } from "@heroicons/react/24/outline";
+import {useNavigate} from 'react-router-dom';
+import {UserGroupIcon, ClockIcon, ChatBubbleLeftEllipsisIcon, XMarkIcon} from '@heroicons/react/24/solid';
+import {getJoinedChatRoom} from "../../api/memberAPI";
+import {leaveChatRoom} from "../../api/chatAPI";
+import {UserIcon} from "@heroicons/react/24/outline";
 import CustomModal from './CustomModal';
+import LoadingSpinner from "./LoadingSpinner";
 
 const style = `
   .drawer-container {
@@ -44,12 +45,12 @@ const style = `
   }
 `;
 
-function SideOpenDrawer({ isOpen, onClose }) {
+function SideOpenDrawer({isOpen, onClose}) {
     const [chatRooms, setChatRooms] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [isActive, setIsActive] = useState(false);
-    const [modalConfig, setModalConfig] = useState({ show: false, title: '', content: '', onConfirm: null });
+    const [modalConfig, setModalConfig] = useState({show: false, title: '', content: '', onConfirm: null});
     const [selectedRoomId, setSelectedRoomId] = useState(null);
     const navigate = useNavigate();
 
@@ -81,7 +82,7 @@ function SideOpenDrawer({ isOpen, onClose }) {
     };
 
     const formatDate = (dateString) => {
-        const options = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        const options = {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'};
         return new Date(dateString).toLocaleDateString('ko-KR', options);
     };
 
@@ -95,7 +96,7 @@ function SideOpenDrawer({ isOpen, onClose }) {
             try {
                 await leaveChatRoom(selectedRoomId);
                 setChatRooms(chatRooms.filter(room => room.postId !== selectedRoomId));
-                setModalConfig({ show: false });
+                setModalConfig({show: false});
             } catch (err) {
                 console.error("채팅방 나가기 실패", err);
                 setError("채팅방 나가기에 실패했습니다.");
@@ -114,7 +115,7 @@ function SideOpenDrawer({ isOpen, onClose }) {
     };
 
     const closeModal = () => {
-        setModalConfig({ show: false });
+        setModalConfig({show: false});
     };
 
     if (!isOpen) return null;
@@ -136,9 +137,9 @@ function SideOpenDrawer({ isOpen, onClose }) {
                     </div>
                 </div>
 
-                {isLoading && <div className="flex justify-center items-center h-24">
-                    <div className="loading loading-spinner loading-md"></div>
-                </div>}
+                {isLoading &&
+                    <LoadingSpinner fullScreen={false} />
+                }
                 {error && <div className="alert alert-error text-sm m-2">{error}</div>}
                 {chatRooms.map((room) => (
                     <div key={room.chatRoomId}
@@ -161,7 +162,8 @@ function SideOpenDrawer({ isOpen, onClose }) {
                             </div>
                             <div className="card-actions justify-between items-center mt-2">
                                 <div className="flex space-x-1 sm:space-x-2">
-                                    <span className={`badge badge-xs sm:badge-sm ${room.participantCount < room.capacity ? 'badge-success' : 'badge-error'}`}>
+                                    <span
+                                        className={`badge badge-xs sm:badge-sm ${room.participantCount < room.capacity ? 'badge-success' : 'badge-error'}`}>
                                         {room.participantCount < room.capacity ? '참여가능' : '마감'}
                                     </span>
                                     <span className="badge badge-xs sm:badge-sm badge-outline">

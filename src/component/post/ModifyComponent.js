@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import PostFormComponent from "./PostFormComponent";
 import FetchingModal from "../common/FetchingModal";
 import {getOne, putOne} from "../../api/postAPI";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 const ModifyComponent = ({ postId }) => {
 
@@ -15,7 +16,7 @@ const ModifyComponent = ({ postId }) => {
         staleTime: Infinity
     });
 
-    if (isLoading) return <FetchingModal />;
+    if (isLoading) return <LoadingSpinner fullScreen={true}/>;
     if (error) return <div>Error loading post: {error.message}</div>;
 
     const extractPostData = (data) => {

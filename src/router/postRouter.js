@@ -1,7 +1,8 @@
 import React, {lazy, Suspense} from 'react';
+import LoadingSpinner from "../component/common/LoadingSpinner";
 
 
-const Loading = <div className={"loading loading-spinner loading-lg"}/>
+const Loading = <LoadingSpinner fullScreen={true}/>
 
 const PostDetail = lazy(() => import("../pages/Post/ReadPage"));
 const ChatRoom = lazy(() => import("../pages/Post/ChatRoomPage"));

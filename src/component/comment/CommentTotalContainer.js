@@ -4,6 +4,7 @@ import { CommentWritingForm } from "./CommentWritingForm";
 import { CommentList } from "./CommentList";
 import { useCommentHook } from "../../hooks/useCommentHook";
 import { fetchCommentList } from "../../api/commentAPI";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 export function CommentTotalContainer({ postId ,postAuthorNickname, loginState }) {
     const {
@@ -20,11 +21,7 @@ export function CommentTotalContainer({ postId ,postAuthorNickname, loginState }
     });
 
     if (isLoading) {
-        return (
-            <div className="w-full my-12 flex justify-center items-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-        );
+        return <LoadingSpinner fullScreen={false}/>
     }
 
     if (isError) {

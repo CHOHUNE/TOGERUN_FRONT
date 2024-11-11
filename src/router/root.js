@@ -3,16 +3,13 @@ import {lazy, Suspense} from "react";
 import PostIndexPage from "../pages/Post/IndexPage";
 import postRouter from "./postRouter";
 import memberRouter from "./memberRouter";
+import LoadingSpinner from "../component/common/LoadingSpinner";
 
 
-const Loading = <div className={"loading loading-spinner loading-lg"}/>
-
-
+const Loading = <LoadingSpinner fullScreen={true}/>
 
 const About = lazy(() => import("../pages/About"));
 const Home = lazy(() => import("../pages/Home"));
-
-
 
 const root = createBrowserRouter([
     {

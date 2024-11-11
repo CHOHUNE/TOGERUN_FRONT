@@ -6,9 +6,7 @@ function ModifyPage(props) {
 
     return (
         <BasicLayout>
-
             <MemberModifyComponent />
-
         </BasicLayout>
     );
 }

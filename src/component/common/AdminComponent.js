@@ -4,6 +4,7 @@ import { getAllMember, deleteMember, restoreMember } from "../../api/memberAPI";
 import { UserCircleIcon, TrashIcon, ArrowPathIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import { UsersIcon } from "@heroicons/react/16/solid";
 import CustomModal from './CustomModal';
+import LoadingSpinner from "./LoadingSpinner";
 
 const AdminComponent = () => {
     const queryClient = useQueryClient();
@@ -56,11 +57,7 @@ const AdminComponent = () => {
 
     const closeModal = () => setModalConfig({ show: false });
 
-    if (isLoading) return (
-        <div className="flex justify-center items-center h-screen">
-            <span className="loading loading-spinner loading-lg"></span>
-        </div>
-    );
+    if (isLoading) return <LoadingSpinner fullScreen={true}/>
 
     if (isError) return (
         <div className="flex justify-center items-center h-screen">

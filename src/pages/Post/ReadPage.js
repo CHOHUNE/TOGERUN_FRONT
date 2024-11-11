@@ -5,6 +5,7 @@ import { getOne } from "../../api/postAPI";
 import ReadComponent from "../../component/post/ReadComponent";
 import CommentTotalContainer from "../../component/comment/CommentTotalContainer";
 import useCustomLogin from "../../hooks/useCustomLogin";
+import LoadingSpinner from "../../component/common/LoadingSpinner";
 
 const ReadPage = () => {
     const { postId } = useParams();
@@ -16,7 +17,7 @@ const ReadPage = () => {
         staleTime: 1000 * 60 * 30
     });
 
-    if (isLoading) return <div>Loading...</div>;
+    if (isLoading) return <LoadingSpinner fullScreen={true}/>
     if (isError) return <div>Error loading post</div>;
 
     return (

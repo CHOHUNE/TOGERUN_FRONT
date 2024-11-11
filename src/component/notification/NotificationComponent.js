@@ -5,6 +5,7 @@ import { useInfiniteQuery, useQueryClient, useMutation, useQuery } from "@tansta
 import { basicURL, fetchNotifications, markNotificationAsRead, fetchUnreadCount, clearNotification } from "../../api/api";
 import useEventSource from "../../hooks/useEventSource";
 import CustomModal from "../common/CustomModal";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 const NotificationComponent = () => {
     const [showNotifications, setShowNotifications] = useState(false);
@@ -143,9 +144,7 @@ const NotificationComponent = () => {
             {showNotifications && (
                 <div className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-screen sm:w-80 max-h-[80vh] overflow-y-auto fixed sm:absolute left-0 sm:left-auto right-0 top-16 sm:top-auto sm:mt-2 z-[100] notification-dropdown">
                     <div className="flex flex-col">
-                        {isLoading ? (
-                            <p className="text-center py-4">로딩 중...</p>
-                        ) : notifications.length === 0 ? (
+                        {isLoading ? <LoadingSpinner fullScreen={false}/> : notifications.length === 0 ? (
                             <p className="text-center py-4">알림이 없습니다.</p>
                         ) : (
                             <>
