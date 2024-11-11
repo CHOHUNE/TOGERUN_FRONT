@@ -6,9 +6,6 @@ import LoadingSpinner from "../common/LoadingSpinner";
 
 const ModifyComponent = ({ postId }) => {
 
-
-
-
     const { data: initialPost, isLoading, error } = useQuery({
         queryKey: ['post', postId],
         queryFn: () => getOne(postId),
