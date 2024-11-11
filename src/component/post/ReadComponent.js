@@ -4,7 +4,6 @@ import useCustomMove from "../../hooks/useCustomMove";
 import ResultModal from "../common/ResultModal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { postInitState } from "../../atoms/postInitState";
-import FetchingModal from "../common/FetchingModal";
 import { HeartIcon, StarIcon, ChatBubbleLeftEllipsisIcon, PencilSquareIcon, ArrowUturnLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import KakaoMapComponent from "../kakaoMap/KakaoMapComponent";
@@ -111,7 +110,7 @@ function ReadComponent({postId}) {
 
     return (
         <div className="min-h-screen py-8">
-            {isFetching && <FetchingModal />}
+            {isFetching && <LoadingSpinner fullScreen={true} />}
 
             <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
                 <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 rounded-t-lg shadow-lg">

@@ -2,12 +2,12 @@ import React, {useState, useEffect, useCallback} from 'react';
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import useCustomMove from "../../hooks/useCustomMove";
 import ResultModal from "../../component/common/ResultModal";
-import FetchingModal from "../common/FetchingModal";
 import KakaoMapSearchComponent from "../kakaoMap/KakaoMapSearchComponent";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import {useDropzone} from "react-dropzone";
 import {PencilIcon} from "@heroicons/react/24/solid";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 10;
 const ACCEPTED_FILE_TYPES = {
@@ -145,7 +145,7 @@ const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => 
 
     return (
         <div className="container mx-auto p-4">
-            {mutation.isPending && <FetchingModal/>}
+            {mutation.isPending && <LoadingSpinner fullScreen={true}/>}
             {mutation.isSuccess && (
                 <ResultModal
                     title={title}

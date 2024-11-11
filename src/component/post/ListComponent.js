@@ -7,12 +7,12 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import PageComponent from "../common/PageComponent";
 import useCustomMove from "../../hooks/useCustomMove";
-import FetchingModal from "../common/FetchingModal";
 import { EyeIcon, MapPinIcon, HeartIcon, UserIcon, CalendarIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { getList } from "../../api/postAPI";
 import { Navigation } from "swiper/modules";
 import AnimatedRowComponent from "../common/AnimatedRowComponent";
 import {ClipboardIcon} from "@heroicons/react/16/solid";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 
 const initState = {
@@ -142,7 +142,7 @@ function ListComponent() {
 
     return (
         <div className="container mx-auto px-4 py-6">
-            {isFetching && <FetchingModal/>}
+            {isFetching && <LoadingSpinner fullScreen={true}/>}
 
             <div className="bg-gradient-to-r from-blue-500 to-teal-400 rounded-lg shadow-lg p-4 sm:p-6 mb-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">

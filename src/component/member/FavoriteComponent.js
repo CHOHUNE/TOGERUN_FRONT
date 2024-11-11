@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { favoriteToggle } from "../../api/postAPI";
 import CustomModal from "../common/CustomModal";
 import AnimatedRowComponent from "../common/AnimatedRowComponent";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 const FavoriteComponent = () => {
     const [favorites, setFavorites] = useState([]);
@@ -118,7 +119,7 @@ const FavoriteComponent = () => {
         </AnimatedRowComponent>
     );
 
-    if (loading) return <div className="loading loading-lg"></div>;
+    if (loading) return <LoadingSpinner fullScreen={true}/>
     if (error) return <div className="alert alert-error">{error}</div>;
 
     return (
