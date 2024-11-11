@@ -1,12 +1,10 @@
 import React, { useEffect } from 'react';
-import { X } from 'lucide-react';
+import { IoClose } from "react-icons/io5";
 
 const ResultModal = ({ title, content, callbackFn }) => {
     useEffect(() => {
-        // 모달이 마운트될 때 body의 스크롤을 막습니다
         document.body.style.overflow = 'hidden';
         return () => {
-            // 컴포넌트가 언마운트될 때 스크롤을 다시 활성화합니다
             document.body.style.overflow = 'unset';
         };
     }, []);
@@ -28,10 +26,10 @@ const ResultModal = ({ title, content, callbackFn }) => {
                     <div className="relative p-6">
                         <button
                             onClick={handleClose}
-                            className="absolute right-4 top-4 p-1 rounded-full hover:bg-gray-100 transition-colors group"
+                            className="absolute right-4 top-4 p-1.5 rounded-full hover:bg-gray-100 transition-colors group"
                             aria-label="Close modal"
                         >
-                            <X className="w-5 h-5 text-gray-500 group-hover:text-gray-700" />
+                            <IoClose className="w-5 h-5 text-gray-500 group-hover:text-gray-700" />
                         </button>
 
                         <h3 className="text-lg font-semibold text-gray-900 pr-8">{title}</h3>
