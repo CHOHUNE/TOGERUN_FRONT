@@ -82,16 +82,20 @@ function ListComponent() {
         return activity ? activity.name : value;
     }
 
+// renderPostCard 함수 부분만 수정된 버전입니다
     const renderPostCard = (post) => (
         <AnimatedRowComponent key={post.id} rowIndex={serverData.dtoList.indexOf(post)}>
             <div className="w-full h-full px-2">
-                <div className="card bg-base-100 shadow-xl h-full">
+                <div className="card bg-base-100 shadow-xl h-full hover:shadow-2xl transition-shadow duration-200">
                     <div className="card-body p-4">
-                        <h2 className="card-title text-base sm:text-lg mb-2">
-                            <Link to={`/post/${post.id}`} className="link link-primary">
+                        <Link
+                            to={`/post/${post.id}`}
+                            className="group transition-all duration-200"
+                        >
+                            <h2 className="text-base sm:text-lg font-semibold mb-2 line-clamp-2 min-h-[2.5rem] group-hover:text-primary transition-colors duration-200">
                                 {post.title}
-                            </Link>
-                        </h2>
+                            </h2>
+                        </Link>
                         <div className="flex flex-wrap items-center text-xs sm:text-sm text-gray-500 mb-2">
                             <UserIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1"/>
                             <span className="mr-2">{post.nickname}</span>
@@ -99,27 +103,28 @@ function ListComponent() {
                             <span>{post.localDate}</span>
                         </div>
                         <div className="flex flex-wrap gap-1 sm:gap-2 mb-2">
-                            <span className={`badge badge-sm ${post.participateFlag ? 'badge-success' : 'badge-error'}`}>
-                                {post.participateFlag ? '참여가능' : '마감'}
-                            </span>
+                        <span className={`badge badge-sm ${post.participateFlag ? 'badge-success' : 'badge-error'}`}>
+                            {post.participateFlag ? '참여가능' : '마감'}
+                        </span>
                             <span className="badge badge-sm badge-info">
-                                <EyeIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1"/>
+                            <EyeIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1"/>
                                 {post.viewCount}
-                            </span>
+                        </span>
                             <span className="badge badge-sm badge-warning">
-                                <HeartIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1"/>
+                            <HeartIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1"/>
                                 {post.likeCount}
-                            </span>
+                        </span>
                             <span className="badge badge-sm badge-accent">
-                                {getActivityName(post.activityType)}
-                            </span>
+                            {getActivityName(post.activityType)}
+                        </span>
                         </div>
                         <div className="flex items-center text-xs sm:text-sm text-gray-500 mb-2">
                             <MapPinIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1"/>
                             <span>{formatRoadName(post.roadName)}</span>
                         </div>
                         <div className="card-actions justify-end mt-auto">
-                            <Link to={`/post/${post.id}`} className="btn btn-primary btn-xs sm:btn-sm">
+                            <Link to={`/post/${post.id}`}
+                                  className="btn btn-primary btn-xs sm:btn-sm">
                                 자세히 보기
                             </Link>
                         </div>
