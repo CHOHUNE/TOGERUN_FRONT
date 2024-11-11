@@ -26,24 +26,18 @@ const ACTIVITY_TYPES = [
 
 const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => {
     const defaultContent = `[준비물]
-- 
-- 
-- 
+
 
 [준비물 및 참여 복장]
-- 
-- 
-- 
 
+ 
 [주의사항]
-- 
-- 
-- 
+
 
 [기타 안내사항]
-- 
-- `;
 
+
+`;
     const [post, setPost] = useState({
         ...initialPost,
         images: initialPost.imageList ? initialPost.imageList.map(url => ({type: 'url', content: url})) : [],
