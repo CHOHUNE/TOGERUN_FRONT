@@ -14,6 +14,7 @@ import { getChatRoomStatus } from "../../api/chatAPI";
 import { likeToggle } from "../../api/api";
 import CustomModal from "../common/CustomModal";
 import useCustomLogin from "../../hooks/useCustomLogin";
+import LoadingSpinner from "../common/LoadingSpinner";
 
 function ReadComponent({postId}) {
     const queryClient = useQueryClient();
@@ -93,9 +94,7 @@ function ReadComponent({postId}) {
     const handleLikeToggle = () => likeMutation.mutate(postId)
     const handleFavoriteToggle = () => favoriteMutation.mutate(postId)
 
-    if (!post) {
-        return <div className="flex justify-center items-center h-screen">Loading...</div>;
-    }
+    if (!post) return <LoadingSpinner fullScreen={true} />
 
 
     const canModifyOrDelete = () => {

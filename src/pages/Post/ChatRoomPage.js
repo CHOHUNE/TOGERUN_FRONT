@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getChatRoom, leaveChatRoom } from "../../api/chatAPI";
 import { ArrowLeftIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import CustomModal from "../../component/common/CustomModal";
+import LoadingSpinner from "../../component/common/LoadingSpinner";
 
 const ChatRoomPage = () => {
     const { postId } = useParams();
@@ -56,11 +57,7 @@ const ChatRoomPage = () => {
         }
     };
 
-    if (loading) return (
-        <div className="flex justify-center items-center h-screen">
-            <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-    );
+    if (loading) return <LoadingSpinner fullScreen={true}/>;
 
     if (error) return (
         <div className="container mx-auto px-4 py-8">
