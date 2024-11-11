@@ -17,13 +17,13 @@ function AnimatedRowComponent({children,rowIndex}) {
     const animationProps = useSpring({
         opacity:inView ? 1: 0,  // 뷰 안에 들어오면 1, 아니면 0
         transform: inView ? 'translateY(0)' : 'translateY(-50px)', // 뷰 안에 들어오면 0, 아니면 -50px
-        delay: rowIndex * 200 // row 단위 delay
+        delay: rowIndex * 100 // row 단위 delay
     })
 
 
     return (
         //animated: 스프링 애니메이션을 적용할 때 사용하는 컴포넌트
-        <animated.div ref={ref} style={animationProps} className="flex flex-wrap -mx-2 mb-4">
+        <animated.div ref={ref} style={animationProps} className="w-full">
             {children}
         </animated.div>
     );
