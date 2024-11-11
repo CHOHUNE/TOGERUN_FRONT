@@ -185,11 +185,10 @@ function MemberModifyComponent() {
         <div className="container mx-auto px-4 py-8">
 
             {showInfoModal && (
-                <CustomModal
+                <ResultModal
                     title="회원 정보 입력 필요"
                     content="회원 정보 입력을 완료해 주세요."
-                    onClose={handleInfoModalClose}
-                    onConfirm={handleInfoModalConfirm}
+                    callbackFn={handleInfoModalConfirm}
                 />
             )}
 

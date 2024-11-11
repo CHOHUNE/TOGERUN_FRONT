@@ -27,10 +27,19 @@ const jwtAxios = axios.create({
     baseURL: API_BASE_URL
 });
 
-const refreshJWT = async (accessToken) => {
-    const header = { headers: { "Authorization": `Bearer ${accessToken}` } };
-    const res = await axiosInstance.get(`/member/refresh`, header);
-    return res.data;
+const checkProfileCompletion = (memberInfo) => {
+    // memberInfo가 없거나 필수 필드가 누락된 경우
+    if (!memberInfo) return false;
+
+    const { social, age, gender, mobile } = memberInfo;
+
+    // social이 true이거나
+    // age, gender가 없거나 빈 문자열이거나
+    // mobile이 없거나 빈 문자열인 경우
+    return social === true ||
+        !age || age === '' ||
+        !gender || gender === '' ||
+        !mobile || mobile === '';
 };
 
 const handleAuthError = () => {
@@ -48,13 +57,38 @@ const handleAuthError = () => {
 };
 
 const beforeReq = (config) => {
+    // 현재 페이지가 이미 수정 페이지인 경우 체크를 건너뜀
+    if (window.location.pathname === REDIRECT_PATHS.MODIFY) {
+        const memberInfo = getCookie('member');
+        if (!memberInfo) return handleAuthError();
+
+        const { accessToken } = memberInfo;
+        config.headers.Authorization = `Bearer ${accessToken}`;
+        return config;
+    }
+
     const memberInfo = getCookie('member');
     if (!memberInfo) return handleAuthError();
+
+    // 프로필 완성도 체크
+    if (checkProfileCompletion(memberInfo)) {
+        return Promise.reject({
+            response: {
+                data: {
+                    status: "REDIRECT",
+                    message: "회원정보를 완성해주세요.",
+                    redirect: REDIRECT_PATHS.MODIFY,
+                    errorStatus: ERROR_TYPES.NEED_PROFILE_UPDATE
+                }
+            }
+        });
+    }
 
     const { accessToken } = memberInfo;
     config.headers.Authorization = `Bearer ${accessToken}`;
     return config;
 };
+
 
 const requestFail = (err) => {
     console.log(".....request error occur.....");
@@ -64,10 +98,9 @@ const requestFail = (err) => {
 const handleTokenRefresh = async (res) => {
     const memberCookieValue = getCookie("member");
     const result = await refreshJWT(memberCookieValue.accessToken);
-    // console.log("refreshJWT RESULT", result);
 
     memberCookieValue.accessToken = result.accessToken;
-    setCookie("member", memberCookieValue,6);
+    setCookie("member", memberCookieValue, 6);
 
     const originalRequest = res.config;
     originalRequest.headers.Authorization = `Bearer ${result.accessToken}`;
@@ -76,7 +109,6 @@ const handleTokenRefresh = async (res) => {
 };
 
 const beforeRes = async (res) => {
-    // console.log("before return response...........");
     const data = res.data;
 
     if (data?.errorStatus === ERROR_TYPES.ERROR_ACCESS_TOKEN) {
@@ -114,6 +146,12 @@ const responseFail = (err) => {
         handleErrorResponse(err.response.data);
     }
     return Promise.reject(err);
+};
+
+const refreshJWT = async (accessToken) => {
+    const header = { headers: { "Authorization": `Bearer ${accessToken}` } };
+    const res = await axiosInstance.get(`/member/refresh`, header);
+    return res.data;
 };
 
 jwtAxios.interceptors.request.use(beforeReq, requestFail);
