@@ -25,7 +25,8 @@ const ACTIVITY_TYPES = [
 ];
 
 const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => {
-    const defaultContent = `[준비물]
+    const defaultContent =
+        `[준비물]
 
 
 [준비물 및 참여 복장]

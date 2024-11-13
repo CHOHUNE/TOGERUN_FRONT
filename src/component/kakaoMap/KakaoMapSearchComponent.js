@@ -198,9 +198,6 @@ const KakaoMapSearch = ({onPlaceSelect}) => {
         }
     };
 
-    // 컴포넌트 렌더링
-// ... (이전 코드 유지)
-
     return (
         <div className="container mx-auto p-4">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
