@@ -51,7 +51,6 @@ function SideOpenDrawer({isOpen, onClose}) {
     const [error, setError] = useState(null);
     const [isActive, setIsActive] = useState(false);
     const [modalConfig, setModalConfig] = useState({show: false, title: '', content: '', onConfirm: null});
-    const [selectedRoomId, setSelectedRoomId] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -91,28 +90,27 @@ function SideOpenDrawer({isOpen, onClose}) {
         handleClose();
     };
 
-    const handleLeaveChatRoom = async () => {
-        if (selectedRoomId) {
-            try {
-                await leaveChatRoom(selectedRoomId);
-                setChatRooms(chatRooms.filter(room => room.postId !== selectedRoomId));
-                setModalConfig({show: false});
-            } catch (err) {
-                console.error("채팅방 나가기 실패", err);
-                setError("채팅방 나가기에 실패했습니다.");
-            }
+    const handleLeaveChatRoom = async (postId) => {
+        try {
+            await leaveChatRoom(postId);
+            setChatRooms(prevRooms => prevRooms.filter(room => room.postId !== postId));
+            setModalConfig({show: false});
+            setError(null); // 이전 에러가 있었다면 초기화
+        } catch (err) {
+            console.error("채팅방 나가기 실패", err);
+            setError("채팅방 나가기에 실패했습니다.");
         }
     };
 
     const openLeaveModal = (postId) => {
-        setSelectedRoomId(postId);
         setModalConfig({
             show: true,
             title: '채팅방 나가기',
             content: '채팅방을 나가면 대화 내용이 모두 삭제됩니다. 정말 나가시겠습니까?',
-            onConfirm: handleLeaveChatRoom
+            onConfirm: () => handleLeaveChatRoom(postId) // postId를 직접 전달
         });
     };
+
 
     const closeModal = () => {
         setModalConfig({show: false});
