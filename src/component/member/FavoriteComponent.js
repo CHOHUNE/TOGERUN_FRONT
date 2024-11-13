@@ -41,15 +41,16 @@ const FavoriteComponent = () => {
             show: true,
             title: '즐겨찾기 삭제',
             content: '즐겨찾기에서 삭제하시겠습니까?',
-            onConfirm: handleRemove
+            onConfirm:  () => handleRemove(postId)
         });
     };
 
-    const handleRemove = async () => {
+    const handleRemove = async (postId) => {
         try {
-            await favoriteToggle(selectedPostId);
-            setFavorites(favorites.filter(fav => fav.postId !== selectedPostId));
+            await favoriteToggle(postId);
+            setFavorites(favorites.filter(fav => fav.postId !== postId));
             setModalConfig({ show: false });
+            setSelectedPostId(null);
         } catch (err) {
             console.error("Error removing favorite:", err);
         }
@@ -57,6 +58,7 @@ const FavoriteComponent = () => {
 
     const closeModal = () => {
         setModalConfig({ show: false });
+        setSelectedPostId(null);
     };
 
     const renderFavoriteCard = (favorite, index) => (
