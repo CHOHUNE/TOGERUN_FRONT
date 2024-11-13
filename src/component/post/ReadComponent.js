@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import useCustomMove from "../../hooks/useCustomMove";
-import ResultModal from "../common/ResultModal";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { postInitState } from "../../atoms/postInitState";
 import { HeartIcon, StarIcon, ChatBubbleLeftEllipsisIcon, PencilSquareIcon, ArrowUturnLeftIcon, TrashIcon } from '@heroicons/react/24/outline';
@@ -62,8 +62,8 @@ function ReadComponent({postId}) {
         mutationFn: (postId) => deleteOne(postId),
         onSuccess: () => {
             queryClient.invalidateQueries(['post/List']);
-            setModalConfig({ show: false });
             moveToList();
+
         }
     });
 
@@ -250,9 +250,6 @@ function ReadComponent({postId}) {
                 />
             )}
 
-            {delMutation.isSuccess && (
-                <ResultModal title={'게시글 삭제'} content={`게시물 삭제가 완료되었습니다.`} callbackFn={closeModal} />
-            )}
         </div>
     );
 }
