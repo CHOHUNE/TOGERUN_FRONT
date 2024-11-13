@@ -77,20 +77,22 @@ function ReadComponent({postId}) {
     const delMutation = useMutation({
         mutationFn: (postId) => deleteOne(postId),
         onSuccess: () => {
-            // 모달 먼저 닫기
-            setModalConfig({ show: false });
+            // 즉시 모달 닫기 및 캐시 무효화
+            closeModal();
 
-            // 캐시 무효화
+            // 캐시에서 해당 게시물 데이터 즉시 제거
+            queryClient.removeQueries(['post', postId]);
             queryClient.invalidateQueries(['post/List']);
 
-            // 목록으로 이동
-            moveToList();
+            // 약간의 지연 후 리스트로 이동
+            setTimeout(() => {
+                moveToList();
+            }, 100);
         },
         onError: (error) => {
-            // 에러 처리
             console.error("삭제 중 에러 발생:", error);
             alert("게시물 삭제 중 오류가 발생했습니다.");
-            setModalConfig({ show: false });
+            closeModal();
         }
     });
 
