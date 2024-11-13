@@ -58,14 +58,7 @@ function ReadComponent({postId}) {
 
     const post = processPostData(data) || postInitState;
 
-    const delMutation = useMutation({
-        mutationFn: (postId) => deleteOne(postId),
-        onSuccess: () => {
-            queryClient.invalidateQueries(['post/List']);
-            moveToList();
 
-        }
-    });
 
     const likeMutation = useMutation({
         mutationFn: (postId) => likeToggle(postId),
@@ -81,14 +74,38 @@ function ReadComponent({postId}) {
         setModalConfig({ show: false });
     }
 
+    const delMutation = useMutation({
+        mutationFn: (postId) => deleteOne(postId),
+        onSuccess: () => {
+            // 모달 먼저 닫기
+            setModalConfig({ show: false });
+
+            // 캐시 무효화
+            queryClient.invalidateQueries(['post/List']);
+
+            // 목록으로 이동
+            moveToList();
+        },
+        onError: (error) => {
+            // 에러 처리
+            console.error("삭제 중 에러 발생:", error);
+            alert("게시물 삭제 중 오류가 발생했습니다.");
+            setModalConfig({ show: false });
+        }
+    });
+
     const handleClickDelete = () => {
         setModalConfig({
             show: true,
             title: '게시물 삭제',
             content: '게시물을 삭제하시겠습니까?',
-            onConfirm: () => delMutation.mutate(postId)
+            onConfirm: () => {
+                delMutation.mutate(postId);
+            }
         });
-    }
+    };
+
+
 
     const handleLikeToggle = () => likeMutation.mutate(postId)
     const handleFavoriteToggle = () => favoriteMutation.mutate(postId)
