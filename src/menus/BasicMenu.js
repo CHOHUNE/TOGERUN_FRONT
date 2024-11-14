@@ -38,11 +38,11 @@ const BasicMenu = () => {
         toggleLogoutModal();
     }
 
-    const closeModal = () => {
-        if (logoutMutation.isSuccess) {
-            moveToPath('/');
-        }
-    }
+    // const closeModal = () => {
+    //     if (logoutMutation.isSuccess) {
+    //         moveToPath('/');
+    //     }
+    // }
 
     const toggleLogoutModal = () => setShowLogoutModal(!showLogoutModal);
     const toggleSideDrawer = () => setIsSideDrawerOpen(!isSideDrawerOpen);
@@ -200,13 +200,13 @@ const BasicMenu = () => {
                 </div>
             )}
 
-            {logoutMutation.isSuccess && (
-                <ResultModal
-                    title={'로그아웃'}
-                    content={'로그아웃이 완료되었습니다.'}
-                    callbackFn={closeModal}
-                />
-            )}
+            {/*{logoutMutation.isSuccess && (*/}
+            {/*    <ResultModal*/}
+            {/*        title={'로그아웃'}*/}
+            {/*        content={'로그아웃이 완료되었습니다.'}*/}
+            {/*        callbackFn={closeModal}*/}
+            {/*    />*/}
+            {/*)}*/}
 
             <style jsx>{`
                 @keyframes slideDown {
