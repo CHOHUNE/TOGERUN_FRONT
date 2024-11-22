@@ -17,17 +17,17 @@ const ACCEPTED_FILE_TYPES = {
 };
 
 const ACTIVITY_TYPES = [
-    {name: '등산', value: 'CLIMBING'},
+    {name: '등산', value: 'HIKING'},
     {name: '달리기', value: 'RUNNING'},
     {name: '자전거', value: 'CYCLING'},
     {name:'클라이밍', value:'CLIMBING'},
-    {name:'크로스핏', value:'CROSSFIT'},
+    {name:'요가', value:'YOGA'},
+    {name:'필라테스', value:'PILATES'},
 ];
 
 const PostFormComponent = ({initialPost, onSubmit, submitButtonText, title}) => {
     const defaultContent =
-        `[준비물]
-
+        `
 
 [준비물 및 참여 복장]
 
