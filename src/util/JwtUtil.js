@@ -61,8 +61,8 @@ const beforeReq = (config) => {
     if (window.location.pathname === REDIRECT_PATHS.MODIFY) {
         const memberInfo = getCookie('member');
 
-        // 로그인 안해도 무방하게..
-        // if (!memberInfo) return handleAuthError();
+
+        if (!memberInfo) return handleAuthError();
 
         const { accessToken } = memberInfo;
         config.headers.Authorization = `Bearer ${accessToken}`;
@@ -71,8 +71,8 @@ const beforeReq = (config) => {
 
     const memberInfo = getCookie('member');
 
-    // if (!memberInfo) return handleAuthError();
-    // 로그인 안해도 무방하게
+    if (!memberInfo) return handleAuthError();
+
 
     // 프로필 완성도 체크
     if (checkProfileCompletion(memberInfo)) {

@@ -72,7 +72,7 @@ const BasicMenu = () => {
                                 </button>
                             </li>
                         )}
-                        {/*{isLogin && (*/}
+                        {isLogin && (
                             <li>
                                 <button
                                     onClick={() => navigate('/post/list')}
@@ -82,12 +82,12 @@ const BasicMenu = () => {
                                     <span>게시글</span>
                                 </button>
                             </li>
-                        {/*//   )}    */}
+                        )}
                     </ul>
                 </div>
 
                 <div className="navbar-end">
-                    {/*{isLogin && (*/}
+                    {isLogin && (
                         <>
                             <div className="hidden lg:block mr-2">
                                 <form onSubmit={handleSearch} className="flex items-center">
@@ -111,7 +111,7 @@ const BasicMenu = () => {
                                 <ChatBubbleLeftRightIcon className="h-5 w-5"/>
                             </button>
                         </>
-                    {/*// )}*/}
+                    )}
                     {loginState.email ? (
                         <div className="dropdown dropdown-end">
                             <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
@@ -147,11 +147,11 @@ const BasicMenu = () => {
             <div
                 className={`lg:hidden bg-base-100 shadow-md overflow-hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-60' : 'max-h-0'}`}>
                 <ul className="menu menu-sm p-2">
-                    {/*{isLogin && */}
+                    {isLogin &&
                         <li>
                         <button onClick={() => navigate('/post/list')}>게시글</button>
                     </li>
-                {/*}*/}
+                }
                     {loginState.roleNames && loginState.roleNames.includes("ROLE_ADMIN") && (
                         <li>
                             <button onClick={() => navigate("/member/admin")}>관리자</button>
