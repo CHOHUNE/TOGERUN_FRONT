@@ -60,7 +60,9 @@ const beforeReq = (config) => {
     // 현재 페이지가 이미 수정 페이지인 경우 체크를 건너뜀
     if (window.location.pathname === REDIRECT_PATHS.MODIFY) {
         const memberInfo = getCookie('member');
-        if (!memberInfo) return handleAuthError();
+
+        // 로그인 안해도 무방하게..
+        // if (!memberInfo) return handleAuthError();
 
         const { accessToken } = memberInfo;
         config.headers.Authorization = `Bearer ${accessToken}`;
@@ -68,7 +70,9 @@ const beforeReq = (config) => {
     }
 
     const memberInfo = getCookie('member');
-    if (!memberInfo) return handleAuthError();
+
+    // if (!memberInfo) return handleAuthError();
+    // 로그인 안해도 무방하게
 
     // 프로필 완성도 체크
     if (checkProfileCompletion(memberInfo)) {
