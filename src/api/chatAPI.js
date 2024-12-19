@@ -1,4 +1,5 @@
 import jwtAxios from "../util/JwtUtil";
+import {axiosInstance} from "./api";
 
 export const joinChatRoom = async (postId) => {
     await jwtAxios.post(`/post/${postId}/chat/join`, null, {
@@ -6,7 +7,7 @@ export const joinChatRoom = async (postId) => {
 };
 
 export const getChatRoom = async (postId) => {
-    const response = await jwtAxios.get(`/post/${postId}/chat`);
+    const response = await axiosInstance.get(`/post/${postId}/chat`);
     return response.data
 }
 
