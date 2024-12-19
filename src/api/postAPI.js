@@ -1,9 +1,8 @@
 import jwtAxios from "../util/JwtUtil";
-import {axiosInstance} from "./api";
 
 export const getList = async (pageParams) => {
     const {page, size, keyword,region,activityType} = pageParams;
-    const res = await axiosInstance.get(`/post/list`, {params: {page, size, keyword,region,activityType}})
+    const res = await jwtAxios.get(`/post/list`, {params: {page, size, keyword,region,activityType}})
     return res.data
 }
 
@@ -23,7 +22,7 @@ export const putOne = async (postId, post) => {
 }
 
 export const getOne = async (postId) => {
-    const response = await axiosInstance.get(`/post/${postId}`)
+    const response = await jwtAxios.get(`/post/${postId}`)
     return response.data
 }
 
